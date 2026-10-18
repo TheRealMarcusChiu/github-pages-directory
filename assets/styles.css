@@ -232,12 +232,58 @@ input[type="search"]:focus-visible { outline-offset: 0; border-color: var(--gold
 }
 .chip[aria-pressed="true"] .chip-count { color: var(--gold); }
 
+/* Results line + Finder-style sort control */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  margin-top: 0.75rem;
+}
+
 .status {
   margin: 0.75rem 0 0;
   min-height: 1.65em;
   color: var(--muted);
   font-size: 0.8125rem;
 }
+.toolbar .status { flex: 1 1 18rem; margin: 0; }
+
+.sort {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+.sort .label { margin: 0; white-space: nowrap; }
+
+select {
+  min-width: 0;
+  max-width: 100%;
+  min-height: var(--tap);
+  padding: 0.35rem 2.25rem 0.35rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background-color: var(--surface);
+  /* Gold chevron drawn with gradients: no image assets */
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--gold) 50%),
+    linear-gradient(135deg, var(--gold) 50%, transparent 50%);
+  background-position: calc(100% - 1.15rem) 52%, calc(100% - 0.8rem) 52%;
+  background-size: 0.35rem 0.35rem;
+  background-repeat: no-repeat;
+  color: var(--text);
+  font: 500 0.75rem/1.2 var(--mono);
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+select:hover { background-color: var(--hover); border-color: #3a2f20; }
+select:focus-visible { outline-offset: 0; border-color: var(--gold); }
+option { background: var(--surface); color: var(--text); }
 
 /* Sections */
 .section { margin-top: clamp(2.5rem, 6vw, 4rem); }
@@ -330,6 +376,24 @@ input[type="search"]:focus-visible { outline-offset: 0; border-color: var(--gold
   font-size: 0.75rem;
   overflow-wrap: anywhere;
 }
+
+/* Repository metadata dates (GitHub created_at / updated_at) */
+.card-dates {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  font-size: 0.6875rem;
+  letter-spacing: 0.02em;
+}
+.card-dates-label {
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.card-date { white-space: nowrap; }
+.card-date time { color: var(--para); font-variant-numeric: tabular-nums; }
+.gallery[data-sort="updated"] .date-updated time,
+.gallery[data-sort="created"] .date-created time { color: var(--gold); }
 
 .card-links {
   display: flex;

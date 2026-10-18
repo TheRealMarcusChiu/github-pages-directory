@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>GitHub Pages Directory · TheRealMarcusChiu</title>
-  <meta name="description" content="A visual gallery of TheRealMarcusChiu's repositories with GitHub Pages enabled, grouped by category, with preview screenshots captured 18 October 2026.">
+  <meta name="description" content="A visual gallery of TheRealMarcusChiu's repositories with GitHub Pages enabled, sortable by repository date or category, with preview screenshots captured 18 October 2026.">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#0f0c09">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%230f0c09'/%3E%3Crect x='3' y='11' width='10' height='1.5' fill='%23d8a942'/%3E%3C/svg%3E">
@@ -31,6 +31,11 @@
         Screenshots are 1365×900 viewport previews captured then, not live or full-page images —
         the live sites may have changed since. This list is not automatically synced.
       </p>
+      <p class="note" id="dates-note">
+        <span class="label">Repo dates</span>
+        “Created” and “updated” are GitHub repository metadata (<code>created_at</code> / <code>updated_at</code>)
+        recorded at the same check — not page-content dates.
+      </p>
     </div>
   </header>
 
@@ -52,7 +57,18 @@
       </div>
     </search>
 
-    <p id="result-status" class="status" role="status" aria-live="polite">Loading directory…</p>
+    <div class="toolbar">
+      <p id="result-status" class="status" role="status" aria-live="polite">Loading directory…</p>
+      <div class="sort">
+        <label for="sort" class="label">Sort by</label>
+        <select id="sort" name="sort" aria-describedby="sort-hint">
+          <option value="updated" selected>Recently updated</option>
+          <option value="created">Recently created</option>
+          <option value="category">Category</option>
+        </select>
+        <p id="sort-hint" class="visually-hidden">Recent orders use GitHub repository created and updated dates, not page-content dates.</p>
+      </div>
+    </div>
 
     <div id="gallery" class="gallery"></div>
 
@@ -75,7 +91,8 @@
     <div class="wrap">
       <p>
         Static snapshot dated <time datetime="2026-10-18">2026-10-18</time> · not automatically synced ·
-        previews are 1365×900 viewport captures from that date; live sites may differ.
+        previews are 1365×900 viewport captures from that date; live sites may differ ·
+        created/updated dates are GitHub repository metadata, not page-content dates.
       </p>
       <p>
         Inventory: <a href="data/sites.json">data/sites.json</a> · Screenshots hosted locally ·
