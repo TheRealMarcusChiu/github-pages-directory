@@ -4,56 +4,83 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>GitHub Pages Directory · TheRealMarcusChiu</title>
-  <meta name="description" content="A static index of TheRealMarcusChiu's repositories with GitHub Pages enabled.">
+  <meta name="description" content="A visual gallery of TheRealMarcusChiu's repositories with GitHub Pages enabled, grouped by category, with preview screenshots captured 18 October 2026.">
   <meta name="color-scheme" content="dark">
-  <meta name="theme-color" content="#0d0e11">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='4' fill='%23ff7a59'/%3E%3C/svg%3E">
+  <meta name="theme-color" content="#0f0c09">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%230f0c09'/%3E%3Crect x='3' y='11' width='10' height='1.5' fill='%23d8a942'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500;1,6..72,600&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap">
   <link rel="stylesheet" href="assets/styles.css">
   <script src="assets/app.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#directory">Skip to directory</a>
 
-  <header class="site-header">
+  <header class="masthead">
     <div class="wrap">
-      <p class="eyebrow">TheRealMarcusChiu</p>
-      <h1>GitHub Pages Directory</h1>
+      <p class="eyebrow">TheRealMarcusChiu · GitHub Pages</p>
+      <h1>Pages, <em>gathered.</em></h1>
       <p class="lede">
-        <span class="count" id="total-count">44</span>
-        <span id="total-label">sites</span> published from repositories with GitHub Pages enabled.
+        Every repository with GitHub Pages enabled, gathered into one quiet gallery —
+        <span class="stat"><strong id="total-count">44</strong> <span id="total-label">sites</span></span>
+        across
+        <span class="stat"><strong id="category-count">9</strong> <span id="category-label">categories</span></span>.
       </p>
-      <p class="note">
-        Static snapshot checked <time datetime="2026-10-18">18&nbsp;October&nbsp;2026</time>.
-        It lists repositories that had Pages enabled at that time and is not automatically synced;
-        individual sites were not checked for availability.
+      <p class="note" id="snapshot-note">
+        <span class="label">Static snapshot</span>
+        Inventory checked and previews captured <time datetime="2026-10-18">18 October 2026</time>.
+        Screenshots are 1365×900 viewport previews captured then, not live or full-page images —
+        the live sites may have changed since. This list is not automatically synced.
       </p>
     </div>
   </header>
 
   <main id="directory" class="wrap" tabindex="-1">
-    <search class="search" role="search">
-      <label for="filter">Filter sites</label>
-      <div class="search-field">
-        <input id="filter" type="search" name="q" autocomplete="off" spellcheck="false"
-               placeholder="Type a name or URL…" aria-describedby="filter-hint result-status">
-        <kbd aria-hidden="true">/</kbd>
+    <search class="controls" role="search" aria-label="Filter the directory">
+      <div class="search">
+        <label for="filter" class="label">Search</label>
+        <div class="search-field">
+          <input id="filter" type="search" name="q" autocomplete="off" spellcheck="false"
+                 placeholder="Title, repo or category…" aria-describedby="filter-hint">
+          <kbd aria-hidden="true">/</kbd>
+        </div>
+        <p id="filter-hint" class="hint">Matches title, repository name and category. Press <kbd>/</kbd> to focus, <kbd>Esc</kbd> to clear.</p>
       </div>
-      <p id="filter-hint" class="hint">Press <kbd>/</kbd> to focus, <kbd>Esc</kbd> to clear.</p>
+
+      <div class="chips-wrap">
+        <p id="chips-label" class="label">Category</p>
+        <div id="chips" class="chips" role="group" aria-labelledby="chips-label"></div>
+      </div>
     </search>
 
     <p id="result-status" class="status" role="status" aria-live="polite">Loading directory…</p>
 
-    <ul id="site-list" class="site-list" aria-label="Sites"></ul>
+    <div id="gallery" class="gallery"></div>
+
+    <div id="empty" class="empty" hidden>
+      <p class="empty-title">Nothing here.</p>
+      <p id="empty-detail" class="empty-detail">No sites match the current search and category.</p>
+      <p class="empty-actions">
+        <button type="button" id="clear-search" class="button">Clear search</button>
+        <button type="button" id="show-all" class="button">Show all categories</button>
+      </p>
+    </div>
 
     <noscript>
-      <p class="status">JavaScript is needed for the live list. The raw inventory is available at
+      <p class="status">JavaScript is needed for the gallery. The raw inventory is available at
         <a href="data/sites.json">data/sites.json</a>.</p>
     </noscript>
   </main>
 
   <footer class="site-footer">
     <div class="wrap">
-      <p>Inventory: <a href="data/sites.json">data/sites.json</a> · Snapshot date 2026-10-18 · No tracking, no external assets.</p>
+      <p>
+        Static snapshot dated <time datetime="2026-10-18">2026-10-18</time> · not automatically synced ·
+        previews are 1365×900 viewport captures from that date; live sites may differ.
+      </p>
+      <p>
+        Inventory: <a href="data/sites.json">data/sites.json</a> · Screenshots hosted locally ·
+        No tracking or analytics. Fonts: Newsreader &amp; JetBrains Mono via Google Fonts.
+      </p>
     </div>
   </footer>
 </body>

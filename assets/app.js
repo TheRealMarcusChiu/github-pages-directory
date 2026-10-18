@@ -3,18 +3,32 @@
 (() => {
   const HOMEPAGE_REPO = "therealmarcuschiu.github.io";
   const DATA_URL = new URL("data/sites.json", document.baseURI);
+  const SCREENSHOT_PATH = /^assets\/previews\/[A-Za-z0-9._-]+\.webp$/;
+  const ALL = "all";
+  // Only the first gallery row loads eagerly; everything below the fold stays lazy.
+  const EAGER_IMAGES = 3;
 
-  const list = document.getElementById("site-list");
+  const gallery = document.getElementById("gallery");
   const input = document.getElementById("filter");
+  const chipsBox = document.getElementById("chips");
   const status = document.getElementById("result-status");
-  const totalCount = document.getElementById("total-count");
-  const totalLabel = document.getElementById("total-label");
+  const empty = document.getElementById("empty");
+  const emptyDetail = document.getElementById("empty-detail");
+  const clearSearch = document.getElementById("clear-search");
+  const showAll = document.getElementById("show-all");
 
-  let items = [];
+  let sections = [];
+  let chips = [];
+  let total = 0;
+  let activeCategory = ALL;
+  let statusTimer = 0;
+  let shotCount = 0;
 
-  const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
-  const normalize = (s) => s.toLowerCase().replace(/[\s_-]+/g, " ").trim();
+  const plural = (n, word, many = `${word}s`) => `${n} ${n === 1 ? word : many}`;
+  // Fold case and punctuation so "var log" finds "/var/log" and "var-log-1".
+  const normalize = (s) => s.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, " ").trim();
   const displayUrl = (url) => url.replace(/^https:\/\//, "").replace(/\/$/, "");
+  const isHttps = (u) => { try { return new URL(u).protocol === "https:"; } catch { return false; } };
 
   function el(tag, props = {}, children = []) {
     const node = document.createElement(tag);
@@ -27,46 +41,132 @@
     return node;
   }
 
-  function renderItem(site) {
+  function renderCard(site, category) {
     const isHome = site.name === HOMEPAGE_REPO;
-    const title = isHome ? "Account homepage" : site.name;
+    const children = [];
 
-    const heading = el("h2", { class: "site-name" }, [
-      el("a", { href: site.url, text: title }),
-    ]);
-    const meta = el("p", { class: "site-url", text: displayUrl(site.url) });
-    const repoLink = el("a", { class: "repo-link", href: site.repository }, [
-      "Repository",
-      isHome
-        ? el("span", { class: "repo-name", text: site.name })
-        : el("span", { class: "visually-hidden", text: ` for ${site.name}` }),
+    if (SCREENSHOT_PATH.test(site.screenshot)) {
+      const img = el("img", {
+        src: site.screenshot,
+        alt: `Preview screenshot of ${site.title} (${site.name}), captured 18 October 2026`,
+        width: "1365",
+        height: "900",
+        loading: shotCount++ < EAGER_IMAGES ? "eager" : "lazy",
+        decoding: "async",
+      });
+      children.push(el("a", { class: "shot", href: site.screenshot }, [
+        img,
+        el("span", { class: "visually-hidden", text: " — open full-size preview image" }),
+      ]));
+    }
+
+    const body = el("div", { class: "card-body" }, [
+      el("p", { class: "card-category", text: category.label }),
+      el("h3", { class: "card-title", text: site.title }),
+      el("p", { class: "card-slug" }, [
+        el("span", { class: "visually-hidden", text: "Repository: " }),
+        el("code", { text: site.name }),
+      ]),
     ]);
 
-    const li = el("li", { class: isHome ? "site home" : "site" }, [
-      heading,
-      meta,
-      el("p", { class: "site-links" }, [repoLink]),
+    const links = el("p", { class: "card-links" });
+    if (isHttps(site.url)) {
+      // Visible label stays at the start of the accessible name.
+      links.append(el("a", { class: "card-link visit", href: site.url }, [
+        "Visit site",
+        el("span", { class: "visually-hidden", text: `: ${site.title} (${displayUrl(site.url)})` }),
+        el("span", { class: "arrow", "aria-hidden": "true", text: " ↗" }),
+      ]));
+    }
+    if (isHttps(site.repository)) {
+      links.append(el("a", { class: "card-link", href: site.repository }, [
+        "GitHub repo",
+        el("span", { class: "visually-hidden", text: `: ${site.name}` }),
+      ]));
+    }
+    body.append(links);
+    children.push(body);
+
+    const li = el("li", { class: isHome ? "card home" : "card" }, [
+      el("article", { class: "card-inner" }, children),
     ]);
     return {
       node: li,
-      haystack: normalize(`${site.name} ${title} ${displayUrl(site.url)}`),
+      haystack: normalize(`${site.name} ${site.title} ${category.label}`),
     };
   }
 
+  function renderSection(category, sites, index) {
+    const headingId = `cat-${category.id}`;
+    const count = el("span", { class: "section-count" });
+    const heading = el("h2", { id: headingId, class: "section-title" }, [
+      el("span", { class: "section-index", "aria-hidden": "true", text: String(index + 1).padStart(2, "0") }),
+      el("span", { class: "section-name", text: category.label }),
+      count,
+    ]);
+    const items = sites.map((s) => renderCard(s, category));
+    const list = el("ul", { class: "cards", role: "list" }, items.map((i) => i.node));
+    const node = el("section", { class: "section", "aria-labelledby": headingId }, [heading, list]);
+    return { category, node, count, items };
+  }
+
+  function renderChip(id, label, count) {
+    const button = el("button", { type: "button", class: "chip", "aria-pressed": "false", "data-category": id }, [
+      el("span", { class: "chip-label", text: label }),
+      el("span", { class: "chip-count", text: String(count) }),
+    ]);
+    button.addEventListener("click", () => setCategory(id));
+    return button;
+  }
+
+  function setCategory(id) {
+    activeCategory = id;
+    for (const chip of chips) chip.setAttribute("aria-pressed", String(chip.dataset.category === id));
+    applyFilter();
+  }
+
   function applyFilter() {
-    const query = normalize(input.value);
+    const raw = input.value.trim();
+    const terms = normalize(raw).split(" ").filter(Boolean);
     let shown = 0;
-    for (const item of items) {
-      const match = !query || item.haystack.includes(query);
-      item.node.hidden = !match;
-      if (match) shown++;
+
+    for (const section of sections) {
+      const inCategory = activeCategory === ALL || section.category.id === activeCategory;
+      let visible = 0;
+      for (const item of section.items) {
+        const match = inCategory && terms.every((t) => item.haystack.includes(t));
+        item.node.hidden = !match;
+        if (match) visible++;
+      }
+      section.node.hidden = visible === 0;
+      section.count.textContent = visible === section.items.length
+        ? plural(visible, "site")
+        : `${visible} of ${section.items.length}`;
+      shown += visible;
     }
-    list.classList.toggle("is-empty", shown === 0);
-    status.textContent = query
-      ? shown
-        ? `Showing ${shown} of ${plural(items.length, "site")} matching “${input.value.trim()}”.`
-        : `No sites match “${input.value.trim()}”.`
-      : `Showing all ${plural(items.length, "site")}.`;
+
+    const categoryLabel = activeCategory === ALL
+      ? ""
+      : sections.find((s) => s.category.id === activeCategory)?.category.label ?? "";
+    const scope = [
+      categoryLabel && `in ${categoryLabel}`,
+      raw && `matching “${raw}”`,
+    ].filter(Boolean).join(" ");
+
+    empty.hidden = shown !== 0;
+    clearSearch.hidden = !raw;
+    showAll.hidden = activeCategory === ALL;
+    if (!shown) emptyDetail.textContent = `No sites ${scope}.`;
+
+    const message = shown
+      ? scope
+        ? `Showing ${shown} of ${plural(total, "site")} ${scope}.`
+        : `Showing all ${plural(total, "site")}.`
+      : `No sites ${scope}.`;
+
+    // Debounce the live region so screen readers aren't flooded while typing.
+    clearTimeout(statusTimer);
+    statusTimer = setTimeout(() => { status.textContent = message; }, raw ? 300 : 0);
   }
 
   async function init() {
@@ -75,16 +175,25 @@
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
 
-      const sites = [...data.sites].sort((a, b) =>
-        (b.name === HOMEPAGE_REPO) - (a.name === HOMEPAGE_REPO) ||
-        a.name.localeCompare(b.name));
+      sections = data.categories
+        .map((category) => [category, data.sites.filter((s) => s.category === category.id)])
+        .filter(([, sites]) => sites.length)
+        .map(([category, sites], i) => renderSection(category, sites, i));
+      total = sections.reduce((n, s) => n + s.items.length, 0);
 
-      items = sites.map(renderItem);
-      list.replaceChildren(...items.map((i) => i.node));
+      gallery.replaceChildren(...sections.map((s) => s.node));
+      chips = [
+        renderChip(ALL, "All", total),
+        ...sections.map((s) => renderChip(s.category.id, s.category.label, s.items.length)),
+      ];
+      chipsBox.replaceChildren(...chips);
 
-      totalCount.textContent = String(items.length);
-      totalLabel.textContent = items.length === 1 ? "site" : "sites";
-      applyFilter();
+      document.getElementById("total-count").textContent = String(total);
+      document.getElementById("total-label").textContent = total === 1 ? "site" : "sites";
+      document.getElementById("category-count").textContent = String(sections.length);
+      document.getElementById("category-label").textContent = sections.length === 1 ? "category" : "categories";
+
+      setCategory(ALL);
     } catch (err) {
       status.textContent =
         "Could not load data/sites.json. If you opened this file directly, serve the folder over HTTP instead (see README).";
@@ -99,6 +208,15 @@
       input.value = "";
       applyFilter();
     }
+  });
+  clearSearch.addEventListener("click", () => {
+    input.value = "";
+    applyFilter();
+    input.focus();
+  });
+  showAll.addEventListener("click", () => {
+    setCategory(ALL);
+    chips[0]?.focus();
   });
 
   document.addEventListener("keydown", (e) => {

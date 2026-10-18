@@ -1,25 +1,32 @@
 # GitHub Pages Directory
 
-A small, dependency-free static index of the GitHub Pages sites published from
-[TheRealMarcusChiu](https://github.com/TheRealMarcusChiu)'s repositories.
+A small, dependency-free static gallery of the GitHub Pages sites published from
+[TheRealMarcusChiu](https://github.com/TheRealMarcusChiu)'s repositories, grouped
+by category with a preview screenshot for each site.
 
 > **Snapshot caveat:** `data/sites.json` is a static snapshot of repositories that
 > had GitHub Pages enabled when checked on **2026-10-18** (44 entries). It is not
-> automatically synced, and listing a site here does not mean its live response
-> was independently tested. This directory's own repository is not included.
+> automatically synced. This directory's own repository is not included.
+>
+> **Screenshots:** `assets/previews/<repo>.webp` are 1365×900 viewport previews
+> (top of the page only, not full-page) captured on **2026-10-18**. They are local
+> static images, not live views — the live sites may have changed since.
 
 ## Structure
 
 ```
-index.html          Page markup
-assets/styles.css   Styles (dark theme, no external fonts)
-assets/app.js       Loads data/sites.json, renders the list, live search
-data/sites.json     The inventory (name, Pages URL, repository URL)
-tests/verify.mjs    Dependency-free checks
+index.html              Page markup
+assets/styles.css       Warm editorial dark theme (Newsreader + JetBrains Mono)
+assets/app.js           Loads data/sites.json, renders the gallery, search + category chips
+assets/previews/*.webp  44 local 1365×900 preview screenshots, dated 2026-10-18
+data/sites.json         The inventory (see below)
+tests/verify.mjs        Dependency-free checks
 ```
 
 All paths are relative, so the site works at a repository subpath such as
-`https://git.marcuschiu.com/github-pages-directory/`. No CDNs, remote fonts, or analytics.
+`https://git.marcuschiu.com/github-pages-directory/`. The only remote resource is the
+Google Fonts stylesheet for Newsreader and JetBrains Mono (with Georgia / system
+monospace fallbacks). No CDNs, third-party images, runtime GitHub API calls, or analytics.
 
 ## Local preview
 
@@ -31,18 +38,45 @@ python3 -m http.server 8000
 # open http://localhost:8000/
 ```
 
+To check the repository-subpath behaviour, serve the parent directory instead and
+open `http://localhost:8000/github-pages-directory/`.
+
 ## Verify
 
 ```sh
 node tests/verify.mjs
 ```
 
-Checks: exactly 44 entries, unique names and URLs, HTTPS-only links, correct
-repository URLs, no `github-pages-directory` entry, and that the required HTML
-and assets exist with relative paths and no remote resources.
+Checks include: exactly 44 unique entries (names, Pages URLs, repository URLs,
+titles, screenshots); HTTPS-only links and correct repository URLs; no
+`github-pages-directory` self-entry; every repository in its expected category
+exactly once; each screenshot path is relative and points at an existing 1365×900
+WebP with no orphans; relative asset paths; only the Google Fonts stylesheet as a
+remote resource; no HTML-injection APIs; and accessibility basics (lang, landmarks,
+labelled search and chip group, live status, alt text, focus styles, reduced motion,
+tap targets) plus the snapshot disclaimers in the page and this README.
+
+## Data format
+
+`data/sites.json` has `snapshotDate`, `screenshots` (capture date and size),
+`categories` (ordered `id`/`label` pairs) and `sites`, where each entry is:
+
+| field        | meaning                                                         |
+|--------------|-----------------------------------------------------------------|
+| `name`       | original repository name (slug, shown on every card)           |
+| `title`      | hand-written display title                                       |
+| `category`   | one category `id`                                                |
+| `url`        | GitHub Pages URL                                                 |
+| `repository` | GitHub repository URL                                            |
+| `screenshot` | relative path, `assets/previews/<name>.webp`                     |
+
+Display titles were written by hand, using the 2026-10-18 scan's page titles and
+headings only as hints. Scraped page text is never stored or rendered; the repo slug
+stays visible to tell apart pages with identical titles (e.g. the three Tetris builds
+and the personal-site versions).
 
 ## Updating the inventory
 
-Edit `data/sites.json` (each entry: `name`, `url`, `repository`), update
-`snapshotDate` and the date shown in `index.html`, then adjust the expected
-count in `tests/verify.mjs`.
+Edit `data/sites.json`, add or replace the matching preview in `assets/previews/`,
+update the snapshot/capture dates in `data/sites.json`, `index.html` and this README,
+then adjust `EXPECTED_COUNT` and `EXPECTED_CATEGORIES` in `tests/verify.mjs`.
