@@ -74,8 +74,8 @@ tap targets) plus the snapshot disclaimers in the page and this README.
 A site with `alsoIn` keeps its primary `category` and gets an extra card in each
 listed section; its card label names the primary category first. Category chips and
 section headers count every member, while the header total, the All chip and the
-result status count unique sites. Currently every Social & Collaborative site is also
-in Games & Simulations, and every Art & 3D site is also in Personal & Portfolio.
+result status count unique sites. Currently every Art & 3D site is also in
+Personal & Portfolio.
 
 Display titles were written by hand, using the 2026-10-18 scan's page titles and
 headings only as hints. Scraped page text is never stored or rendered; the repo slug

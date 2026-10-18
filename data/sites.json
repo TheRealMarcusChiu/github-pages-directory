@@ -37,10 +37,6 @@
     {
       "id": "art",
       "label": "Art & 3D"
-    },
-    {
-      "id": "social",
-      "label": "Social & Collaborative"
     }
   ],
   "sites": [
@@ -325,6 +321,22 @@
       "screenshot": "assets/previews/tower-defense.webp"
     },
     {
+      "name": "shared-canvas",
+      "title": "Common · Shared Canvas",
+      "category": "games",
+      "url": "https://git.marcuschiu.com/shared-canvas/",
+      "repository": "https://github.com/TheRealMarcusChiu/shared-canvas",
+      "screenshot": "assets/previews/shared-canvas.webp"
+    },
+    {
+      "name": "table-topics",
+      "title": "Table Topics",
+      "category": "games",
+      "url": "https://git.marcuschiu.com/table-topics/",
+      "repository": "https://github.com/TheRealMarcusChiu/table-topics",
+      "screenshot": "assets/previews/table-topics.webp"
+    },
+    {
       "name": "art",
       "title": "Art Gallery",
       "category": "art",
@@ -357,24 +369,6 @@
       "url": "https://git.marcuschiu.com/shazaam/",
       "repository": "https://github.com/TheRealMarcusChiu/shazaam",
       "screenshot": "assets/previews/shazaam.webp"
-    },
-    {
-      "name": "shared-canvas",
-      "title": "Common · Shared Canvas",
-      "category": "social",
-      "url": "https://git.marcuschiu.com/shared-canvas/",
-      "repository": "https://github.com/TheRealMarcusChiu/shared-canvas",
-      "alsoIn": ["games"],
-      "screenshot": "assets/previews/shared-canvas.webp"
-    },
-    {
-      "name": "table-topics",
-      "title": "Table Topics",
-      "category": "social",
-      "url": "https://git.marcuschiu.com/table-topics/",
-      "repository": "https://github.com/TheRealMarcusChiu/table-topics",
-      "alsoIn": ["games"],
-      "screenshot": "assets/previews/table-topics.webp"
     }
   ]
 }

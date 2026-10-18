@@ -21,20 +21,17 @@ const EXPECTED_CATEGORIES = [
   ["faith", "Faith & Bible Study", ["bible-graph", "the-law-of-first-mention"]],
   ["tech", "Tech & Learning", ["bandwidth-compare", "barnes-hut-algorithm", "confluence-data", "display-tech-explorer", "fisher-information", "monitor-tech-guide", "tech", "visualizing-neural-networks", "obsidian-generator", "obsidian-stargazer", "crontab-guru-clone", "shazaam"]],
   ["knowledge", "Knowledge & Reading", ["quartz", "stardust", "var-log", "var-log-1"]],
-  ["games", "Games & Simulations", ["better-plume", "birdseye-arena", "dark-twilight-imperium", "spinning-cube", "tetris-ascii", "tetris-canvas", "tetris-unicode", "tower-defense"]],
+  ["games", "Games & Simulations", ["better-plume", "birdseye-arena", "dark-twilight-imperium", "spinning-cube", "tetris-ascii", "tetris-canvas", "tetris-unicode", "tower-defense", "shared-canvas", "table-topics"]],
   ["art", "Art & 3D", ["art", "my-room-in-3d"]],
-  ["social", "Social & Collaborative", ["shared-canvas", "table-topics"]],
 ];
 // Secondary memberships (optional `alsoIn`), repository → extra category ids. Primary category is unchanged.
 const EXPECTED_ALSO_IN = {
-  "shared-canvas": ["games"],
-  "table-topics": ["games"],
   "art": ["personal"],
   "my-room-in-3d": ["personal"],
 };
 // Every site whose primary category is the key must also be listed in the value category.
 const SECONDARY_COUNT = Object.values(EXPECTED_ALSO_IN).flat().length;
-const REQUIRED_OVERLAPS = [["social", "games"], ["art", "personal"]];
+const REQUIRED_OVERLAPS = [["art", "personal"]];
 // Titles/categories settled by earlier requests that must not regress.
 const PINNED = [
   { name: "images", title: "Markive · YouTube Videos, Quotes & Images", category: "personal" },
