@@ -39,10 +39,6 @@
       "label": "Art & 3D"
     },
     {
-      "id": "media",
-      "label": "Media & Collections"
-    },
-    {
       "id": "social",
       "label": "Social & Collaborative"
     }
@@ -347,7 +343,7 @@
     {
       "name": "images",
       "title": "Markive · YouTube Videos, Quotes & Images",
-      "category": "media",
+      "category": "personal",
       "url": "https://git.marcuschiu.com/images/",
       "repository": "https://github.com/TheRealMarcusChiu/images",
       "screenshot": "assets/previews/images.webp"
@@ -355,7 +351,7 @@
     {
       "name": "shazaam",
       "title": "Local Shazam",
-      "category": "media",
+      "category": "tech",
       "url": "https://git.marcuschiu.com/shazaam/",
       "repository": "https://github.com/TheRealMarcusChiu/shazaam",
       "screenshot": "assets/previews/shazaam.webp"

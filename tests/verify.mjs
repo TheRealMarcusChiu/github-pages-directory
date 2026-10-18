@@ -16,14 +16,13 @@ const GOOGLE_FONTS =
 
 // Category id → label → repositories. Each repository must appear exactly once.
 const EXPECTED_CATEGORIES = [
-  ["personal", "Personal & Portfolio", ["therealmarcuschiu.github.io", "personal-website", "personal-website-2-public", "personal-website-3", "projects", "now", "workouts"]],
+  ["personal", "Personal & Portfolio", ["therealmarcuschiu.github.io", "personal-website", "personal-website-2-public", "personal-website-3", "projects", "now", "workouts", "images"]],
   ["writing", "Writing & Reflection", ["thoughts", "quotes", "meditations"]],
   ["faith", "Faith & Bible Study", ["bible-graph", "the-law-of-first-mention"]],
-  ["tech", "Tech & Learning", ["bandwidth-compare", "barnes-hut-algorithm", "confluence-data", "display-tech-explorer", "fisher-information", "monitor-tech-guide", "tech", "visualizing-neural-networks", "obsidian-generator", "obsidian-stargazer", "crontab-guru-clone"]],
+  ["tech", "Tech & Learning", ["bandwidth-compare", "barnes-hut-algorithm", "confluence-data", "display-tech-explorer", "fisher-information", "monitor-tech-guide", "tech", "visualizing-neural-networks", "obsidian-generator", "obsidian-stargazer", "crontab-guru-clone", "shazaam"]],
   ["knowledge", "Knowledge & Reading", ["quartz", "stardust", "var-log", "var-log-1"]],
   ["games", "Games & Simulations", ["better-plume", "birdseye-arena", "dark-twilight-imperium", "spinning-cube", "tetris-ascii", "tetris-canvas", "tetris-unicode", "tower-defense"]],
   ["art", "Art & 3D", ["art", "my-room-in-3d"]],
-  ["media", "Media & Collections", ["images", "shazaam"]],
   ["social", "Social & Collaborative", ["shared-canvas", "table-topics"]],
 ];
 
