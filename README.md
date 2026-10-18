@@ -5,7 +5,7 @@ A small, dependency-free static gallery of the GitHub Pages sites published from
 by category with a preview screenshot for each site.
 
 > **Snapshot caveat:** `data/sites.json` is a static snapshot of repositories that
-> had GitHub Pages enabled when checked on **2026-10-18** (44 entries). It is not
+> had GitHub Pages enabled when checked on **2026-10-18** (41 entries). It is not
 > automatically synced. This directory's own repository is not included.
 >
 > **Screenshots:** `assets/previews/<repo>.webp` are 1365×900 viewport previews
@@ -18,7 +18,7 @@ by category with a preview screenshot for each site.
 index.html              Page markup
 assets/styles.css       Warm editorial dark theme (Newsreader + JetBrains Mono)
 assets/app.js           Loads data/sites.json, renders the gallery, search + category chips
-assets/previews/*.webp  44 local 1365×900 preview screenshots, dated 2026-10-18
+assets/previews/*.webp  41 local 1365×900 preview screenshots, dated 2026-10-18
 data/sites.json         The inventory (see below)
 tests/verify.mjs        Dependency-free checks
 ```
@@ -47,7 +47,7 @@ open `http://localhost:8000/github-pages-directory/`.
 node tests/verify.mjs
 ```
 
-Checks include: exactly 44 unique entries (names, Pages URLs, repository URLs,
+Checks include: exactly 41 unique entries (names, Pages URLs, repository URLs,
 titles, screenshots); HTTPS-only links and correct repository URLs; no
 `github-pages-directory` self-entry; every repository in its expected category
 exactly once; each screenshot path is relative and points at an existing 1365×900

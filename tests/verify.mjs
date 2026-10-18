@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const EXPECTED_COUNT = 44;
+const EXPECTED_COUNT = 41;
 const OWNER = "TheRealMarcusChiu";
 const SNAPSHOT = "2026-10-18";
 const PREVIEW_DIR = "assets/previews";
@@ -16,14 +16,14 @@ const GOOGLE_FONTS =
 
 // Category id → label → repositories. Each repository must appear exactly once.
 const EXPECTED_CATEGORIES = [
-  ["personal", "Personal & Portfolio", ["therealmarcuschiu.github.io", "fake-personal-website", "personal-website", "personal-website-2-public", "personal-website-3", "projects", "now", "workouts"]],
+  ["personal", "Personal & Portfolio", ["therealmarcuschiu.github.io", "personal-website", "personal-website-2-public", "personal-website-3", "projects", "now", "workouts"]],
   ["writing", "Writing & Reflection", ["thoughts", "quotes", "meditations"]],
   ["faith", "Faith & Bible Study", ["bible-graph", "the-law-of-first-mention"]],
   ["tech", "Tech & Learning", ["bandwidth-compare", "barnes-hut-algorithm", "confluence-data", "display-tech-explorer", "fisher-information", "monitor-tech-guide", "tech", "visualizing-neural-networks", "obsidian-generator", "obsidian-stargazer", "crontab-guru-clone"]],
-  ["knowledge", "Knowledge & Reading", ["confluence-obsidian-quartz", "quartz", "stardust", "var-log", "var-log-1", "wiki-viewer"]],
+  ["knowledge", "Knowledge & Reading", ["quartz", "stardust", "var-log", "var-log-1"]],
   ["games", "Games & Simulations", ["better-plume", "birdseye-arena", "dark-twilight-imperium", "spinning-cube", "tetris-ascii", "tetris-canvas", "tetris-unicode", "tower-defense"]],
   ["art", "Art & 3D", ["art", "my-room-in-3d"]],
-  ["music", "Music & Audio", ["images", "shazaam"]],
+  ["media", "Media & Collections", ["images", "shazaam"]],
   ["social", "Social & Collaborative", ["shared-canvas", "table-topics"]],
 ];
 
