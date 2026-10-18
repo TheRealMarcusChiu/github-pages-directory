@@ -1,0 +1,227 @@
+{
+  "owner": "TheRealMarcusChiu",
+  "snapshotDate": "2026-10-18",
+  "description": "Static snapshot of TheRealMarcusChiu repositories with GitHub Pages enabled. Not automatically synced.",
+  "sites": [
+    {
+      "name": "art",
+      "url": "https://git.marcuschiu.com/art/",
+      "repository": "https://github.com/TheRealMarcusChiu/art"
+    },
+    {
+      "name": "bandwidth-compare",
+      "url": "https://git.marcuschiu.com/bandwidth-compare/",
+      "repository": "https://github.com/TheRealMarcusChiu/bandwidth-compare"
+    },
+    {
+      "name": "barnes-hut-algorithm",
+      "url": "https://git.marcuschiu.com/barnes-hut-algorithm/",
+      "repository": "https://github.com/TheRealMarcusChiu/barnes-hut-algorithm"
+    },
+    {
+      "name": "better-plume",
+      "url": "https://git.marcuschiu.com/better-plume/",
+      "repository": "https://github.com/TheRealMarcusChiu/better-plume"
+    },
+    {
+      "name": "bible-graph",
+      "url": "https://git.marcuschiu.com/bible-graph/",
+      "repository": "https://github.com/TheRealMarcusChiu/bible-graph"
+    },
+    {
+      "name": "birdseye-arena",
+      "url": "https://git.marcuschiu.com/birdseye-arena/",
+      "repository": "https://github.com/TheRealMarcusChiu/birdseye-arena"
+    },
+    {
+      "name": "confluence-data",
+      "url": "https://git.marcuschiu.com/confluence-data/",
+      "repository": "https://github.com/TheRealMarcusChiu/confluence-data"
+    },
+    {
+      "name": "confluence-obsidian-quartz",
+      "url": "https://git.marcuschiu.com/confluence-obsidian-quartz/",
+      "repository": "https://github.com/TheRealMarcusChiu/confluence-obsidian-quartz"
+    },
+    {
+      "name": "crontab-guru-clone",
+      "url": "https://git.marcuschiu.com/crontab-guru-clone/",
+      "repository": "https://github.com/TheRealMarcusChiu/crontab-guru-clone"
+    },
+    {
+      "name": "dark-twilight-imperium",
+      "url": "https://git.marcuschiu.com/dark-twilight-imperium/",
+      "repository": "https://github.com/TheRealMarcusChiu/dark-twilight-imperium"
+    },
+    {
+      "name": "display-tech-explorer",
+      "url": "https://git.marcuschiu.com/display-tech-explorer/",
+      "repository": "https://github.com/TheRealMarcusChiu/display-tech-explorer"
+    },
+    {
+      "name": "fake-personal-website",
+      "url": "https://git.marcuschiu.com/fake-personal-website/",
+      "repository": "https://github.com/TheRealMarcusChiu/fake-personal-website"
+    },
+    {
+      "name": "fisher-information",
+      "url": "https://git.marcuschiu.com/fisher-information/",
+      "repository": "https://github.com/TheRealMarcusChiu/fisher-information"
+    },
+    {
+      "name": "images",
+      "url": "https://git.marcuschiu.com/images/",
+      "repository": "https://github.com/TheRealMarcusChiu/images"
+    },
+    {
+      "name": "meditations",
+      "url": "https://git.marcuschiu.com/meditations/",
+      "repository": "https://github.com/TheRealMarcusChiu/meditations"
+    },
+    {
+      "name": "monitor-tech-guide",
+      "url": "https://git.marcuschiu.com/monitor-tech-guide/",
+      "repository": "https://github.com/TheRealMarcusChiu/monitor-tech-guide"
+    },
+    {
+      "name": "my-room-in-3d",
+      "url": "https://git.marcuschiu.com/my-room-in-3d/",
+      "repository": "https://github.com/TheRealMarcusChiu/my-room-in-3d"
+    },
+    {
+      "name": "now",
+      "url": "https://git.marcuschiu.com/now/",
+      "repository": "https://github.com/TheRealMarcusChiu/now"
+    },
+    {
+      "name": "obsidian-generator",
+      "url": "https://git.marcuschiu.com/obsidian-generator/",
+      "repository": "https://github.com/TheRealMarcusChiu/obsidian-generator"
+    },
+    {
+      "name": "obsidian-stargazer",
+      "url": "https://git.marcuschiu.com/obsidian-stargazer/",
+      "repository": "https://github.com/TheRealMarcusChiu/obsidian-stargazer"
+    },
+    {
+      "name": "personal-website",
+      "url": "https://git.marcuschiu.com/personal-website/",
+      "repository": "https://github.com/TheRealMarcusChiu/personal-website"
+    },
+    {
+      "name": "personal-website-2-public",
+      "url": "https://git.marcuschiu.com/personal-website-2-public/",
+      "repository": "https://github.com/TheRealMarcusChiu/personal-website-2-public"
+    },
+    {
+      "name": "personal-website-3",
+      "url": "https://git.marcuschiu.com/personal-website-3/",
+      "repository": "https://github.com/TheRealMarcusChiu/personal-website-3"
+    },
+    {
+      "name": "projects",
+      "url": "https://git.marcuschiu.com/projects/",
+      "repository": "https://github.com/TheRealMarcusChiu/projects"
+    },
+    {
+      "name": "quartz",
+      "url": "https://git.marcuschiu.com/quartz/",
+      "repository": "https://github.com/TheRealMarcusChiu/quartz"
+    },
+    {
+      "name": "quotes",
+      "url": "https://git.marcuschiu.com/quotes/",
+      "repository": "https://github.com/TheRealMarcusChiu/quotes"
+    },
+    {
+      "name": "shared-canvas",
+      "url": "https://git.marcuschiu.com/shared-canvas/",
+      "repository": "https://github.com/TheRealMarcusChiu/shared-canvas"
+    },
+    {
+      "name": "shazaam",
+      "url": "https://git.marcuschiu.com/shazaam/",
+      "repository": "https://github.com/TheRealMarcusChiu/shazaam"
+    },
+    {
+      "name": "spinning-cube",
+      "url": "https://git.marcuschiu.com/spinning-cube/",
+      "repository": "https://github.com/TheRealMarcusChiu/spinning-cube"
+    },
+    {
+      "name": "stardust",
+      "url": "https://git.marcuschiu.com/stardust/",
+      "repository": "https://github.com/TheRealMarcusChiu/stardust"
+    },
+    {
+      "name": "table-topics",
+      "url": "https://git.marcuschiu.com/table-topics/",
+      "repository": "https://github.com/TheRealMarcusChiu/table-topics"
+    },
+    {
+      "name": "tech",
+      "url": "https://git.marcuschiu.com/tech/",
+      "repository": "https://github.com/TheRealMarcusChiu/tech"
+    },
+    {
+      "name": "tetris-ascii",
+      "url": "https://git.marcuschiu.com/tetris-ascii/",
+      "repository": "https://github.com/TheRealMarcusChiu/tetris-ascii"
+    },
+    {
+      "name": "tetris-canvas",
+      "url": "https://git.marcuschiu.com/tetris-canvas/",
+      "repository": "https://github.com/TheRealMarcusChiu/tetris-canvas"
+    },
+    {
+      "name": "tetris-unicode",
+      "url": "https://git.marcuschiu.com/tetris-unicode/",
+      "repository": "https://github.com/TheRealMarcusChiu/tetris-unicode"
+    },
+    {
+      "name": "the-law-of-first-mention",
+      "url": "https://git.marcuschiu.com/the-law-of-first-mention/",
+      "repository": "https://github.com/TheRealMarcusChiu/the-law-of-first-mention"
+    },
+    {
+      "name": "therealmarcuschiu.github.io",
+      "url": "https://git.marcuschiu.com/",
+      "repository": "https://github.com/TheRealMarcusChiu/therealmarcuschiu.github.io"
+    },
+    {
+      "name": "thoughts",
+      "url": "https://git.marcuschiu.com/thoughts/",
+      "repository": "https://github.com/TheRealMarcusChiu/thoughts"
+    },
+    {
+      "name": "tower-defense",
+      "url": "https://git.marcuschiu.com/tower-defense/",
+      "repository": "https://github.com/TheRealMarcusChiu/tower-defense"
+    },
+    {
+      "name": "var-log",
+      "url": "https://git.marcuschiu.com/var-log/",
+      "repository": "https://github.com/TheRealMarcusChiu/var-log"
+    },
+    {
+      "name": "var-log-1",
+      "url": "https://git.marcuschiu.com/var-log-1/",
+      "repository": "https://github.com/TheRealMarcusChiu/var-log-1"
+    },
+    {
+      "name": "visualizing-neural-networks",
+      "url": "https://git.marcuschiu.com/visualizing-neural-networks/",
+      "repository": "https://github.com/TheRealMarcusChiu/visualizing-neural-networks"
+    },
+    {
+      "name": "wiki-viewer",
+      "url": "https://git.marcuschiu.com/wiki-viewer/",
+      "repository": "https://github.com/TheRealMarcusChiu/wiki-viewer"
+    },
+    {
+      "name": "workouts",
+      "url": "https://git.marcuschiu.com/workouts/",
+      "repository": "https://github.com/TheRealMarcusChiu/workouts"
+    }
+  ]
+}
