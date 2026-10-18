@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>GitHub Pages Directory · TheRealMarcusChiu</title>
-  <meta name="description" content="A visual gallery of TheRealMarcusChiu's repositories with GitHub Pages enabled, sortable by repository date or category, with preview screenshots captured 18 October 2026.">
+  <meta name="description" content="A visual gallery of TheRealMarcusChiu's repositories with GitHub Pages enabled, newest repositories first, with preview screenshots captured 18 October 2026.">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#0f0c09">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%230f0c09'/%3E%3Crect x='3' y='11' width='10' height='1.5' fill='%23d8a942'/%3E%3C/svg%3E">
@@ -20,55 +20,55 @@
       <p class="eyebrow">TheRealMarcusChiu · GitHub Pages</p>
       <h1>Pages, <em>gathered.</em></h1>
       <p class="lede">
-        Every repository with GitHub Pages enabled, gathered into one quiet gallery —
         <span class="stat"><strong id="total-count">41</strong> <span id="total-label">sites</span></span>
         across
-        <span class="stat"><strong id="category-count">7</strong> <span id="category-label">categories</span></span>.
+        <span class="stat"><strong id="category-count">7</strong> <span id="category-label">categories</span></span>
+        with GitHub Pages enabled.
       </p>
       <p class="note" id="snapshot-note">
-        <span class="label">Static snapshot</span>
-        Inventory checked and previews captured <time datetime="2026-10-18">18 October 2026</time>.
-        Screenshots are 1365×900 viewport previews captured then, not live or full-page images —
-        the live sites may have changed since. This list is not automatically synced.
-      </p>
-      <p class="note" id="dates-note">
-        <span class="label">Repo dates</span>
-        “Created” and “updated” are GitHub repository metadata (<code>created_at</code> / <code>updated_at</code>)
-        recorded at the same check — not page-content dates.
+        Snapshot from <time datetime="2026-10-18">18 October 2026</time>, not automatically synced.
+        Previews are 1365×900 viewport captures; live sites may have changed.
+        Dates are GitHub repository metadata, not page-content dates.
       </p>
     </div>
   </header>
 
   <main id="directory" class="wrap" tabindex="-1">
     <search class="controls" role="search" aria-label="Filter the directory">
-      <div class="search">
+      <div class="control search">
         <label for="filter" class="label">Search</label>
         <div class="search-field">
           <input id="filter" type="search" name="q" autocomplete="off" spellcheck="false"
                  placeholder="Title, repo or category…" aria-describedby="filter-hint">
           <kbd aria-hidden="true">/</kbd>
         </div>
-        <p id="filter-hint" class="hint">Matches title, repository name and category. Press <kbd>/</kbd> to focus, <kbd>Esc</kbd> to clear.</p>
+        <p id="filter-hint" class="visually-hidden">Matches title, repository name and category. Press / to focus, Escape to clear.</p>
       </div>
 
-      <div class="chips-wrap">
-        <p id="chips-label" class="label">Category</p>
-        <div id="chips" class="chips" role="group" aria-labelledby="chips-label"></div>
+      <div class="control category-filter" id="category-filter">
+        <span id="category-filter-label" class="label">Category</span>
+        <button type="button" id="category-toggle" class="menu-toggle" aria-expanded="false" aria-controls="category-panel"
+                aria-labelledby="category-filter-label category-summary">
+          <span id="category-summary">All categories</span>
+        </button>
+        <div id="category-panel" class="menu-panel" role="group" aria-labelledby="category-filter-label" hidden>
+          <ul id="category-options" class="menu-options" role="list"></ul>
+          <button type="button" id="category-clear" class="menu-clear">Show all categories</button>
+        </div>
       </div>
-    </search>
 
-    <div class="toolbar">
-      <p id="result-status" class="status" role="status" aria-live="polite">Loading directory…</p>
-      <div class="sort">
+      <div class="control sort">
         <label for="sort" class="label">Sort by</label>
         <select id="sort" name="sort" aria-describedby="sort-hint">
-          <option value="updated" selected>Recently updated</option>
-          <option value="created">Recently created</option>
+          <option value="created" selected>Recently created</option>
+          <option value="updated">Recently updated</option>
           <option value="category">Category</option>
         </select>
         <p id="sort-hint" class="visually-hidden">Recent orders use GitHub repository created and updated dates, not page-content dates.</p>
       </div>
-    </div>
+    </search>
+
+    <p id="result-status" class="status" role="status" aria-live="polite">Loading directory…</p>
 
     <div id="gallery" class="gallery"></div>
 
@@ -90,13 +90,8 @@
   <footer class="site-footer">
     <div class="wrap">
       <p>
-        Static snapshot dated <time datetime="2026-10-18">2026-10-18</time> · not automatically synced ·
-        previews are 1365×900 viewport captures from that date; live sites may differ ·
-        created/updated dates are GitHub repository metadata, not page-content dates.
-      </p>
-      <p>
-        Inventory: <a href="data/sites.json">data/sites.json</a> · Screenshots hosted locally ·
-        No tracking or analytics. Fonts: Newsreader &amp; JetBrains Mono via Google Fonts.
+        Snapshot <time datetime="2026-10-18">2026-10-18</time> ·
+        Inventory: <a href="data/sites.json">data/sites.json</a> · No tracking or analytics.
       </p>
     </div>
   </footer>

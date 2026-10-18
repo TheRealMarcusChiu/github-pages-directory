@@ -2,9 +2,11 @@
 
 A small, dependency-free static gallery of the GitHub Pages sites published from
 [TheRealMarcusChiu](https://github.com/TheRealMarcusChiu)'s repositories, grouped
-by category with a preview screenshot for each site. A Finder-style **Sort by**
-control orders the gallery by *Recently updated* (default), *Recently created* or
-*Category*.
+by category with a preview screenshot for each site. Search, a multi-select
+**Category** dropdown and a Finder-style **Sort by** control share one row on desktop;
+the gallery is ordered by *Recently created* (default), *Recently updated* or
+*Category*. Each tile is one link to the live site (screenshot included), with a
+separate *GitHub repo* link.
 
 > **Snapshot caveat:** `data/sites.json` is a static snapshot of repositories that
 > had GitHub Pages enabled when checked on **2026-10-18** (41 entries). It is not
@@ -26,7 +28,7 @@ control orders the gallery by *Recently updated* (default), *Recently created* o
 ```
 index.html              Page markup
 assets/styles.css       Warm editorial dark theme (Newsreader + JetBrains Mono)
-assets/app.js           Loads data/sites.json, renders the gallery, search, category chips + sort
+assets/app.js           Loads data/sites.json, renders the gallery, search, category dropdown + sort
 assets/previews/*.webp  41 local 1365×900 preview screenshots, dated 2026-10-18
 data/sites.json         The inventory (see below)
 tests/verify.mjs        Dependency-free checks
@@ -50,18 +52,31 @@ python3 -m http.server 8000
 To check the repository-subpath behaviour, serve the parent directory instead and
 open `http://localhost:8000/github-pages-directory/`.
 
-## Sorting
+## Sorting and filtering
 
-- **Recently updated** (default) and **Recently created** show every unique site once
-  in a single *All sites* section, sorted globally by descending `updatedAt` /
-  `createdAt`. Ties fall back to the other date, then repository name, then source
-  order. Sorting works on copies; `data/sites.json` order is never changed.
+- **Recently created** (default) shows every unique site once in a single *All sites*
+  section, by descending repository `createdAt` (GitHub `created_at`); ties go to
+  repository name, then source order — never `updatedAt` or screenshot dates.
+- **Recently updated** uses the same single section by descending `updatedAt`; ties
+  fall back to `createdAt`, then repository name, then source order. Sorting works on
+  copies; `data/sites.json` order is never changed.
 - **Category** shows the original category sections in source order, with secondary
   (`alsoIn`) cards as before.
-- Category chips, search, counts and the empty/reset state work the same in every
-  mode; in the recent modes a category chip keeps all its members (primary or
-  secondary) in the global order. Every card shows its category labels and its repo
-  created/updated dates, with the active sort date in gold.
+- The **Category** dropdown is a disclosure button over a labelled group of
+  checkboxes (with member counts). No boxes checked means every category; checked
+  boxes combine with OR, and search narrows the result further (AND) in every sort
+  mode. Escape, Tab-away or a click outside closes it; arrow keys, Home and End move
+  between options; *Show all categories* clears the selection.
+- Counts and the empty/reset state (*Clear search*, *Show all categories*) work the
+  same in every mode. Every card shows its category labels and repo created/updated
+  dates, with the active sort date in gold.
+
+## Tiles
+
+Each tile is one `<a>` to the GitHub Pages URL wrapping the screenshot, category,
+title, repo slug and dates, so clicking anywhere on the tile opens the site. The
+*GitHub repo* link is a sibling anchor (never nested) pinned into a reserved strip at
+the bottom of the tile.
 
 ## Verify
 
@@ -80,18 +95,22 @@ titles, screenshots); HTTPS-only links and correct repository URLs; no
 category exactly once, with exactly the expected `alsoIn` secondary memberships; each screenshot path is relative and points at an existing 1365×900
 WebP with no orphans; relative asset paths; only the Google Fonts stylesheet as a
 remote resource; no HTML-injection APIs; and accessibility basics (lang, landmarks,
-labelled search and chip group, live status, alt text, focus styles, reduced motion,
+labelled search, category dropdown and checkbox group, live status, alt text, focus styles, reduced motion,
 tap targets) plus the snapshot disclaimers in the page and this README. The exact
 names, titles and source order are pinned, and every entry must carry valid ISO 8601
 UTC `createdAt` ≤ `updatedAt` matching the retrieved GitHub values; the page must
-offer a labelled *Sort by* select defaulting to *Recently updated*.
+offer a labelled *Sort by* select defaulting to *Recently created*.
 
 The browser stage serves the folder under `/github-pages-directory/` and, at desktop
-(1365×900) and phone (360×740) sizes, checks all three sort modes (global descending
-order with tie-breakers; category sections and members), chip + search composition,
-zero results and both reset buttons, keyboard use (Tab to the select, arrow keys,
-chips, `/`, Esc), no horizontal overflow, and no console errors, failed requests or
-off-site requests besides Google Fonts.
+(1365×900) and phone (360×740) sizes, checks the default *Recently created* order on
+load, all three sort modes (global descending order with tie-breakers, plus a
+tied-`created_at` fixture; category sections and members), multi-category checkbox +
+search composition in every mode, zero results and both reset buttons, the dropdown
+(open/close, Escape, Tab-away, outside click, focus return, checked states, arrow
+keys), tile structure (one site anchor around image and text, a separate GitHub
+anchor, no nested anchors) and real clicks on the image, card background and GitHub
+link, controls on one row on desktop, no horizontal overflow (menu open or closed),
+and no console errors, failed requests or off-site requests besides Google Fonts.
 
 ## Data format
 
@@ -112,9 +131,9 @@ off-site requests besides Google Fonts.
 | `updatedAt`  | GitHub repository `updated_at` (ISO 8601 UTC), repo metadata     |
 
 A site with `alsoIn` keeps its primary `category` and gets an extra card in each
-listed section; its card label names the primary category first. Category chips and
-section headers count every member, while the header total, the All chip and the
-result status count unique sites. Currently every Art & 3D site is also in
+listed section; its card label names the primary category first. Category checkboxes and
+section headers count every member, while the header total and the result status
+count unique sites. Currently every Art & 3D site is also in
 Personal & Portfolio.
 
 Display titles were written by hand, using the 2026-10-18 scan's page titles and

@@ -82,7 +82,7 @@ const EXPECTED_SITES = [
 ];
 const DATES_RETRIEVED = "2026-10-18T21:24:42Z";
 const ISO_UTC = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
-const SORT_OPTIONS = [["updated", "Recently updated"], ["created", "Recently created"], ["category", "Category"]];
+const SORT_OPTIONS = [["created", "Recently created"], ["updated", "Recently updated"], ["category", "Category"]];
 // Titles/categories settled by earlier requests that must not regress.
 const PINNED = [
   { name: "images", title: "Markive · YouTube Videos, Quotes & Images", category: "personal" },
@@ -271,22 +271,36 @@ check(/<main[\s>]/.test(html) && /<header[\s>]/.test(html) && /<footer[\s>]/.tes
 check(/class="skip-link" href="#directory"/.test(html) && /id="directory"/.test(html), "skip link targets the directory");
 check(/<label for="filter"[^>]*>/.test(html) && /<input id="filter" type="search"/.test(html), "search input has an associated label");
 check(/role="search"/.test(html), "search region is exposed as a landmark");
-check(/id="chips"[^>]*role="group"[^>]*aria-labelledby="chips-label"/.test(html) && /id="chips-label"/.test(html), "category chips are a labelled group");
+check(/<button type="button" id="category-toggle"[^>]*aria-expanded="false"[^>]*aria-controls="category-panel"[^>]*aria-labelledby="category-filter-label category-summary"/.test(html) &&
+  /id="category-filter-label"[^>]*>Category</.test(html),
+  "category filter is a labelled disclosure button with aria-expanded/aria-controls");
+check(/<div id="category-panel"[^>]*role="group"[^>]*aria-labelledby="category-filter-label"[^>]*hidden>/.test(html) &&
+  /type: "checkbox", name: "category"/.test(js), "category dropdown panel is a labelled group of checkboxes, hidden by default");
+check(!/id="chips"|class="chip"|aria-pressed/.test(html + js), "the old single-select category chips are gone");
+const controlsHtml = html.match(/<search class="controls"[\s\S]*?<\/search>/)?.[0] ?? "";
+check(["id=\"filter\"", "id=\"category-toggle\"", "id=\"sort\""].every((id) => controlsHtml.includes(id)),
+  "search, category dropdown and sort live together in the controls row");
+check(/grid-template-columns: minmax\(0, 2fr\) minmax\(0, 1fr\) minmax\(0, 1fr\)/.test(css), "desktop controls share one three-column row");
 check(/role="status"/.test(html) && /aria-live="polite"/.test(html), "result count uses a live status region");
 check(/id="empty"[^>]*hidden/.test(html), "empty state exists and is hidden by default");
 check(html.includes('href="assets/styles.css"'), "stylesheet linked with a relative path");
 check(html.includes('src="assets/app.js"'), "script linked with a relative path");
 check(html.includes(SNAPSHOT) || /18 October 2026/.test(html), "capture date shown in the UI");
 check(/not automatically synced/i.test(html) && /may have changed/i.test(html), "static-snapshot disclaimer shown in the UI");
-check(/1365×900/.test(html) && /viewport previews?/i.test(html), "UI says screenshots are 1365×900 viewport previews");
+check(/1365×900/.test(html) && /viewport (?:previews?|captures?)/i.test(html), "UI says screenshots are 1365×900 viewport captures");
+const headerText = (html.match(/<header[\s\S]*?<\/header>/)?.[0] ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+const footerText = (html.match(/<footer[\s\S]*?<\/footer>/)?.[0] ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+check(headerText.length <= 330 && (html.match(/class="note"/g) ?? []).length === 1, `header copy is short: one note (${headerText.length} chars)`);
+check(footerText.length <= 110 && (html.match(/<footer[\s\S]*?<\/footer>/)?.[0].match(/<p>/g) ?? []).length === 1,
+  `footer is a single short line (${footerText.length} chars)`);
 check(/GitHub repository metadata/.test(html) && /not page-content dates/.test(html), "UI labels created/updated as repository metadata, not page-content dates");
 const sortSelect = html.match(/<select id="sort"[^>]*>([\s\S]*?)<\/select>/);
 check(/<label for="sort"[^>]*>Sort by<\/label>/.test(html) && !!sortSelect, "a labelled “Sort by” select exists");
 const sortOpts = [...(sortSelect?.[1] ?? "").matchAll(/<option value="([^"]+)"( selected)?>([^<]+)<\/option>/g)];
 check(JSON.stringify(sortOpts.map((m) => [m[1], m[3]])) === JSON.stringify(SORT_OPTIONS),
   `sort options are ${SORT_OPTIONS.map(([, l]) => l).join(" / ")}`);
-check(sortOpts.filter((m) => m[2]).map((m) => m[1]).join() === "updated" && /const DEFAULT_SORT = "updated";/.test(js),
-  "sort defaults to Recently updated");
+check(sortOpts.filter((m) => m[2]).map((m) => m[1]).join() === "created" && /const DEFAULT_SORT = "created";/.test(js),
+  "sort defaults to Recently created (repository created_at)");
 
 // Remote resources: only the Google Fonts stylesheet, linked exactly once from index.html.
 const fontLinks = html.split(`<link rel="stylesheet" href="${GOOGLE_FONTS.replace(/&/g, "&amp;")}">`).length - 1 +
@@ -311,24 +325,24 @@ check(/const EAGER_IMAGES = 3;/.test(js) && /loading: shotCount\+\+ < EAGER_IMAG
   (js.match(/loading:/g) ?? []).length === 1 && (js.match(/shotCount = 0/g) ?? []).length === 1,
   "first three screenshots load eagerly; all others are lazy-loaded");
 check(/alt: `Preview screenshot of \$\{site\.title\} \(\$\{site\.name\}\)/.test(js), "screenshots get meaningful alt text (title + repo)");
-check(/class: "shot", href: site\.screenshot/.test(js), "screenshot links to its full-size local image");
-check(/href: site\.url/.test(js) && /href: site\.repository/.test(js), "cards link to the live site and the repository");
-check(/"aria-pressed"/.test(js), "category chips expose pressed state");
-check(/renderChip\(ALL, "All"/.test(js), "an All chip is rendered");
+check(/el\("a", \{ class: "card-main", href: site\.url, "aria-labelledby": `\$\{titleId\} \$\{hostId\}` \}, children\)/.test(js) &&
+  /el\("a", \{ class: "card-link card-repo", href: site\.repository, "aria-label": `GitHub repo: \$\{site\.name\}`/.test(js),
+  "each tile is one site link (screenshot + text) with a sibling GitHub repository link");
+check(!/Visit site|Visit website|href: site\.screenshot/.test(js + html), "no “Visit site” link and no screenshot-file link");
 check(/site\.name\} \$\{site\.title\} \$\{category\.label\}/.test(js), "search covers repo name, title and category");
 check(/inCategory && terms\.every/.test(js), "search and category filter combine (AND)");
 check(/data\.sites\.filter\(\(s\) => isMember\(s, category\.id\)\)/.test(js) &&
   /const isMember = \(site, id\) => site\.category === id \|\| alsoIn\(site\)\.includes\(id\)/.test(js),
   "sections include sites by primary category or alsoIn membership");
-check(/total = new Set\(/.test(js) && /const shownSites = new Set\(\)/.test(js) && /const shown = shownSites\.size/.test(js) &&
-  /renderChip\(ALL, "All", total\)/.test(js),
-  "All chip, header total and status count unique sites, not duplicated cards");
-check(/renderChip\(s\.category\.id, s\.category\.label, s\.items\.length\)/.test(js),
-  "category chips count every member (primary + secondary)");
+check(/total = new Set\(/.test(js) && /const shownSites = new Set\(\)/.test(js) && /const shown = shownSites\.size/.test(js),
+  "header total and status count unique sites, not duplicated cards");
+check(/renderOption\(s\.category\.id, s\.category\.label, s\.items\.length\)/.test(js),
+  "category checkboxes count every member (primary + secondary)");
 check(/return \[\.\.\.entries\]\.sort\(/.test(js) && !/data\.sites\.sort\(|\bsites\.sort\(|\.reverse\(\)/.test(js),
   "recent sorts work on copies; the source data order is never mutated");
-check(/b\.time\[key\] - a\.time\[key\] \|\|\s*b\.time\[then\] - a\.time\[then\] \|\|[\s\S]{0,120}a\.site\.name < b\.site\.name[\s\S]{0,80}a\.index - b\.index/.test(js),
-  "recent sorts break ties by the other date, then repo name, then source order");
+check(/created: \{ keys: \["createdAt"\]/.test(js) && /updated: \{ keys: \["updatedAt", "createdAt"\]/.test(js) &&
+  /keys\.reduce\(\(diff, key\) => diff \|\| b\.time\[key\] - a\.time\[key\], 0\) \|\|[\s\S]{0,120}a\.site\.name < b\.site\.name[\s\S]{0,80}a\.index - b\.index/.test(js),
+  "created order uses only createdAt then repo name then source order; updated order keeps createdAt as its tie-break");
 check(/ISO_UTC\.test\(site\[key\]/.test(js), "repository dates are validated before they are rendered or sorted");
 check(/SCREENSHOT_PATH\.test\(site\.screenshot\)/.test(js) && /isHttps\(site\.url\)/.test(js), "data is validated before it becomes a URL attribute");
 
@@ -378,7 +392,11 @@ const nameCmp = (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
 const recentOrder = (key, then) => sites.map((s, index) => ({ ...s, index }))
   .sort((a, b) => Date.parse(b[key]) - Date.parse(a[key]) || Date.parse(b[then]) - Date.parse(a[then]) || nameCmp(a, b) || a.index - b.index)
   .map((s) => s.name);
-const EXPECTED_ORDER = { updated: recentOrder("updatedAt", "createdAt"), created: recentOrder("createdAt", "updatedAt") };
+// Created order never looks at updatedAt: ties go to repo name, then source order.
+const createdOrder = sites.map((s, index) => ({ ...s, index }))
+  .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt) || nameCmp(a, b) || a.index - b.index)
+  .map((s) => s.name);
+const EXPECTED_ORDER = { updated: recentOrder("updatedAt", "createdAt"), created: createdOrder };
 const labelOf = new Map(categories.map((c) => [c.id, c.label]));
 const membersOf = (id) => sites.filter((s) => isMember(s, id)).map((s) => s.name);
 
@@ -394,14 +412,37 @@ const uniqueNames = (cards) => [...new Set(cards.map((c) => c[1]))];
 const isDescending = (values) => values.every((v, i) => i === 0 || values[i - 1] >= v);
 const statusText = async (page) => { await page.waitForTimeout(350); return page.textContent("#result-status"); };
 
+// Category dropdown helpers
+const menuOpen = (page) => page.getAttribute("#category-toggle", "aria-expanded").then((v) => v === "true");
+async function pickCategories(page, ids) {
+  if (!(await menuOpen(page))) await page.click("#category-toggle");
+  for (const box of await page.$$("#category-options input[type=checkbox]")) {
+    const want = ids.includes(await box.getAttribute("value"));
+    if (await box.isChecked() !== want) await box.click();
+  }
+  await page.keyboard.press("Escape");
+}
+const checkedIds = (page) => page.$$eval("#category-options input", (b) => b.filter((x) => x.checked).map((x) => x.value));
+const activeId = (page) => page.evaluate(() => document.activeElement?.id || document.activeElement?.value || "");
+
 async function exercise(page, label) {
   const tag = (m) => `[${label}] ${m}`;
   await page.waitForSelector(".card");
   const select = page.getByLabel("Sort by", { exact: true });
-  check(await select.evaluate((n) => n.id) === "sort" && await select.inputValue() === "updated",
-    tag("Sort by select is labelled and defaults to Recently updated"));
+  check(await select.evaluate((n) => n.id) === "sort" && await select.inputValue() === "created",
+    tag("Sort by select is labelled and defaults to Recently created"));
   check(JSON.stringify(await page.$$eval("#sort option", (o) => o.map((x) => [x.value, x.textContent]))) === JSON.stringify(SORT_OPTIONS),
     tag("sort options render in order"));
+
+  // Default view, before touching anything: created_at descending.
+  const initial = await visibleCards(page);
+  check(JSON.stringify(initial.map((c) => c[1])) === JSON.stringify(EXPECTED_ORDER.created) && isDescending(initial.map((c) => c[3])),
+    tag("default load shows all sites by repository created_at, newest first"));
+  check(JSON.stringify(EXPECTED_ORDER.created) !== JSON.stringify(EXPECTED_ORDER.updated),
+    tag("created and updated orders differ, so the default-order check is meaningful"));
+  check(await page.$eval(".gallery", (g) => g.dataset.sort) === "created", tag("created date is highlighted by default"));
+  const eager = await page.$$eval("#cat-all-sites + ul img", (imgs) => imgs.slice(0, 4).map((i) => i.loading));
+  check(eager.join() === "eager,eager,eager,lazy", tag(`the first three cards in the default order load eagerly (${eager.join()})`));
 
   for (const mode of ["updated", "created"]) {
     await select.selectOption(mode);
@@ -433,32 +474,52 @@ async function exercise(page, label) {
   check(grouped.length === EXPECTED_COUNT + SECONDARY_COUNT && uniqueNames(grouped).length === EXPECTED_COUNT &&
     /Showing all 41 sites, grouped by category\./.test(await statusText(page)),
     tag(`category: ${EXPECTED_COUNT + SECONDARY_COUNT} cards, ${EXPECTED_COUNT} unique sites counted`));
-
-  // Chip counts and header totals hold in every mode
-  const chipCounts = await page.$$eval(".chip", (c) => c.map((x) => [x.dataset.category, Number(x.querySelector(".chip-count").textContent)]));
-  check(JSON.stringify(chipCounts) === JSON.stringify([["all", EXPECTED_COUNT], ...EXPECTED_CATEGORIES.map(([id]) => [id, membersOf(id).length])]),
-    tag("chips count All as unique sites and each category by members"));
   check(await page.textContent("#total-count") === "41" && await page.textContent("#category-count") === "7", tag("header shows 41 sites across 7 categories"));
 
-  // Category chips + search compose in every sort mode
-  for (const mode of ["updated", "created", "category"]) {
+  // Category dropdown: closed by default; opens to checkboxes carrying member counts.
+  check(!(await menuOpen(page)) && await page.isHidden("#category-panel") &&
+    (await page.textContent("#category-summary")) === "All categories", tag("dropdown: closed by default, summary reads All categories"));
+  check(await page.getByRole("button", { name: "Category All categories" }).count() === 1, tag("dropdown: toggle's accessible name includes the label and summary"));
+  await page.click("#category-toggle");
+  const options = await page.$$eval("#category-options label", (ls) => ls.map((l) => [
+    l.querySelector("input").value, l.querySelector(".menu-option-label").textContent, Number(l.querySelector(".chip-count").textContent), l.querySelector("input").checked]));
+  check(await menuOpen(page) && await page.isVisible("#category-panel") &&
+    JSON.stringify(options) === JSON.stringify(EXPECTED_CATEGORIES.map(([id, l]) => [id, l, membersOf(id).length, false])),
+    tag("dropdown: opens to 7 unchecked checkboxes with member counts, in category order"));
+  check(await page.getByRole("group", { name: "Category" }).getByRole("checkbox").count() === 7 &&
+    await page.getByRole("checkbox", { name: /^Personal & Portfolio/ }).count() === 1, tag("dropdown: checkboxes are labelled in a named group"));
+  await page.click("#category-toggle");
+  check(!(await menuOpen(page)) && await page.isHidden("#category-panel"), tag("dropdown: clicking the toggle again closes it"));
+
+  // Multi-select + search + every sort compose (OR across categories, AND with search).
+  for (const mode of ["created", "updated", "category"]) {
     await select.selectOption(mode);
-    await page.click('.chip[data-category="personal"]');
+    await pickCategories(page, ["personal"]);
     let cards = await visibleCards(page);
     const want = membersOf("personal");
     const ordered = mode === "category" ? want : EXPECTED_ORDER[mode].filter((n) => want.includes(n));
     check(JSON.stringify(cards.map((c) => c[1])) === JSON.stringify(ordered) &&
-      (await statusText(page)).startsWith(`Showing ${want.length} of 41 sites in Personal & Portfolio`),
-      tag(`${mode}: Personal chip shows its ${want.length} members${mode === "category" ? "" : " in global sort order"}`));
+      (await statusText(page)).startsWith(`Showing ${want.length} of 41 sites in Personal & Portfolio`) &&
+      (await page.textContent("#category-summary")) === "Personal & Portfolio",
+      tag(`${mode}: Personal checkbox shows its ${want.length} members${mode === "category" ? "" : " in global sort order"}`));
 
-    await page.click('.chip[data-category="games"]');
+    await pickCategories(page, ["games", "faith"]);
+    cards = await visibleCards(page);
+    const both = sites.filter((s) => isMember(s, "games") || isMember(s, "faith")).map((s) => s.name);
+    const wantBoth = mode === "category" ? [...membersOf("faith"), ...membersOf("games")] : EXPECTED_ORDER[mode].filter((n) => both.includes(n));
+    check(JSON.stringify(cards.map((c) => c[1])) === JSON.stringify(wantBoth) &&
+      (await page.textContent("#category-summary")) === "2 categories" &&
+      (await statusText(page)).startsWith(`Showing ${both.length} of 41 sites in Faith & Bible Study or Games & Simulations`),
+      tag(`${mode}: two checked categories show the union (${both.length}) in ${mode === "category" ? "section" : "global sort"} order`));
+
     await page.fill("#filter", "tetris");
     cards = await visibleCards(page);
-    check(uniqueNames(cards).sort().join() === "tetris-ascii,tetris-canvas,tetris-unicode" &&
-      (await statusText(page)).startsWith("Showing 3 of 41 sites in Games & Simulations matching “tetris”"),
-      tag(`${mode}: search + Games chip → the 3 Tetris builds`));
+    const tetris = (mode === "category" ? membersOf("games") : EXPECTED_ORDER[mode]).filter((n) => n.startsWith("tetris-"));
+    check(JSON.stringify(cards.map((c) => c[1])) === JSON.stringify(tetris) &&
+      (await statusText(page)).startsWith("Showing 3 of 41 sites in Faith & Bible Study or Games & Simulations matching “tetris”"),
+      tag(`${mode}: search + categories → the 3 Tetris builds, still in sort order`));
 
-    await page.click('.chip[data-category="personal"]');
+    await pickCategories(page, ["personal"]);
     await statusText(page);
     check(await page.isVisible("#empty") && (await visibleCards(page)).length === 0 &&
       await page.isVisible("#clear-search") && await page.isVisible("#show-all") &&
@@ -466,63 +527,187 @@ async function exercise(page, label) {
       tag(`${mode}: zero results show the empty state with both reset buttons`));
     await page.click("#show-all");
     check(uniqueNames(await visibleCards(page)).length === 3 && await page.isHidden("#empty") &&
-      await page.evaluate(() => document.activeElement?.dataset.category) === "all",
-      tag(`${mode}: Show all categories resets the chip and keeps the search`));
+      (await checkedIds(page)).length === 0 && (await page.textContent("#category-summary")) === "All categories" &&
+      await activeId(page) === "category-toggle",
+      tag(`${mode}: Show all categories unchecks every box, keeps the search, focuses the dropdown`));
     await page.fill("#filter", "zzzz-no-match");
     await page.click("#clear-search");
     check((await visibleCards(page)).length === (mode === "category" ? EXPECTED_COUNT + SECONDARY_COUNT : EXPECTED_COUNT) &&
-      await select.inputValue() === mode && await page.evaluate(() => document.activeElement?.id) === "filter",
+      await select.inputValue() === mode && await activeId(page) === "filter",
       tag(`${mode}: Clear search restores everything and keeps the sort`));
   }
+  await select.selectOption("created");
 
-  // Keyboard: Tab reaches the select after the chips; arrows change the sort; chips and "/" + Esc work.
-  await page.click("body", { position: { x: 1, y: 1 } });
-  await page.focus('.chip[data-category="art"]');
+  // Dropdown keyboard: Enter opens, arrows move focus, Space checks, Escape closes back to the toggle.
+  await page.focus("#filter");
   await page.keyboard.press("Tab");
-  check(await page.evaluate(() => document.activeElement?.id) === "sort", tag("keyboard: Tab moves from the last chip to Sort by"));
-  await select.selectOption("updated");
-  await page.focus("#sort");
-  await page.keyboard.press("ArrowDown");
-  check(await select.inputValue() === "created" &&
-    JSON.stringify((await visibleCards(page)).map((c) => c[1])) === JSON.stringify(EXPECTED_ORDER.created),
-    tag("keyboard: ArrowDown on Sort by switches to Recently created and re-sorts"));
-  await page.keyboard.press("ArrowDown");
-  check(await select.inputValue() === "category" && (await visibleCards(page)).length === EXPECTED_COUNT + SECONDARY_COUNT,
-    tag("keyboard: ArrowDown again switches to Category"));
-  await page.keyboard.press("/");
-  check(await select.inputValue() === "category", tag("keyboard: “/” in the select does not hijack it"));
-  await page.focus('.chip[data-category="faith"]');
+  check(await activeId(page) === "category-toggle", tag("keyboard: Tab moves from search to the category dropdown"));
   await page.keyboard.press("Enter");
-  check(uniqueNames(await visibleCards(page)).length === 2, tag("keyboard: Enter on a chip filters"));
-  await page.focus('.chip[data-category="all"]');
+  check(await menuOpen(page), tag("keyboard: Enter opens the dropdown"));
+  await page.keyboard.press("Tab");
+  check(await activeId(page) === "personal", tag("keyboard: Tab enters the open panel at the first checkbox"));
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("ArrowDown");
+  check(await activeId(page) === "faith", tag("keyboard: ArrowDown moves between checkboxes"));
   await page.keyboard.press("Space");
+  check(JSON.stringify(await checkedIds(page)) === '["faith"]' && uniqueNames(await visibleCards(page)).length === 2 &&
+    await page.getByRole("checkbox", { name: /^Faith/ }).isChecked(), tag("keyboard: Space checks a category and filters"));
+  await page.keyboard.press("End");
+  check(await activeId(page) === "category-clear", tag("keyboard: End reaches Show all categories"));
+  await page.keyboard.press("Home");
+  check(await activeId(page) === "personal", tag("keyboard: Home returns to the first checkbox"));
+  await page.keyboard.press("Escape");
+  check(!(await menuOpen(page)) && await activeId(page) === "category-toggle" &&
+    JSON.stringify(await checkedIds(page)) === '["faith"]' && (await page.textContent("#category-summary")) === "Faith & Bible Study",
+    tag("keyboard: Escape closes the dropdown, returns focus to the toggle and keeps the selection"));
+  await page.keyboard.press("ArrowDown");
+  check(await menuOpen(page) && await activeId(page) === "personal",
+    tag("keyboard: ArrowDown on the toggle opens it and focuses the first checkbox"));
+  await page.keyboard.press("End");
+  await page.keyboard.press("Enter");
+  check((await checkedIds(page)).length === 0 && uniqueNames(await visibleCards(page)).length === EXPECTED_COUNT,
+    tag("keyboard: Show all categories inside the panel clears every checkbox"));
+  await page.keyboard.press("Escape");
+  await page.keyboard.press("Tab");
+  check(await activeId(page) === "sort" && !(await menuOpen(page)), tag("keyboard: Tab from the closed dropdown reaches Sort by"));
+  await page.keyboard.press("ArrowDown");
+  check(await select.inputValue() === "updated" &&
+    JSON.stringify((await visibleCards(page)).map((c) => c[1])) === JSON.stringify(EXPECTED_ORDER.updated),
+    tag("keyboard: ArrowDown on Sort by switches to Recently updated and re-sorts"));
+  await page.keyboard.press("/");
+  check(await select.inputValue() === "updated", tag("keyboard: “/” in the select does not hijack it"));
+  await select.selectOption("created");
+
+  // Focus leaving the panel and clicks outside it close the dropdown.
+  await page.click("#category-toggle");
+  await page.focus("#category-options input");
+  await page.focus("#sort");
+  check(!(await menuOpen(page)), tag("dropdown: moving focus out of the panel closes it"));
+  await page.click("#category-toggle");
+  await page.click("h1");
+  check(!(await menuOpen(page)), tag("dropdown: a click outside closes it"));
+  await page.click("#category-toggle");
+  await page.click("#category-options label >> nth=3");
+  check(await menuOpen(page) && JSON.stringify(await checkedIds(page)) === '["tech"]', tag("dropdown: clicking an option label checks it and keeps the panel open"));
+  const panel = await page.locator("#category-panel").boundingBox();
+  check(panel && panel.x >= 0 && panel.x + panel.width <= page.viewportSize().width, tag("dropdown panel fits inside the viewport"));
+  await page.click("#category-clear");
+  await page.keyboard.press("Escape");
+
   await page.click("body", { position: { x: 1, y: 1 } });
   await page.keyboard.press("/");
   await page.keyboard.type("quartz");
-  check(await page.evaluate(() => document.activeElement?.id) === "filter" && uniqueNames(await visibleCards(page)).length === 2,
-    tag("keyboard: Space selects All, “/” focuses search"));
+  check(await activeId(page) === "filter" && uniqueNames(await visibleCards(page)).length === 2, tag("keyboard: “/” focuses search"));
   await page.keyboard.press("Escape");
   check(await page.inputValue("#filter") === "" && uniqueNames(await visibleCards(page)).length === EXPECTED_COUNT,
     tag("keyboard: Esc clears the search"));
 
-  // No horizontal overflow, in every mode, with the empty state too
+  // Tiles: one site anchor wraps image + text; the GitHub anchor is a separate sibling. No nested anchors.
+  const structure = await page.$$eval(".card", (cards) => cards.map((li) => {
+    const main = li.querySelector("a.card-main");
+    const repo = li.querySelectorAll("a.card-repo");
+    return {
+      name: li.querySelector(".card-slug code").textContent,
+      href: main?.getAttribute("href"),
+      repo: repo.length === 1 ? repo[0].getAttribute("href") : null,
+      imgInside: !!main?.querySelector(".shot img"),
+      titleInside: !!main?.querySelector(".card-title"),
+      nested: li.querySelectorAll("a a").length,
+      repoOutside: repo.length === 1 && !repo[0].closest("a.card-main") && repo[0].parentElement === main?.parentElement,
+      anchors: li.querySelectorAll("a").length,
+      visitText: /visit/i.test(li.textContent),
+      labelled: main?.getAttribute("aria-labelledby")?.split(" ").map((id) => document.getElementById(id)?.textContent ?? "").join(" "),
+    };
+  }));
+  const badTiles = structure.filter((t) => {
+    const s = sites.find((x) => x.name === t.name);
+    return t.href !== s.url || t.repo !== s.repository || !t.imgInside || !t.titleInside || t.nested || !t.repoOutside ||
+      t.anchors !== 2 || t.visitText || t.labelled !== `${s.title} (${s.url.replace(/^https:\/\//, "").replace(/\/$/, "")})`;
+  }).map((t) => t.name);
+  check(structure.length === EXPECTED_COUNT * 2 + SECONDARY_COUNT && badTiles.length === 0,
+    tag(`every tile: image + text inside one site anchor, separate GitHub anchor, no nested anchors, no “Visit” text${list(badTiles)}`));
+  check(await page.getByRole("link", { name: "Account Home (git.marcuschiu.com)", exact: true }).count() >= 1 &&
+    await page.getByRole("link", { name: "GitHub repo: therealmarcuschiu.github.io", exact: true }).count() >= 1,
+    tag("site and GitHub links have distinct accessible names"));
+
+  // Real hit-testing: which anchor would a click at each point activate?
+  const first = sites.find((s) => s.name === EXPECTED_ORDER.created[0]);
+  const card = page.locator("#cat-all-sites + ul .card:not([hidden])").first();
+  await card.scrollIntoViewIfNeeded();
+  const box = await card.boundingBox();
+  const repoBox = await card.locator(".card-repo").boundingBox();
+  const imgBox = await card.locator(".shot img").boundingBox();
+  const hrefAt = (x, y) => page.evaluate(([px, py]) => document.elementFromPoint(px, py)?.closest("a")?.getAttribute("href") ?? null, [x, y]);
+  const hits = {
+    image: await hrefAt(imgBox.x + imgBox.width / 2, imgBox.y + imgBox.height / 2),
+    topLeft: await hrefAt(box.x + 3, box.y + 3),
+    bottomRight: await hrefAt(box.x + box.width - 3, box.y + box.height - 3),
+    bottomLeft: await hrefAt(box.x + 3, box.y + box.height - 3),
+    besideGitHub: await hrefAt(Math.min(box.x + box.width - 3, repoBox.x + repoBox.width + 8), repoBox.y + repoBox.height / 2),
+    body: await hrefAt(box.x + box.width / 2, box.y + box.height * 0.78),
+    github: await hrefAt(repoBox.x + repoBox.width / 2, repoBox.y + repoBox.height / 2),
+  };
+  const misses = Object.entries(hits).filter(([k, v]) => k !== "github" && v !== first.url).map(([k, v]) => `${k}→${v}`);
+  check(misses.length === 0, tag(`image, corners, body and the strip beside GitHub all hit the site link${list(misses)}`));
+  check(hits.github === first.repository, tag(`the GitHub link area hits the repository link (${hits.github})`));
+
+  // Real clicks navigate (destinations are answered locally by the route handler).
+  const firstCard = () => page.locator("#cat-all-sites + ul .card:not([hidden])").first();
+  const goAndBack = async (locator, target, position) => {
+    await Promise.all([page.waitForURL(target), locator.click(position ? { position } : {})]);
+    const ok = page.url() === target;
+    await page.goBack();
+    await page.waitForSelector(".card");
+    return ok;
+  };
+  check(await goAndBack(firstCard().locator(".shot img"), first.url), tag("clicking the screenshot navigates to the site"));
+  check(await goAndBack(firstCard(), first.url, { x: box.width - 4, y: box.height - 4 }), tag("clicking the card background navigates to the site"));
+  check(await goAndBack(firstCard().locator(".card-repo"), first.repository), tag("clicking the GitHub link navigates to the repository"));
+  await firstCard().locator(".card-main").focus();
+  await page.keyboard.press("Tab");
+  check(await page.evaluate(() => document.activeElement?.classList.contains("card-repo")), tag("keyboard: Tab goes from a tile's site link to its GitHub link"));
+
+  // Layout: controls share one row on desktop and stack on phones. No horizontal overflow in any mode.
+  const tops = await page.$$eval("#filter, #category-toggle, #sort", (n) => n.map((x) => Math.round(x.getBoundingClientRect().top)));
+  const width = page.viewportSize().width;
+  check(width >= 900 ? new Set(tops).size === 1 : tops[0] < tops[1] && tops[1] < tops[2],
+    tag(width >= 900 ? "desktop: search, category and sort are on one row" : "phone: controls stack"));
   const overflow = [];
-  for (const mode of ["updated", "created", "category"]) {
+  for (const mode of ["created", "updated", "category"]) {
     await select.selectOption(mode);
-    const o = await page.evaluate(() => ({
-      doc: document.documentElement.scrollWidth - window.innerWidth,
-      wide: [...document.querySelectorAll("body *")].filter((n) => {
-        const r = n.getBoundingClientRect();
-        return r.width && n.offsetParent !== null && !n.closest(".visually-hidden") && (r.right > window.innerWidth + 0.5 || r.left < -0.5);
-      }).length,
-    }));
-    if (o.doc > 0 || o.wide) overflow.push(`${mode}: +${o.doc}px, ${o.wide} element(s)`);
+    for (const open of [false, true]) {
+      if (open) await page.click("#category-toggle");
+      const o = await page.evaluate(() => ({
+        doc: document.documentElement.scrollWidth - window.innerWidth,
+        wide: [...document.querySelectorAll("body *")].filter((n) => {
+          const r = n.getBoundingClientRect();
+          return r.width && n.offsetParent !== null && !n.closest(".visually-hidden") && (r.right > window.innerWidth + 0.5 || r.left < -0.5);
+        }).length,
+      }));
+      if (o.doc > 0 || o.wide) overflow.push(`${mode}${open ? "+menu" : ""}: +${o.doc}px, ${o.wide} element(s)`);
+      if (open) await page.keyboard.press("Escape");
+    }
   }
-  check(overflow.length === 0, tag(`no horizontal overflow in any sort mode${list(overflow)}`));
+  check(overflow.length === 0, tag(`no horizontal overflow in any sort mode, menu open or closed${list(overflow)}`));
   const sortBox = await page.locator(".sort").boundingBox();
-  check(sortBox && sortBox.x >= 0 && sortBox.x + sortBox.width <= page.viewportSize().width,
-    tag("Sort by control fits inside the viewport"));
-  await select.selectOption("updated");
+  check(sortBox && sortBox.x >= 0 && sortBox.x + sortBox.width <= width, tag("Sort by control fits inside the viewport"));
+  await select.selectOption("created");
+}
+
+// Deterministic tie-breaks: serve a copy of the data with tied created_at values (updated_at deliberately disagreeing).
+async function exerciseTies(page) {
+  const tied = structuredClone(data);
+  const set = (name, createdAt, updatedAt) => Object.assign(tied.sites.find((s) => s.name === name), { createdAt, updatedAt });
+  set("tetris-unicode", "2026-10-18T22:00:00Z", "2026-10-18T23:59:00Z");
+  set("quotes", "2026-10-18T22:00:00Z", "2026-10-18T22:30:00Z");
+  set("art", "2026-10-18T22:00:00Z", "2026-10-18T22:00:00Z");
+  await page.route("**/data/sites.json", (route) => route.fulfill({ contentType: "application/json", body: JSON.stringify(tied) }));
+  const load = async () => { await page.reload(); await page.waitForSelector(".card"); return (await visibleCards(page)).map((c) => c[1]); };
+  const order = await load();
+  check(JSON.stringify(order.slice(0, 3)) === JSON.stringify(["art", "quotes", "tetris-unicode"]),
+    `[ties] equal created_at break by repo name, never by updated_at (got ${order.slice(0, 3).join(", ")})`);
+  check(JSON.stringify(await load()) === JSON.stringify(order), "[ties] the order is identical across reloads");
+  await page.unroute("**/data/sites.json");
 }
 
 const chromium = await loadPlaywright();
@@ -549,11 +734,16 @@ if (!chromium) {
         const u = route.request().url();
         if (u.startsWith(url)) return route.continue();
         if (u === GOOGLE_FONTS) return route.fulfill({ status: 200, contentType: "text/css", body: "" });
+        // Tile/GitHub navigation targets: answered locally, never fetched.
+        if (route.request().isNavigationRequest() && sites.some((s) => u === s.url || u === s.repository)) {
+          return route.fulfill({ status: 200, contentType: "text/html", body: "<!doctype html><title>stub</title>" });
+        }
         offsite.push(u);
         return route.abort();
       });
       await page.goto(url);
       await exercise(page, label);
+      if (label === "desktop") await exerciseTies(page);
       check(problems.length === 0, `[${label}] no console errors/warnings, page errors or failed requests${list(problems)}`);
       check(offsite.length === 0, `[${label}] no requests outside the site other than Google Fonts${list(offsite)}`);
       await context.close();
