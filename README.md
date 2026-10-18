@@ -93,7 +93,7 @@ Checks include: exactly 41 unique entries (names, Pages URLs, repository URLs,
 titles, screenshots); HTTPS-only links and correct repository URLs; no
 `github-pages-directory` self-entry; every repository in its expected primary
 category exactly once, with exactly the expected `alsoIn` secondary memberships; each screenshot path is relative and points at an existing 1365×900
-WebP with no orphans; relative asset paths; only the Google Fonts stylesheet as a
+WebP with no orphans (all complete, non-blank lossy VP8, one global capture date); relative asset paths; only the Google Fonts stylesheet as a
 remote resource; no HTML-injection APIs; and accessibility basics (lang, landmarks,
 labelled search, category dropdown and checkbox group, live status, alt text, focus styles, reduced motion,
 tap targets) plus the snapshot disclaimers in the page and this README. The exact

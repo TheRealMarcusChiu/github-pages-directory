@@ -250,6 +250,29 @@ const onDisk = existsSync(join(ROOT, PREVIEW_DIR)) ? readdirSync(join(ROOT, PREV
 const referenced = new Set(sites.map((s) => s.screenshot));
 const orphans = onDisk.filter((f) => !referenced.has(`${PREVIEW_DIR}/${f}`));
 check(onDisk.length === EXPECTED_COUNT && orphans.length === 0, `${PREVIEW_DIR} holds exactly the ${EXPECTED_COUNT} referenced previews${list(orphans)}`);
+// Every preview uses the same encoding (simple lossy "VP8 " WebP, no alpha/metadata container), has a RIFF
+// size matching the file, and is big enough not to be a blank frame (a flat 1365×900 lossy WebP is < 1 KB).
+const MIN_PREVIEW_BYTES = 3000;
+const badShotFormat = [];
+for (const f of onDisk) {
+  const buf = readFileSync(join(ROOT, PREVIEW_DIR, f));
+  if (buf.toString("ascii", 12, 16) !== "VP8 ") badShotFormat.push(`${f} (${buf.toString("ascii", 12, 16).trim()})`);
+  else if (buf.readUInt32LE(4) + 8 !== buf.length) badShotFormat.push(`${f} (truncated)`);
+  else if (buf.length < MIN_PREVIEW_BYTES) badShotFormat.push(`${f} (${buf.length} bytes, likely blank)`);
+}
+check(badShotFormat.length === 0, `all previews are complete, non-trivial lossy VP8 WebP${list(badShotFormat)}`);
+// Re-captured from the live sites after the game restyles; still covered by the single global capture date.
+const REFRESHED_PREVIEWS = ["shared-canvas", "better-plume", "birdseye-arena"];
+const badRefreshed = REFRESHED_PREVIEWS.filter((name) => {
+  const s = sites.find((x) => x.name === name);
+  const file = join(ROOT, PREVIEW_DIR, `${name}.webp`);
+  const size = existsSync(file) && webpSize(readFileSync(file));
+  return !s || s.screenshot !== `${PREVIEW_DIR}/${name}.webp` || !size ||
+    size.width !== PREVIEW_SIZE.width || size.height !== PREVIEW_SIZE.height;
+});
+check(badRefreshed.length === 0, `refreshed previews (${REFRESHED_PREVIEWS.join(", ")}) are referenced 1365×900 WebP${list(badRefreshed)}`);
+const perEntryDates = sites.filter((s) => "capturedOn" in s || "screenshotCapturedOn" in s).map((s) => s.name);
+check(perEntryDates.length === 0, `capture date is the single global screenshots.capturedOn (no per-entry dates)${list(perEntryDates)}`);
 
 // ---------------------------------------------------------------- HTML / assets
 const html = read("index.html");
