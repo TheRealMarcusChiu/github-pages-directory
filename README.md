@@ -19,7 +19,7 @@ tests/verify.mjs    Dependency-free checks
 ```
 
 All paths are relative, so the site works at a repository subpath such as
-`https://<user>.github.io/github-pages-directory/`. No CDNs, remote fonts, or analytics.
+`https://git.marcuschiu.com/github-pages-directory/`. No CDNs, remote fonts, or analytics.
 
 ## Local preview
 
