@@ -330,6 +330,7 @@
       "category": "art",
       "url": "https://git.marcuschiu.com/art/",
       "repository": "https://github.com/TheRealMarcusChiu/art",
+      "alsoIn": ["personal"],
       "screenshot": "assets/previews/art.webp"
     },
     {
@@ -338,6 +339,7 @@
       "category": "art",
       "url": "https://git.marcuschiu.com/my-room-in-3d/",
       "repository": "https://github.com/TheRealMarcusChiu/my-room-in-3d",
+      "alsoIn": ["personal"],
       "screenshot": "assets/previews/my-room-in-3d.webp"
     },
     {
@@ -362,6 +364,7 @@
       "category": "social",
       "url": "https://git.marcuschiu.com/shared-canvas/",
       "repository": "https://github.com/TheRealMarcusChiu/shared-canvas",
+      "alsoIn": ["games"],
       "screenshot": "assets/previews/shared-canvas.webp"
     },
     {
@@ -370,6 +373,7 @@
       "category": "social",
       "url": "https://git.marcuschiu.com/table-topics/",
       "repository": "https://github.com/TheRealMarcusChiu/table-topics",
+      "alsoIn": ["games"],
       "screenshot": "assets/previews/table-topics.webp"
     }
   ]

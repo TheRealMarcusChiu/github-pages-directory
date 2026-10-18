@@ -29,6 +29,9 @@
   const normalize = (s) => s.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, " ").trim();
   const displayUrl = (url) => url.replace(/^https:\/\//, "").replace(/\/$/, "");
   const isHttps = (u) => { try { return new URL(u).protocol === "https:"; } catch { return false; } };
+  // Secondary memberships: optional `alsoIn` list of extra category ids (primary stays `category`).
+  const alsoIn = (site) => (Array.isArray(site.alsoIn) ? site.alsoIn.filter((id) => id !== site.category) : []);
+  const isMember = (site, id) => site.category === id || alsoIn(site).includes(id);
 
   function el(tag, props = {}, children = []) {
     const node = document.createElement(tag);
@@ -41,8 +44,13 @@
     return node;
   }
 
-  function renderCard(site, category) {
+  function renderCard(site, category, labels) {
     const isHome = site.name === HOMEPAGE_REPO;
+    // Always lead with the primary category, then any secondary ones.
+    const memberLabels = [site.category, ...alsoIn(site)].map((id) => labels.get(id)).filter(Boolean);
+    const categoryText = memberLabels.length > 1
+      ? `${memberLabels[0]} · also ${memberLabels.slice(1).join(", ")}`
+      : category.label;
     const children = [];
 
     if (SCREENSHOT_PATH.test(site.screenshot)) {
@@ -61,7 +69,7 @@
     }
 
     const body = el("div", { class: "card-body" }, [
-      el("p", { class: "card-category", text: category.label }),
+      el("p", { class: "card-category", text: categoryText }),
       el("h3", { class: "card-title", text: site.title }),
       el("p", { class: "card-slug" }, [
         el("span", { class: "visually-hidden", text: "Repository: " }),
@@ -92,11 +100,12 @@
     ]);
     return {
       node: li,
-      haystack: normalize(`${site.name} ${site.title} ${category.label}`),
+      name: site.name,
+      haystack: normalize(`${site.name} ${site.title} ${category.label} ${memberLabels.join(" ")}`),
     };
   }
 
-  function renderSection(category, sites, index) {
+  function renderSection(category, sites, index, labels) {
     const headingId = `cat-${category.id}`;
     const count = el("span", { class: "section-count" });
     const heading = el("h2", { id: headingId, class: "section-title" }, [
@@ -104,7 +113,7 @@
       el("span", { class: "section-name", text: category.label }),
       count,
     ]);
-    const items = sites.map((s) => renderCard(s, category));
+    const items = sites.map((s) => renderCard(s, category, labels));
     const list = el("ul", { class: "cards", role: "list" }, items.map((i) => i.node));
     const node = el("section", { class: "section", "aria-labelledby": headingId }, [heading, list]);
     return { category, node, count, items };
@@ -128,7 +137,8 @@
   function applyFilter() {
     const raw = input.value.trim();
     const terms = normalize(raw).split(" ").filter(Boolean);
-    let shown = 0;
+    // A site can be carded in several sections; count each repository once.
+    const shownSites = new Set();
 
     for (const section of sections) {
       const inCategory = activeCategory === ALL || section.category.id === activeCategory;
@@ -136,14 +146,17 @@
       for (const item of section.items) {
         const match = inCategory && terms.every((t) => item.haystack.includes(t));
         item.node.hidden = !match;
-        if (match) visible++;
+        if (match) {
+          visible++;
+          shownSites.add(item.name);
+        }
       }
       section.node.hidden = visible === 0;
       section.count.textContent = visible === section.items.length
         ? plural(visible, "site")
         : `${visible} of ${section.items.length}`;
-      shown += visible;
     }
+    const shown = shownSites.size;
 
     const categoryLabel = activeCategory === ALL
       ? ""
@@ -175,11 +188,13 @@
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
 
+      const labels = new Map(data.categories.map((c) => [c.id, c.label]));
       sections = data.categories
-        .map((category) => [category, data.sites.filter((s) => s.category === category.id)])
+        .map((category) => [category, data.sites.filter((s) => isMember(s, category.id))])
         .filter(([, sites]) => sites.length)
-        .map(([category, sites], i) => renderSection(category, sites, i));
-      total = sections.reduce((n, s) => n + s.items.length, 0);
+        .map(([category, sites], i) => renderSection(category, sites, i, labels));
+      // Unique repositories, not cards: secondary memberships duplicate cards across sections.
+      total = new Set(sections.flatMap((s) => s.items.map((i) => i.name))).size;
 
       gallery.replaceChildren(...sections.map((s) => s.node));
       chips = [

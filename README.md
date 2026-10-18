@@ -49,8 +49,8 @@ node tests/verify.mjs
 
 Checks include: exactly 41 unique entries (names, Pages URLs, repository URLs,
 titles, screenshots); HTTPS-only links and correct repository URLs; no
-`github-pages-directory` self-entry; every repository in its expected category
-exactly once; each screenshot path is relative and points at an existing 1365×900
+`github-pages-directory` self-entry; every repository in its expected primary
+category exactly once, with exactly the expected `alsoIn` secondary memberships; each screenshot path is relative and points at an existing 1365×900
 WebP with no orphans; relative asset paths; only the Google Fonts stylesheet as a
 remote resource; no HTML-injection APIs; and accessibility basics (lang, landmarks,
 labelled search and chip group, live status, alt text, focus styles, reduced motion,
@@ -65,10 +65,17 @@ tap targets) plus the snapshot disclaimers in the page and this README.
 |--------------|-----------------------------------------------------------------|
 | `name`       | original repository name (slug, shown on every card)           |
 | `title`      | hand-written display title                                       |
-| `category`   | one category `id`                                                |
+| `category`   | primary category `id`                                            |
+| `alsoIn`     | optional list of extra category `id`s the card is also shown in  |
 | `url`        | GitHub Pages URL                                                 |
 | `repository` | GitHub repository URL                                            |
 | `screenshot` | relative path, `assets/previews/<name>.webp`                     |
+
+A site with `alsoIn` keeps its primary `category` and gets an extra card in each
+listed section; its card label names the primary category first. Category chips and
+section headers count every member, while the header total, the All chip and the
+result status count unique sites. Currently every Social & Collaborative site is also
+in Games & Simulations, and every Art & 3D site is also in Personal & Portfolio.
 
 Display titles were written by hand, using the 2026-10-18 scan's page titles and
 headings only as hints. Scraped page text is never stored or rendered; the repo slug
@@ -79,4 +86,4 @@ and the personal-site versions).
 
 Edit `data/sites.json`, add or replace the matching preview in `assets/previews/`,
 update the snapshot/capture dates in `data/sites.json`, `index.html` and this README,
-then adjust `EXPECTED_COUNT` and `EXPECTED_CATEGORIES` in `tests/verify.mjs`.
+then adjust `EXPECTED_COUNT`, `EXPECTED_CATEGORIES` and `EXPECTED_ALSO_IN` in `tests/verify.mjs`.

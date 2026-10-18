@@ -14,7 +14,7 @@ const HOMEPAGE_REPO = "therealmarcuschiu.github.io";
 const GOOGLE_FONTS =
   "https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500;1,6..72,600&family=JetBrains+Mono:wght@400;500;600&display=swap";
 
-// Category id → label → repositories. Each repository must appear exactly once.
+// Category id → label → primary repositories. Each repository has exactly one primary category.
 const EXPECTED_CATEGORIES = [
   ["personal", "Personal & Portfolio", ["therealmarcuschiu.github.io", "personal-website", "personal-website-2-public", "personal-website-3", "projects", "now", "workouts", "images"]],
   ["writing", "Writing & Reflection", ["thoughts", "quotes", "meditations"]],
@@ -24,6 +24,21 @@ const EXPECTED_CATEGORIES = [
   ["games", "Games & Simulations", ["better-plume", "birdseye-arena", "dark-twilight-imperium", "spinning-cube", "tetris-ascii", "tetris-canvas", "tetris-unicode", "tower-defense"]],
   ["art", "Art & 3D", ["art", "my-room-in-3d"]],
   ["social", "Social & Collaborative", ["shared-canvas", "table-topics"]],
+];
+// Secondary memberships (optional `alsoIn`), repository → extra category ids. Primary category is unchanged.
+const EXPECTED_ALSO_IN = {
+  "shared-canvas": ["games"],
+  "table-topics": ["games"],
+  "art": ["personal"],
+  "my-room-in-3d": ["personal"],
+};
+// Every site whose primary category is the key must also be listed in the value category.
+const SECONDARY_COUNT = Object.values(EXPECTED_ALSO_IN).flat().length;
+const REQUIRED_OVERLAPS = [["social", "games"], ["art", "personal"]];
+// Titles/categories settled by earlier requests that must not regress.
+const PINNED = [
+  { name: "images", title: "Markive · YouTube Videos, Quotes & Images", category: "personal" },
+  { name: "shazaam", title: "Local Shazam", category: "tech" },
 ];
 
 let failures = 0;
@@ -81,8 +96,9 @@ check(sites.find((s) => s.name === HOMEPAGE_REPO)?.title === "Account Home", "ac
 const badTitles = sites.filter((s) => typeof s.title !== "string" || !s.title.trim() || s.title !== s.title.trim() ||
   s.title.length > 60 || /[<>]/.test(s.title)).map((s) => s.name);
 check(badTitles.length === 0, `every entry has a readable plain-text title${list(badTitles)}`);
-const unexpectedKeys = sites.filter((s) => Object.keys(s).sort().join() !== "category,name,repository,screenshot,title,url").map((s) => s.name);
-check(unexpectedKeys.length === 0, `entries have exactly name/title/category/url/repository/screenshot${list(unexpectedKeys)}`);
+const BASE_KEYS = "category,name,repository,screenshot,title,url";
+const unexpectedKeys = sites.filter((s) => Object.keys(s).filter((k) => k !== "alsoIn").sort().join() !== BASE_KEYS).map((s) => s.name);
+check(unexpectedKeys.length === 0, `entries have exactly name/title/category/url/repository/screenshot, plus optional alsoIn${list(unexpectedKeys)}`);
 
 // Categories
 const categories = Array.isArray(data.categories) ? data.categories : [];
@@ -103,7 +119,44 @@ const missing = assigned.filter((n) => names.filter((m) => m === n).length !== 1
 check(missing.length === 0, `every expected repository appears exactly once${list(missing)}`);
 for (const [id, label, repos] of EXPECTED_CATEGORIES) {
   const count = sites.filter((s) => s.category === id).length;
-  check(count === repos.length, `${label}: ${repos.length} sites (found ${count})`);
+  check(count === repos.length, `${label}: ${repos.length} primary sites (found ${count})`);
+}
+
+// Secondary memberships (alsoIn)
+const badAlsoInShape = sites.filter((s) => "alsoIn" in s && !(Array.isArray(s.alsoIn) && s.alsoIn.length > 0 &&
+  s.alsoIn.every((id) => typeof id === "string" && categoryIds.has(id) && id !== s.category) &&
+  new Set(s.alsoIn).size === s.alsoIn.length)).map((s) => s.name);
+check(badAlsoInShape.length === 0,
+  `alsoIn, when present, is a non-empty list of unique known category ids other than the primary${list(badAlsoInShape)}`);
+const alsoInOf = (s) => (Array.isArray(s.alsoIn) ? s.alsoIn : []);
+const wrongAlsoIn = sites.filter((s) => JSON.stringify(alsoInOf(s)) !== JSON.stringify(EXPECTED_ALSO_IN[s.name] ?? []))
+  .map((s) => `${s.name}→[${alsoInOf(s).join(",")}]`);
+check(wrongAlsoIn.length === 0, `secondary memberships are exactly the expected ${Object.keys(EXPECTED_ALSO_IN).length}${list(wrongAlsoIn)}`);
+const unknownAlsoIn = Object.keys(EXPECTED_ALSO_IN).filter((n) => !names.includes(n));
+check(unknownAlsoIn.length === 0, `every expected secondary membership names a real entry${list(unknownAlsoIn)}`);
+for (const [from, to] of REQUIRED_OVERLAPS) {
+  const label = (id) => categories.find((c) => c.id === id)?.label ?? id;
+  const primaries = sites.filter((s) => s.category === from);
+  const notAlso = primaries.filter((s) => !alsoInOf(s).includes(to)).map((s) => s.name);
+  check(primaries.length > 0 && notAlso.length === 0,
+    `every ${label(from)} site keeps its primary category and also appears in ${label(to)}${list(notAlso)}`);
+}
+const isMember = (s, id) => s.category === id || alsoInOf(s).includes(id);
+for (const [id, label, repos] of EXPECTED_CATEGORIES) {
+  const want = [...repos, ...Object.keys(EXPECTED_ALSO_IN).filter((n) => EXPECTED_ALSO_IN[n].includes(id))].sort();
+  const got = sites.filter((s) => isMember(s, id)).map((s) => s.name).sort();
+  check(JSON.stringify(got) === JSON.stringify(want), `${label}: ${want.length} member sites (primary + secondary; found ${got.length})`);
+}
+const memberships = sites.reduce((n, s) => n + 1 + alsoInOf(s).length, 0);
+const uniqueMembers = new Set(sites.filter((s) => categories.some((c) => isMember(s, c.id))).map((s) => s.name)).size;
+check(uniqueMembers === EXPECTED_COUNT && memberships === EXPECTED_COUNT + SECONDARY_COUNT,
+  `overall total counts ${EXPECTED_COUNT} unique sites across ${EXPECTED_COUNT + SECONDARY_COUNT} category memberships (found ${uniqueMembers}/${memberships})`);
+
+// Earlier decisions stay in place
+for (const pin of PINNED) {
+  const s = sites.find((x) => x.name === pin.name);
+  check(s?.title === pin.title && s?.category === pin.category && !("alsoIn" in s),
+    `${pin.name} keeps title “${pin.title}” in ${pin.category}`);
 }
 
 // Screenshots
@@ -192,6 +245,14 @@ check(/"aria-pressed"/.test(js), "category chips expose pressed state");
 check(/renderChip\(ALL, "All"/.test(js), "an All chip is rendered");
 check(/site\.name\} \$\{site\.title\} \$\{category\.label\}/.test(js), "search covers repo name, title and category");
 check(/inCategory && terms\.every/.test(js), "search and category filter combine (AND)");
+check(/data\.sites\.filter\(\(s\) => isMember\(s, category\.id\)\)/.test(js) &&
+  /const isMember = \(site, id\) => site\.category === id \|\| alsoIn\(site\)\.includes\(id\)/.test(js),
+  "sections include sites by primary category or alsoIn membership");
+check(/total = new Set\(/.test(js) && /const shownSites = new Set\(\)/.test(js) && /const shown = shownSites\.size/.test(js) &&
+  /renderChip\(ALL, "All", total\)/.test(js),
+  "All chip, header total and status count unique sites, not duplicated cards");
+check(/renderChip\(s\.category\.id, s\.category\.label, s\.items\.length\)/.test(js),
+  "category chips count every member (primary + secondary)");
 check(/SCREENSHOT_PATH\.test\(site\.screenshot\)/.test(js) && /isHttps\(site\.url\)/.test(js), "data is validated before it becomes a URL attribute");
 
 // CSS: design tokens, focus, motion, small screens
