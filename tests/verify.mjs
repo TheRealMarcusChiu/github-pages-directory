@@ -7,18 +7,26 @@ import { dirname, join, extname, normalize as normalizePath } from "node:path";
 import { createServer } from "node:http";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const EXPECTED_COUNT = 45;
+const EXPECTED_COUNT = 47;
 const OWNER = "TheRealMarcusChiu";
 const SNAPSHOT = "2026-10-19";
 // Preview capture dates are per entry: 40 of the original 41 previews kept their 2026-10-18 captures;
 // bandwidth-compare (one of the original 41) was re-captured on 2026-10-19, and the four repositories
-// added in the 2026-10-19 refresh were captured that day — 40 previews dated 2026-10-18, 5 dated 2026-10-19.
+// added in the 2026-10-19 refresh were captured that day, as were the two later 2026-10-19 additions —
+// 40 previews dated 2026-10-18, 7 dated 2026-10-19, 47 in total.
 const ORIGINAL_CAPTURE = "2026-10-18";
 const ADDED_CAPTURE = "2026-10-19";
 const ORIGINAL_COUNT = 41;
 const ADDED = ["confluence-obsidian-quartz", "f1-car-generations", "fake-personal-website", "wiki-viewer"];
+// Added later on 2026-10-19 (after the four above), appended in this order.
+const LATER_ADDED = ["zfs-layout-lab", "vram-fit-map"];
+const ALL_ADDED = [...ADDED, ...LATER_ADDED];
+
 // Original entries whose preview was re-captured on ADDED_CAPTURE after a redeploy.
 const RECAPTURED = ["bandwidth-compare"];
+// 40 previews dated ORIGINAL_CAPTURE, 7 dated ADDED_CAPTURE.
+const ORIGINAL_CAPTURE_COUNT = ORIGINAL_COUNT - RECAPTURED.length;
+const ADDED_CAPTURE_COUNT = RECAPTURED.length + ALL_ADDED.length;
 const LONG_DATE = { "2026-10-18": "18 October 2026", "2026-10-19": "19 October 2026" };
 const PREVIEW_DIR = "assets/previews";
 const PREVIEW_SIZE = { width: 1365, height: 900 };
@@ -32,7 +40,7 @@ const EXPECTED_CATEGORIES = [
   ["personal", "Personal & Portfolio", ["therealmarcuschiu.github.io", "personal-website", "personal-website-2-public", "personal-website-3", "projects", "now", "workouts", "images", "fake-personal-website"]],
   ["writing", "Writing & Reflection", ["thoughts", "quotes", "meditations"]],
   ["faith", "Faith & Bible Study", ["bible-graph", "the-law-of-first-mention"]],
-  ["tech", "Tech & Learning", ["bandwidth-compare", "barnes-hut-algorithm", "confluence-data", "display-tech-explorer", "fisher-information", "monitor-tech-guide", "tech", "visualizing-neural-networks", "obsidian-generator", "obsidian-stargazer", "crontab-guru-clone", "shazaam", "f1-car-generations"]],
+  ["tech", "Tech & Learning", ["bandwidth-compare", "barnes-hut-algorithm", "confluence-data", "display-tech-explorer", "fisher-information", "monitor-tech-guide", "tech", "visualizing-neural-networks", "obsidian-generator", "obsidian-stargazer", "crontab-guru-clone", "shazaam", "f1-car-generations", "zfs-layout-lab", "vram-fit-map"]],
   ["knowledge", "Knowledge & Reading", ["quartz", "stardust", "var-log", "var-log-1", "confluence-obsidian-quartz", "wiki-viewer"]],
   ["games", "Games & Simulations", ["better-plume", "birdseye-arena", "dark-twilight-imperium", "spinning-cube", "tetris-ascii", "tetris-canvas", "tetris-unicode", "tower-defense", "shared-canvas", "table-topics"]],
   ["art", "Art & 3D", ["art", "my-room-in-3d"]],
@@ -47,7 +55,8 @@ const SECONDARY_COUNT = Object.values(EXPECTED_ALSO_IN).flat().length;
 const REQUIRED_OVERLAPS = [["art", "personal"]];
 // Exact source order, display titles, GitHub repository created_at / updated_at (retrieved once from the
 // authenticated owner Pages inventory on 2026-10-19) and per-entry preview capture date.
-// Repository metadata only — not page-content dates. The four additions are appended after the original 41.
+// Repository metadata only — not page-content dates. The four additions are appended after the original 41,
+// then the two later additions after them.
 const EXPECTED_SITES = [
   ["therealmarcuschiu.github.io", "Account Home", "2020-07-12T18:05:00Z", "2026-07-03T06:00:22Z", "2026-10-18"],
   ["personal-website", "Personal Website · Developer (v1)", "2018-12-21T07:19:36Z", "2025-05-28T20:45:00Z", "2026-10-18"],
@@ -94,8 +103,10 @@ const EXPECTED_SITES = [
   ["f1-car-generations", "The Shape of Speed · F1, 1950–2026", "2026-10-19T05:44:38Z", "2026-10-19T05:57:46Z", "2026-10-19"],
   ["fake-personal-website", "Fake Personal Site · Inspector", "2019-03-02T04:36:01Z", "2026-07-03T05:29:35Z", "2026-10-19"],
   ["wiki-viewer", "Wiki Viewer · Empty Garden", "2026-07-09T07:20:31Z", "2026-07-12T04:51:36Z", "2026-10-19"],
+  ["zfs-layout-lab", "ZFS Layout Lab · Pool Geometry", "2026-10-19T16:17:23Z", "2026-10-19T16:17:33Z", "2026-10-19"],
+  ["vram-fit-map", "VRAM Fit Map · Local LLM Budget", "2026-10-19T16:17:32Z", "2026-10-19T16:17:43Z", "2026-10-19"],
 ];
-const DATES_RETRIEVED = "2026-10-19T05:58:50Z";
+const DATES_RETRIEVED = "2026-10-19T18:48:14Z";
 const ISO_UTC = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
 const SORT_OPTIONS = [["created", "Recently created"], ["updated", "Recently updated"], ["category", "Category"]];
 // Titles/categories settled by earlier requests that must not regress.
@@ -137,9 +148,11 @@ check(/screenshotCapturedOn/.test(screenshotNote) &&
   screenshotNote.includes(`${ORIGINAL_COUNT - RECAPTURED.length} of the original ${ORIGINAL_COUNT} previews were captured on ${ORIGINAL_CAPTURE}`) &&
   RECAPTURED.every((name) => screenshotNote.includes(`${name} was re-captured on ${ADDED_CAPTURE}`)) &&
   screenshotNote.includes(`the four additions were captured on ${ADDED_CAPTURE}`) &&
+  screenshotNote.includes(`the two later additions (${LATER_ADDED.join(", ")}) were captured on ${ADDED_CAPTURE}`) &&
+  screenshotNote.includes(`${ORIGINAL_CAPTURE_COUNT} previews are dated ${ORIGINAL_CAPTURE} and ${ADDED_CAPTURE_COUNT} are dated ${ADDED_CAPTURE}`) &&
   !/The original \d+ previews were captured/.test(screenshotNote) &&
   /may have changed/.test(screenshotNote),
-  `screenshot note says ${ORIGINAL_COUNT - RECAPTURED.length} of the original ${ORIGINAL_COUNT} are dated ${ORIGINAL_CAPTURE}, ${RECAPTURED.join(", ")} was re-captured on ${ADDED_CAPTURE}, and the additions are dated ${ADDED_CAPTURE}`);
+  `screenshot note says ${ORIGINAL_COUNT - RECAPTURED.length} of the original ${ORIGINAL_COUNT} are dated ${ORIGINAL_CAPTURE}, ${RECAPTURED.join(", ")} was re-captured on ${ADDED_CAPTURE}, and all ${ALL_ADDED.length} additions are dated ${ADDED_CAPTURE} (${ORIGINAL_CAPTURE_COUNT}/${ADDED_CAPTURE_COUNT})`);
 
 const names = sites.map((s) => s.name);
 const unique = (key) => new Set(sites.map((s) => s[key])).size === sites.length;
@@ -174,8 +187,9 @@ check(unexpectedKeys.length === 0,
   `entries have exactly name/title/category/url/repository/screenshot/screenshotCapturedOn/createdAt/updatedAt, plus optional alsoIn${list(unexpectedKeys)}`);
 check(JSON.stringify(sites.map((s) => [s.name, s.title])) === JSON.stringify(EXPECTED_SITES.map(([n, t]) => [n, t])),
   `the ${EXPECTED_COUNT} names and display titles match, in source order`);
-check(EXPECTED_SITES.length === EXPECTED_COUNT && JSON.stringify(names.slice(ORIGINAL_COUNT)) === JSON.stringify(ADDED),
-  `the original ${ORIGINAL_COUNT} keep their relative order and the ${ADDED.length} additions are appended at the end`);
+check(EXPECTED_SITES.length === EXPECTED_COUNT && ORIGINAL_COUNT + ALL_ADDED.length === EXPECTED_COUNT &&
+  JSON.stringify(names.slice(ORIGINAL_COUNT)) === JSON.stringify(ALL_ADDED),
+  `the original ${ORIGINAL_COUNT} keep their relative order, then the ${ADDED.length} additions, then the ${LATER_ADDED.length} later additions (${LATER_ADDED.join(", ")})`);
 
 // Repository dates (GitHub created_at / updated_at)
 const meta = data.repositoryDates ?? {};
@@ -304,8 +318,9 @@ const badCapture = sites.filter((s) => !validDay(s.screenshotCapturedOn) || s.sc
 check(badCapture.length === 0, `every entry has a valid screenshotCapturedOn on or before ${SNAPSHOT}${list(badCapture)}`);
 const wrongCapture = sites.filter((s, i) => s.screenshotCapturedOn !== EXPECTED_SITES[i]?.[4]).map((s) => `${s.name}→${s.screenshotCapturedOn}`);
 check(wrongCapture.length === 0, `capture dates match the expected per-entry dates${list(wrongCapture)}`);
-const originals = sites.filter((s) => !ADDED.includes(s.name));
+const originals = sites.filter((s) => !ALL_ADDED.includes(s.name));
 const additions = sites.filter((s) => ADDED.includes(s.name));
+const laterAdditions = sites.filter((s) => LATER_ADDED.includes(s.name));
 const kept = originals.filter((s) => !RECAPTURED.includes(s.name));
 const recaptured = originals.filter((s) => RECAPTURED.includes(s.name));
 check(originals.length === ORIGINAL_COUNT && kept.length === ORIGINAL_COUNT - RECAPTURED.length &&
@@ -315,6 +330,13 @@ check(recaptured.length === RECAPTURED.length && recaptured.every((s) => s.scree
   `the ${RECAPTURED.length} re-captured original preview (${RECAPTURED.join(", ")}) is dated ${ADDED_CAPTURE}`);
 check(additions.length === ADDED.length && additions.every((s) => s.screenshotCapturedOn === ADDED_CAPTURE),
   `the ${ADDED.length} added previews (${ADDED.join(", ")}) are dated ${ADDED_CAPTURE}`);
+check(laterAdditions.length === LATER_ADDED.length && laterAdditions.every((s) => s.screenshotCapturedOn === ADDED_CAPTURE),
+  `the ${LATER_ADDED.length} later added previews (${LATER_ADDED.join(", ")}) are dated ${ADDED_CAPTURE}`);
+const datedOriginal = sites.filter((s) => s.screenshotCapturedOn === ORIGINAL_CAPTURE).length;
+const datedAdded = sites.filter((s) => s.screenshotCapturedOn === ADDED_CAPTURE).length;
+check(ORIGINAL_CAPTURE_COUNT === 40 && ADDED_CAPTURE_COUNT === 7 && datedOriginal === ORIGINAL_CAPTURE_COUNT &&
+  datedAdded === ADDED_CAPTURE_COUNT && datedOriginal + datedAdded === EXPECTED_COUNT,
+  `${ORIGINAL_CAPTURE_COUNT} previews dated ${ORIGINAL_CAPTURE} + ${ADDED_CAPTURE_COUNT} dated ${ADDED_CAPTURE} = ${EXPECTED_COUNT} (found ${datedOriginal} + ${datedAdded})`);
 
 // ---------------------------------------------------------------- HTML / assets
 const html = read("index.html");
@@ -353,8 +375,9 @@ check(html.includes('src="assets/app.js"'), "script linked with a relative path"
 check(/<time datetime="2026-10-19">19 October 2026<\/time>/.test(html) && /<time datetime="2026-10-19">2026-10-19<\/time>/.test(html),
   "snapshot date 2026-10-19 shown in the header and footer");
 check(!/2026-10-18|18 October 2026/.test(html), "no stale 18 October snapshot/global capture date in the page");
-check(/<strong id="total-count">45<\/strong>/.test(html) && /45 sites/.test(html.match(/<footer[\s\S]*?<\/footer>/)?.[0] ?? "") && /45-site/.test(html.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? ""),
-  "header, footer and meta description describe 45 sites");
+check(/<strong id="total-count">47<\/strong>/.test(html) && /47 sites/.test(html.match(/<footer[\s\S]*?<\/footer>/)?.[0] ?? "") && /47-site/.test(html.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? ""),
+  "header, footer and meta description describe 47 sites");
+check(!/\b45(?: sites|-site|<\/strong>)/.test(html), "no stale 45-site count in the page");
 check(/GitHub Pages configured/.test(html), "UI says membership means GitHub Pages is configured");
 check(/dated per card/.test(html) && /capture dates vary by entry/.test(html.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? ""),
   "UI and meta description say preview capture dates vary by entry");
@@ -439,8 +462,10 @@ check(/--tap:\s*2\.75rem/.test(css) && /min-height: var\(--tap\)/.test(css), "co
 // README
 check(readme.includes(SNAPSHOT) && /not automatically synced/i.test(readme), "README states the snapshot date and that it is not synced");
 check(/1365×900/.test(readme) && /may have changed/i.test(readme), "README notes screenshots are dated 1365×900 previews");
-check(/\(45 entries\)/.test(readme) && /exactly 45 unique entries/.test(readme) && /45 local 1365×900/.test(readme) &&
-  !/\(41 entries\)|exactly 41 unique|41 local/.test(readme), "README describes 45 entries, not the old 41");
+check(/\(47 entries\)/.test(readme) && /exactly 47 unique entries/.test(readme) && /47 local 1365×900/.test(readme) &&
+  !/\((?:41|45) entries\)|exactly (?:41|45) unique|(?:41|45) local/.test(readme), "README describes 47 entries, not the old 41 or 45");
+check(LATER_ADDED.every((n) => readme.includes(`\`${n}\``)) && /40 previews dated 2026-10-18, 7 dated 2026-10-19, 47 in total/.test(readme) &&
+  !/5 dated 2026-10-19/.test(readme), "README capture prose counts 40 + 7 = 47 previews and names the later additions");
 check(/GitHub Pages\s+configured/.test(readme) && /Pages\s+API/.test(readme), "README says membership means Pages configured per the Pages API inventory");
 check(/Capture dates vary by entry/.test(readme) && /screenshotCapturedOn/.test(readme) && readme.includes(ORIGINAL_CAPTURE) &&
   readme.includes(ADDED_CAPTURE) && !/one global capture date/.test(readme), "README documents per-entry capture dates");
@@ -800,9 +825,10 @@ async function exercise(page, label) {
 async function exerciseTies(page) {
   const tied = structuredClone(data);
   const set = (name, createdAt, updatedAt) => Object.assign(tied.sites.find((s) => s.name === name), { createdAt, updatedAt });
-  set("tetris-unicode", "2026-10-19T05:50:00Z", "2026-10-19T05:58:00Z");
-  set("quotes", "2026-10-19T05:50:00Z", "2026-10-19T05:55:00Z");
-  set("art", "2026-10-19T05:50:00Z", "2026-10-19T05:50:00Z");
+  // The tied created_at must be newer than every real createdAt (latest: vram-fit-map, 2026-10-19T16:17:32Z).
+  set("tetris-unicode", "2026-10-19T18:40:00Z", "2026-10-19T18:48:00Z");
+  set("quotes", "2026-10-19T18:40:00Z", "2026-10-19T18:45:00Z");
+  set("art", "2026-10-19T18:40:00Z", "2026-10-19T18:40:00Z");
   await page.route("**/data/sites.json", (route) => route.fulfill({ contentType: "application/json", body: JSON.stringify(tied) }));
   const load = async () => { await page.reload(); await page.waitForSelector(".card"); return (await visibleCards(page)).map((c) => c[1]); };
   const order = await load();

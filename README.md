@@ -9,7 +9,7 @@ the gallery is ordered by *Recently created* (default), *Recently updated* or
 separate *GitHub repo* link.
 
 > **Snapshot caveat:** `data/sites.json` is a static snapshot dated **2026-10-19**
-> (45 entries). It is not automatically synced. Membership means the repository is
+> (47 entries). It is not automatically synced. Membership means the repository is
 > public and has GitHub Pages configured according to the authenticated GitHub Pages
 > API owner inventory — not that the page was reviewed or looks finished. The account
 > homepage is included; this directory's own repository is not.
@@ -18,8 +18,9 @@ separate *GitHub repo* link.
 > (top of the page only, not full-page). Capture dates vary by entry and are stored
 > per site as `screenshotCapturedOn`: 40 of the original 41 were captured on **2026-10-18**;
 > `bandwidth-compare` (one of the original 41) was re-captured on **2026-10-19**, and the
-> four added in this refresh were captured on **2026-10-19** — 40 previews dated 2026-10-18,
-> 5 dated 2026-10-19. They are local static images, not
+> four added in this refresh were captured on **2026-10-19**, as were the two later
+> additions (`zfs-layout-lab`, `vram-fit-map`) — 40 previews dated 2026-10-18,
+> 7 dated 2026-10-19, 47 in total. They are local static images, not
 > live views — the live sites may have changed since.
 >
 > **Notes on the 2026-10-19 additions:** `confluence-obsidian-quartz` answers HTTP 200
@@ -30,7 +31,7 @@ separate *GitHub repo* link.
 >
 > **Repository dates:** each entry's `createdAt` / `updatedAt` are the GitHub
 > repository `created_at` / `updated_at` values from the authenticated GitHub REST API
-> (one owner Pages inventory, retrieved 2026-10-19T05:58:50Z). They are
+> (one owner Pages inventory, retrieved 2026-10-19T18:48:14Z). They are
 > repository metadata, not page-content dates — `updated_at` moves on any repository
 > update (pushes, settings, description). They are stored statically; the page makes
 > no GitHub API calls.
@@ -41,7 +42,7 @@ separate *GitHub repo* link.
 index.html              Page markup
 assets/styles.css       Warm editorial dark theme (Newsreader + JetBrains Mono)
 assets/app.js           Loads data/sites.json, renders the gallery, search, category dropdown + sort
-assets/previews/*.webp  45 local 1365×900 preview screenshots, capture date per entry
+assets/previews/*.webp  47 local 1365×900 preview screenshots, capture date per entry
 data/sites.json         The inventory (see below)
 tests/verify.mjs        Dependency-free checks
 ```
@@ -102,11 +103,11 @@ PLAYWRIGHT_MODULE=/path/to/node_modules/playwright REQUIRE_BROWSER=1 node tests/
 Without Playwright the browser stage prints `SKIP`; `REQUIRE_BROWSER=1` turns that
 into a failure.
 
-Checks include: exactly 45 unique entries (names, Pages URLs, repository URLs,
+Checks include: exactly 47 unique entries (names, Pages URLs, repository URLs,
 titles, screenshots); HTTPS-only links and correct repository URLs; no
 `github-pages-directory` self-entry; every repository in its expected primary
 category exactly once, with exactly the expected `alsoIn` secondary memberships; each screenshot path is relative and points at an existing 1365×900
-WebP with no orphans (all complete, non-blank lossy VP8), each entry's required `screenshotCapturedOn` (exact per entry: 2026-10-18 for 40 of the original 41, 2026-10-19 for the re-captured `bandwidth-compare` and the four additions); relative asset paths; only the Google Fonts stylesheet as a
+WebP with no orphans (all complete, non-blank lossy VP8), each entry's required `screenshotCapturedOn` (exact per entry: 2026-10-18 for 40 of the original 41, 2026-10-19 for the re-captured `bandwidth-compare`, the four additions and the two later additions); relative asset paths; only the Google Fonts stylesheet as a
 remote resource; no HTML-injection APIs; and accessibility basics (lang, landmarks,
 labelled search, category dropdown and checkbox group, live status, alt text, focus styles, reduced motion,
 tap targets) plus the snapshot disclaimers in the page and this README. The exact

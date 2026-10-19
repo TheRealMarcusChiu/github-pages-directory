@@ -7,11 +7,11 @@
     "width": 1365,
     "height": 900,
     "format": "webp",
-    "note": "Viewport previews; each entry's screenshotCapturedOn is its capture date. 40 of the original 41 previews were captured on 2026-10-18; bandwidth-compare was re-captured on 2026-10-19; the four additions were captured on 2026-10-19; live sites may have changed since."
+    "note": "Viewport previews; each entry's screenshotCapturedOn is its capture date. 40 of the original 41 previews were captured on 2026-10-18; bandwidth-compare was re-captured on 2026-10-19; the four additions were captured on 2026-10-19; the two later additions (zfs-layout-lab, vram-fit-map) were captured on 2026-10-19; 40 previews are dated 2026-10-18 and 7 are dated 2026-10-19; live sites may have changed since."
   },
   "repositoryDates": {
     "source": "GitHub REST API repository created_at / updated_at (authenticated owner repo listing)",
-    "retrievedAt": "2026-10-19T05:58:50Z",
+    "retrievedAt": "2026-10-19T18:48:14Z",
     "note": "Repository metadata dates, not page-content dates. updated_at changes on any repository update (pushes, settings, metadata). Static; not automatically synced."
   },
   "categories": [
@@ -541,6 +541,28 @@
       "screenshotCapturedOn": "2026-10-19",
       "createdAt": "2026-07-09T07:20:31Z",
       "updatedAt": "2026-07-12T04:51:36Z"
+    },
+    {
+      "name": "zfs-layout-lab",
+      "title": "ZFS Layout Lab · Pool Geometry",
+      "category": "tech",
+      "url": "https://git.marcuschiu.com/zfs-layout-lab/",
+      "repository": "https://github.com/TheRealMarcusChiu/zfs-layout-lab",
+      "screenshot": "assets/previews/zfs-layout-lab.webp",
+      "screenshotCapturedOn": "2026-10-19",
+      "createdAt": "2026-10-19T16:17:23Z",
+      "updatedAt": "2026-10-19T16:17:33Z"
+    },
+    {
+      "name": "vram-fit-map",
+      "title": "VRAM Fit Map · Local LLM Budget",
+      "category": "tech",
+      "url": "https://git.marcuschiu.com/vram-fit-map/",
+      "repository": "https://github.com/TheRealMarcusChiu/vram-fit-map",
+      "screenshot": "assets/previews/vram-fit-map.webp",
+      "screenshotCapturedOn": "2026-10-19",
+      "createdAt": "2026-10-19T16:17:32Z",
+      "updatedAt": "2026-10-19T16:17:43Z"
     }
   ]
 }
