@@ -11,7 +11,7 @@
   },
   "repositoryDates": {
     "source": "GitHub REST API repository created_at / updated_at (authenticated owner repo listing)",
-    "retrievedAt": "2026-10-19T21:17:36Z",
+    "retrievedAt": "2026-10-19T21:46:15Z",
     "note": "Repository metadata dates, not page-content dates. updated_at changes on any repository update (pushes, settings, metadata). Static; not automatically synced."
   },
   "categories": [
@@ -573,7 +573,7 @@
       "screenshot": "assets/previews/display-decision-lab.webp",
       "screenshotCapturedOn": "2026-10-19",
       "createdAt": "2026-10-19T21:16:15Z",
-      "updatedAt": "2026-10-19T21:16:45Z"
+      "updatedAt": "2026-10-19T21:45:05Z"
     }
   ]
 }

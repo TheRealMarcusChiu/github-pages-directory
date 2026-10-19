@@ -107,9 +107,9 @@ const EXPECTED_SITES = [
   ["wiki-viewer", "Wiki Viewer · Empty Garden", "2026-07-09T07:20:31Z", "2026-07-12T04:51:36Z", "2026-10-19"],
   ["zfs-layout-lab", "ZFS Layout Lab · Pool Geometry", "2026-10-19T16:17:23Z", "2026-10-19T16:17:33Z", "2026-10-19"],
   ["vram-fit-map", "VRAM Fit Map · Local LLM Budget", "2026-10-19T16:17:32Z", "2026-10-19T16:17:43Z", "2026-10-19"],
-  ["display-decision-lab", "Display Decision Lab · Panel Trade-offs", "2026-10-19T21:16:15Z", "2026-10-19T21:16:45Z", "2026-10-19"],
+  ["display-decision-lab", "Display Decision Lab · Panel Trade-offs", "2026-10-19T21:16:15Z", "2026-10-19T21:45:05Z", "2026-10-19"],
 ];
-const DATES_RETRIEVED = "2026-10-19T21:17:36Z";
+const DATES_RETRIEVED = "2026-10-19T21:46:15Z";
 const ISO_UTC = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
 const SORT_OPTIONS = [["created", "Recently created"], ["updated", "Recently updated"], ["category", "Category"]];
 // Titles/categories settled by earlier requests that must not regress.

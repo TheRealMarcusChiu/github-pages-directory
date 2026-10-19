@@ -32,7 +32,7 @@ separate *GitHub repo* link.
 >
 > **Repository dates:** each entry's `createdAt` / `updatedAt` are the GitHub
 > repository `created_at` / `updated_at` values from the authenticated GitHub REST API
-> (one owner Pages inventory, retrieved 2026-10-19T21:17:36Z). They are
+> (one owner Pages inventory, retrieved 2026-10-19T21:46:15Z). They are
 > repository metadata, not page-content dates — `updated_at` moves on any repository
 > update (pushes, settings, description). They are stored statically; the page makes
 > no GitHub API calls.
