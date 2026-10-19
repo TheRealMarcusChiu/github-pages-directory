@@ -8,17 +8,27 @@ the gallery is ordered by *Recently created* (default), *Recently updated* or
 *Category*. Each tile is one link to the live site (screenshot included), with a
 separate *GitHub repo* link.
 
-> **Snapshot caveat:** `data/sites.json` is a static snapshot of repositories that
-> had GitHub Pages enabled when checked on **2026-10-18** (41 entries). It is not
-> automatically synced. This directory's own repository is not included.
+> **Snapshot caveat:** `data/sites.json` is a static snapshot dated **2026-10-19**
+> (45 entries). It is not automatically synced. Membership means the repository is
+> public and has GitHub Pages configured according to the authenticated GitHub Pages
+> API owner inventory — not that the page was reviewed or looks finished. The account
+> homepage is included; this directory's own repository is not.
 >
 > **Screenshots:** `assets/previews/<repo>.webp` are 1365×900 viewport previews
-> (top of the page only, not full-page) captured on **2026-10-18**. They are local
-> static images, not live views — the live sites may have changed since.
+> (top of the page only, not full-page). Capture dates vary by entry and are stored
+> per site as `screenshotCapturedOn`: the original 41 were captured on **2026-10-18**,
+> the four added in this refresh on **2026-10-19**. They are local static images, not
+> live views — the live sites may have changed since.
+>
+> **Notes on the 2026-10-19 additions:** `confluence-obsidian-quartz` answers HTTP 200
+> but serves a raw RSS feed (`application/rss+xml`), not a styled site, so its title is
+> *Quartz Feed · /var/log* and its preview shows the raw feed.
+> `wiki-viewer` rendered its empty state (`0 shown`) at capture time, hence
+> *Wiki Viewer · Empty Garden*.
 >
 > **Repository dates:** each entry's `createdAt` / `updatedAt` are the GitHub
 > repository `created_at` / `updated_at` values from the authenticated GitHub REST API
-> (one paginated owner repo listing, retrieved 2026-10-18T21:24:42Z). They are
+> (one owner Pages inventory, retrieved 2026-10-19T05:58:50Z). They are
 > repository metadata, not page-content dates — `updated_at` moves on any repository
 > update (pushes, settings, description). They are stored statically; the page makes
 > no GitHub API calls.
@@ -29,7 +39,7 @@ separate *GitHub repo* link.
 index.html              Page markup
 assets/styles.css       Warm editorial dark theme (Newsreader + JetBrains Mono)
 assets/app.js           Loads data/sites.json, renders the gallery, search, category dropdown + sort
-assets/previews/*.webp  41 local 1365×900 preview screenshots, dated 2026-10-18
+assets/previews/*.webp  45 local 1365×900 preview screenshots, capture date per entry
 data/sites.json         The inventory (see below)
 tests/verify.mjs        Dependency-free checks
 ```
@@ -69,7 +79,8 @@ open `http://localhost:8000/github-pages-directory/`.
   between options; *Show all categories* clears the selection.
 - Counts and the empty/reset state (*Clear search*, *Show all categories*) work the
   same in every mode. Every card shows its category labels and repo created/updated
-  dates, with the active sort date in gold.
+  dates, with the active sort date in gold, plus a separate, quieter
+  *Preview · <date>* line giving that card's screenshot capture date.
 
 ## Tiles
 
@@ -89,11 +100,11 @@ PLAYWRIGHT_MODULE=/path/to/node_modules/playwright REQUIRE_BROWSER=1 node tests/
 Without Playwright the browser stage prints `SKIP`; `REQUIRE_BROWSER=1` turns that
 into a failure.
 
-Checks include: exactly 41 unique entries (names, Pages URLs, repository URLs,
+Checks include: exactly 45 unique entries (names, Pages URLs, repository URLs,
 titles, screenshots); HTTPS-only links and correct repository URLs; no
 `github-pages-directory` self-entry; every repository in its expected primary
 category exactly once, with exactly the expected `alsoIn` secondary memberships; each screenshot path is relative and points at an existing 1365×900
-WebP with no orphans (all complete, non-blank lossy VP8, one global capture date); relative asset paths; only the Google Fonts stylesheet as a
+WebP with no orphans (all complete, non-blank lossy VP8), each entry's required `screenshotCapturedOn` (2026-10-18 for the original 41, 2026-10-19 for the four additions); relative asset paths; only the Google Fonts stylesheet as a
 remote resource; no HTML-injection APIs; and accessibility basics (lang, landmarks,
 labelled search, category dropdown and checkbox group, live status, alt text, focus styles, reduced motion,
 tap targets) plus the snapshot disclaimers in the page and this README. The exact
@@ -114,7 +125,8 @@ and no console errors, failed requests or off-site requests besides Google Fonts
 
 ## Data format
 
-`data/sites.json` has `snapshotDate`, `screenshots` (capture date and size),
+`data/sites.json` has `snapshotDate`, `screenshots` (size, format and
+`captureDatePolicy: "per-entry"`),
 `repositoryDates` (source and retrieval time of the repo dates),
 `categories` (ordered `id`/`label` pairs) and `sites`, where each entry is:
 
@@ -127,6 +139,7 @@ and no console errors, failed requests or off-site requests besides Google Fonts
 | `url`        | GitHub Pages URL                                                 |
 | `repository` | GitHub repository URL                                            |
 | `screenshot` | relative path, `assets/previews/<name>.webp`                     |
+| `screenshotCapturedOn` | date (`YYYY-MM-DD`) this entry's preview was captured  |
 | `createdAt`  | GitHub repository `created_at` (ISO 8601 UTC), repo metadata     |
 | `updatedAt`  | GitHub repository `updated_at` (ISO 8601 UTC), repo metadata     |
 
@@ -136,15 +149,16 @@ section headers count every member, while the header total and the result status
 count unique sites. Currently every Art & 3D site is also in
 Personal & Portfolio.
 
-Display titles were written by hand, using the 2026-10-18 scan's page titles and
-headings only as hints. Scraped page text is never stored or rendered; the repo slug
+Display titles were written by hand, using the 2026-10-18 and 2026-10-19 scans' page
+titles and headings only as hints. Scraped page text is never stored or rendered; the repo slug
 stays visible to tell apart pages with identical titles (e.g. the three Tetris builds
 and the personal-site versions).
 
 ## Updating the inventory
 
 Edit `data/sites.json`, add or replace the matching preview in `assets/previews/`,
-update the snapshot/capture dates in `data/sites.json`, `index.html` and this README,
+set that entry's `screenshotCapturedOn`, update the snapshot date in `data/sites.json`,
+`index.html` and this README,
 refresh `createdAt` / `updatedAt` from the GitHub API (and `repositoryDates.retrievedAt`),
 then adjust `EXPECTED_COUNT`, `EXPECTED_CATEGORIES`, `EXPECTED_ALSO_IN`, `EXPECTED_SITES`
-and `DATES_RETRIEVED` in `tests/verify.mjs`.
+(including capture dates) and `DATES_RETRIEVED` in `tests/verify.mjs`.

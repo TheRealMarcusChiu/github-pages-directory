@@ -6,6 +6,9 @@
   const SCREENSHOT_PATH = /^assets\/previews\/[A-Za-z0-9._-]+\.webp$/;
   // Repository dates are GitHub API ISO 8601 UTC timestamps (repo metadata, not page-content dates).
   const ISO_UTC = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/;
+  // Preview capture dates are per entry (screenshotCapturedOn, YYYY-MM-DD) and separate from repository dates.
+  const CAPTURE_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
+  const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   // Created order never consults updated_at: ties fall straight through to repo name, then source order.
   const SORTS = {
     created: { keys: ["createdAt"], phrase: "most recently created repository first" },
@@ -51,6 +54,11 @@
   // Secondary memberships: optional `alsoIn` list of extra category ids (primary stays `category`).
   const alsoIn = (site) => (Array.isArray(site.alsoIn) ? site.alsoIn.filter((id) => id !== site.category) : []);
   const isMember = (site, id) => site.category === id || alsoIn(site).includes(id);
+  // "YYYY-MM-DD" → "D Month YYYY", formatted by hand so no time zone can shift the day.
+  const longDate = (ymd) => {
+    const m = CAPTURE_DATE.exec(ymd ?? "");
+    return m && MONTHS[m[2] - 1] ? `${Number(m[3])} ${MONTHS[m[2] - 1]} ${m[1]}` : "";
+  };
   const stamp = (site, key) => (ISO_UTC.test(site[key] ?? "") ? Date.parse(site[key]) : -Infinity);
 
   // Newest first by each sort key in turn, then repo name, then source order — on a copy, never in place.
@@ -86,6 +94,17 @@
     return p;
   }
 
+  function renderCapture(site) {
+    const captured = longDate(site.screenshotCapturedOn);
+    if (!captured) return null;
+    return el("span", { class: "card-capture" }, [
+      el("span", { class: "card-dates-label", text: "Preview" }),
+      el("span", { class: "card-dates-sep", "aria-hidden": "true", text: " ·" }),
+      " ",
+      el("time", { datetime: site.screenshotCapturedOn, title: `Preview screenshot captured: ${site.screenshotCapturedOn}`, text: captured }),
+    ]);
+  }
+
   function renderCard(site, category, labels, idPrefix) {
     const isHome = site.name === HOMEPAGE_REPO;
     // Always lead with the primary category, then any secondary ones.
@@ -99,9 +118,10 @@
     const children = [];
 
     if (SCREENSHOT_PATH.test(site.screenshot)) {
+      const captured = longDate(site.screenshotCapturedOn);
       children.push(el("span", { class: "shot" }, [el("img", {
         src: site.screenshot,
-        alt: `Preview screenshot of ${site.title} (${site.name}), captured 18 October 2026`,
+        alt: `Preview screenshot of ${site.title} (${site.name})${captured ? `, captured ${captured}` : ""}`,
         width: "1365",
         height: "900",
         loading: shotCount++ < EAGER_IMAGES ? "eager" : "lazy",
@@ -121,6 +141,8 @@
     ]);
     const dates = renderDates(site);
     if (dates) body.append(dates);
+    const capture = renderCapture(site);
+    if (capture) body.append(capture);
     children.push(body);
 
     // The whole tile (screenshot + text) is one site link; the GitHub link is a sibling, never nested.

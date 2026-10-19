@@ -1,17 +1,17 @@
 {
   "owner": "TheRealMarcusChiu",
-  "snapshotDate": "2026-10-18",
+  "snapshotDate": "2026-10-19",
   "description": "Static snapshot of TheRealMarcusChiu repositories with GitHub Pages enabled. Not automatically synced.",
   "screenshots": {
-    "capturedOn": "2026-10-18",
+    "captureDatePolicy": "per-entry",
     "width": 1365,
     "height": 900,
     "format": "webp",
-    "note": "Viewport previews captured on 2026-10-18; live sites may have changed since."
+    "note": "Viewport previews; each entry's screenshotCapturedOn is its capture date. The original 41 previews were captured on 2026-10-18 and the four added on 2026-10-19; live sites may have changed since."
   },
   "repositoryDates": {
     "source": "GitHub REST API repository created_at / updated_at (authenticated owner repo listing)",
-    "retrievedAt": "2026-10-18T21:24:42Z",
+    "retrievedAt": "2026-10-19T05:58:50Z",
     "note": "Repository metadata dates, not page-content dates. updated_at changes on any repository update (pushes, settings, metadata). Static; not automatically synced."
   },
   "categories": [
@@ -52,6 +52,7 @@
       "url": "https://git.marcuschiu.com/",
       "repository": "https://github.com/TheRealMarcusChiu/therealmarcuschiu.github.io",
       "screenshot": "assets/previews/therealmarcuschiu.github.io.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2020-07-12T18:05:00Z",
       "updatedAt": "2026-07-03T06:00:22Z"
     },
@@ -62,6 +63,7 @@
       "url": "https://git.marcuschiu.com/personal-website/",
       "repository": "https://github.com/TheRealMarcusChiu/personal-website",
       "screenshot": "assets/previews/personal-website.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2018-12-21T07:19:36Z",
       "updatedAt": "2025-05-28T20:45:00Z"
     },
@@ -72,6 +74,7 @@
       "url": "https://git.marcuschiu.com/personal-website-2-public/",
       "repository": "https://github.com/TheRealMarcusChiu/personal-website-2-public",
       "screenshot": "assets/previews/personal-website-2-public.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2025-06-09T05:09:38Z",
       "updatedAt": "2026-07-03T06:00:55Z"
     },
@@ -82,8 +85,9 @@
       "url": "https://git.marcuschiu.com/personal-website-3/",
       "repository": "https://github.com/TheRealMarcusChiu/personal-website-3",
       "screenshot": "assets/previews/personal-website-3.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-06-10T00:53:07Z",
-      "updatedAt": "2026-10-18T20:24:47Z"
+      "updatedAt": "2026-10-18T23:08:24Z"
     },
     {
       "name": "projects",
@@ -92,6 +96,7 @@
       "url": "https://git.marcuschiu.com/projects/",
       "repository": "https://github.com/TheRealMarcusChiu/projects",
       "screenshot": "assets/previews/projects.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-06-10T18:39:17Z",
       "updatedAt": "2026-08-19T19:15:51Z"
     },
@@ -102,8 +107,9 @@
       "url": "https://git.marcuschiu.com/now/",
       "repository": "https://github.com/TheRealMarcusChiu/now",
       "screenshot": "assets/previews/now.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-07-01T21:51:17Z",
-      "updatedAt": "2026-10-18T20:03:31Z"
+      "updatedAt": "2026-10-19T05:23:01Z"
     },
     {
       "name": "workouts",
@@ -112,6 +118,7 @@
       "url": "https://git.marcuschiu.com/workouts/",
       "repository": "https://github.com/TheRealMarcusChiu/workouts",
       "screenshot": "assets/previews/workouts.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-06-24T18:35:11Z",
       "updatedAt": "2026-08-07T06:11:53Z"
     },
@@ -122,6 +129,7 @@
       "url": "https://git.marcuschiu.com/thoughts/",
       "repository": "https://github.com/TheRealMarcusChiu/thoughts",
       "screenshot": "assets/previews/thoughts.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-06-09T23:29:40Z",
       "updatedAt": "2026-09-26T20:14:02Z"
     },
@@ -132,6 +140,7 @@
       "url": "https://git.marcuschiu.com/quotes/",
       "repository": "https://github.com/TheRealMarcusChiu/quotes",
       "screenshot": "assets/previews/quotes.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-06-09T06:46:37Z",
       "updatedAt": "2026-08-19T19:14:09Z"
     },
@@ -142,6 +151,7 @@
       "url": "https://git.marcuschiu.com/meditations/",
       "repository": "https://github.com/TheRealMarcusChiu/meditations",
       "screenshot": "assets/previews/meditations.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-08-02T06:27:30Z",
       "updatedAt": "2026-10-18T03:06:46Z"
     },
@@ -152,6 +162,7 @@
       "url": "https://git.marcuschiu.com/bible-graph/",
       "repository": "https://github.com/TheRealMarcusChiu/bible-graph",
       "screenshot": "assets/previews/bible-graph.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-07-03T20:27:30Z",
       "updatedAt": "2026-07-10T03:36:13Z"
     },
@@ -162,6 +173,7 @@
       "url": "https://git.marcuschiu.com/the-law-of-first-mention/",
       "repository": "https://github.com/TheRealMarcusChiu/the-law-of-first-mention",
       "screenshot": "assets/previews/the-law-of-first-mention.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2025-08-14T20:27:13Z",
       "updatedAt": "2026-07-03T05:46:27Z"
     },
@@ -172,8 +184,9 @@
       "url": "https://git.marcuschiu.com/bandwidth-compare/",
       "repository": "https://github.com/TheRealMarcusChiu/bandwidth-compare",
       "screenshot": "assets/previews/bandwidth-compare.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-10-16T04:26:33Z",
-      "updatedAt": "2026-10-16T19:33:32Z"
+      "updatedAt": "2026-10-19T02:52:50Z"
     },
     {
       "name": "barnes-hut-algorithm",
@@ -182,6 +195,7 @@
       "url": "https://git.marcuschiu.com/barnes-hut-algorithm/",
       "repository": "https://github.com/TheRealMarcusChiu/barnes-hut-algorithm",
       "screenshot": "assets/previews/barnes-hut-algorithm.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-01-26T18:15:23Z",
       "updatedAt": "2026-07-03T05:56:58Z"
     },
@@ -192,6 +206,7 @@
       "url": "https://git.marcuschiu.com/confluence-data/",
       "repository": "https://github.com/TheRealMarcusChiu/confluence-data",
       "screenshot": "assets/previews/confluence-data.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2020-05-12T01:03:40Z",
       "updatedAt": "2026-07-03T07:09:14Z"
     },
@@ -202,6 +217,7 @@
       "url": "https://git.marcuschiu.com/display-tech-explorer/",
       "repository": "https://github.com/TheRealMarcusChiu/display-tech-explorer",
       "screenshot": "assets/previews/display-tech-explorer.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-10-18T17:04:16Z",
       "updatedAt": "2026-10-18T17:06:01Z"
     },
@@ -212,6 +228,7 @@
       "url": "https://git.marcuschiu.com/fisher-information/",
       "repository": "https://github.com/TheRealMarcusChiu/fisher-information",
       "screenshot": "assets/previews/fisher-information.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2021-12-23T19:39:34Z",
       "updatedAt": "2026-07-03T05:56:08Z"
     },
@@ -222,6 +239,7 @@
       "url": "https://git.marcuschiu.com/monitor-tech-guide/",
       "repository": "https://github.com/TheRealMarcusChiu/monitor-tech-guide",
       "screenshot": "assets/previews/monitor-tech-guide.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-10-18T04:20:19Z",
       "updatedAt": "2026-10-18T04:20:35Z"
     },
@@ -232,6 +250,7 @@
       "url": "https://git.marcuschiu.com/tech/",
       "repository": "https://github.com/TheRealMarcusChiu/tech",
       "screenshot": "assets/previews/tech.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-06-09T18:22:49Z",
       "updatedAt": "2026-07-03T06:42:43Z"
     },
@@ -242,6 +261,7 @@
       "url": "https://git.marcuschiu.com/visualizing-neural-networks/",
       "repository": "https://github.com/TheRealMarcusChiu/visualizing-neural-networks",
       "screenshot": "assets/previews/visualizing-neural-networks.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2025-09-02T03:15:39Z",
       "updatedAt": "2026-07-03T05:41:40Z"
     },
@@ -252,6 +272,7 @@
       "url": "https://git.marcuschiu.com/obsidian-generator/",
       "repository": "https://github.com/TheRealMarcusChiu/obsidian-generator",
       "screenshot": "assets/previews/obsidian-generator.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-07-09T20:20:13Z",
       "updatedAt": "2026-07-10T03:57:54Z"
     },
@@ -262,6 +283,7 @@
       "url": "https://git.marcuschiu.com/obsidian-stargazer/",
       "repository": "https://github.com/TheRealMarcusChiu/obsidian-stargazer",
       "screenshot": "assets/previews/obsidian-stargazer.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-07-09T20:16:50Z",
       "updatedAt": "2026-07-10T02:48:34Z"
     },
@@ -272,6 +294,7 @@
       "url": "https://git.marcuschiu.com/crontab-guru-clone/",
       "repository": "https://github.com/TheRealMarcusChiu/crontab-guru-clone",
       "screenshot": "assets/previews/crontab-guru-clone.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2019-04-01T04:23:31Z",
       "updatedAt": "2026-07-03T05:44:58Z"
     },
@@ -282,6 +305,7 @@
       "url": "https://git.marcuschiu.com/quartz/",
       "repository": "https://github.com/TheRealMarcusChiu/quartz",
       "screenshot": "assets/previews/quartz.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-06-04T17:24:25Z",
       "updatedAt": "2026-07-11T17:41:12Z"
     },
@@ -292,6 +316,7 @@
       "url": "https://git.marcuschiu.com/stardust/",
       "repository": "https://github.com/TheRealMarcusChiu/stardust",
       "screenshot": "assets/previews/stardust.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-06-29T05:23:53Z",
       "updatedAt": "2026-10-07T18:03:58Z"
     },
@@ -302,6 +327,7 @@
       "url": "https://git.marcuschiu.com/var-log/",
       "repository": "https://github.com/TheRealMarcusChiu/var-log",
       "screenshot": "assets/previews/var-log.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-06-04T20:38:46Z",
       "updatedAt": "2026-07-12T04:06:25Z"
     },
@@ -312,6 +338,7 @@
       "url": "https://git.marcuschiu.com/var-log-1/",
       "repository": "https://github.com/TheRealMarcusChiu/var-log-1",
       "screenshot": "assets/previews/var-log-1.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-06-26T17:48:53Z",
       "updatedAt": "2026-06-26T19:50:07Z"
     },
@@ -322,8 +349,9 @@
       "url": "https://git.marcuschiu.com/better-plume/",
       "repository": "https://github.com/TheRealMarcusChiu/better-plume",
       "screenshot": "assets/previews/better-plume.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-10-10T05:28:48Z",
-      "updatedAt": "2026-10-10T06:13:20Z"
+      "updatedAt": "2026-10-18T22:30:26Z"
     },
     {
       "name": "birdseye-arena",
@@ -332,8 +360,9 @@
       "url": "https://git.marcuschiu.com/birdseye-arena/",
       "repository": "https://github.com/TheRealMarcusChiu/birdseye-arena",
       "screenshot": "assets/previews/birdseye-arena.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-10-11T01:28:21Z",
-      "updatedAt": "2026-10-13T05:37:32Z"
+      "updatedAt": "2026-10-18T22:35:00Z"
     },
     {
       "name": "dark-twilight-imperium",
@@ -342,6 +371,7 @@
       "url": "https://git.marcuschiu.com/dark-twilight-imperium/",
       "repository": "https://github.com/TheRealMarcusChiu/dark-twilight-imperium",
       "screenshot": "assets/previews/dark-twilight-imperium.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-07-03T05:27:24Z",
       "updatedAt": "2026-07-03T05:40:05Z"
     },
@@ -352,6 +382,7 @@
       "url": "https://git.marcuschiu.com/spinning-cube/",
       "repository": "https://github.com/TheRealMarcusChiu/spinning-cube",
       "screenshot": "assets/previews/spinning-cube.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-07-03T05:33:28Z",
       "updatedAt": "2026-07-03T05:34:53Z"
     },
@@ -362,6 +393,7 @@
       "url": "https://git.marcuschiu.com/tetris-ascii/",
       "repository": "https://github.com/TheRealMarcusChiu/tetris-ascii",
       "screenshot": "assets/previews/tetris-ascii.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2025-08-14T04:57:41Z",
       "updatedAt": "2026-07-03T06:45:00Z"
     },
@@ -372,6 +404,7 @@
       "url": "https://git.marcuschiu.com/tetris-canvas/",
       "repository": "https://github.com/TheRealMarcusChiu/tetris-canvas",
       "screenshot": "assets/previews/tetris-canvas.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2025-08-08T04:02:38Z",
       "updatedAt": "2026-07-03T06:35:50Z"
     },
@@ -382,6 +415,7 @@
       "url": "https://git.marcuschiu.com/tetris-unicode/",
       "repository": "https://github.com/TheRealMarcusChiu/tetris-unicode",
       "screenshot": "assets/previews/tetris-unicode.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2025-08-11T21:51:55Z",
       "updatedAt": "2026-07-03T06:38:03Z"
     },
@@ -392,6 +426,7 @@
       "url": "https://git.marcuschiu.com/tower-defense/",
       "repository": "https://github.com/TheRealMarcusChiu/tower-defense",
       "screenshot": "assets/previews/tower-defense.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-07-06T03:42:06Z",
       "updatedAt": "2026-07-06T03:54:32Z"
     },
@@ -402,6 +437,7 @@
       "url": "https://git.marcuschiu.com/shared-canvas/",
       "repository": "https://github.com/TheRealMarcusChiu/shared-canvas",
       "screenshot": "assets/previews/shared-canvas.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-09-26T21:46:08Z",
       "updatedAt": "2026-10-18T21:14:42Z"
     },
@@ -412,6 +448,7 @@
       "url": "https://git.marcuschiu.com/table-topics/",
       "repository": "https://github.com/TheRealMarcusChiu/table-topics",
       "screenshot": "assets/previews/table-topics.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2023-05-23T02:06:33Z",
       "updatedAt": "2026-07-03T05:57:17Z"
     },
@@ -423,6 +460,7 @@
       "repository": "https://github.com/TheRealMarcusChiu/art",
       "alsoIn": ["personal"],
       "screenshot": "assets/previews/art.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-09-07T06:35:16Z",
       "updatedAt": "2026-09-07T06:36:29Z"
     },
@@ -434,6 +472,7 @@
       "repository": "https://github.com/TheRealMarcusChiu/my-room-in-3d",
       "alsoIn": ["personal"],
       "screenshot": "assets/previews/my-room-in-3d.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-07-03T04:58:16Z",
       "updatedAt": "2026-07-03T05:55:49Z"
     },
@@ -444,8 +483,9 @@
       "url": "https://git.marcuschiu.com/images/",
       "repository": "https://github.com/TheRealMarcusChiu/images",
       "screenshot": "assets/previews/images.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-06-08T19:32:30Z",
-      "updatedAt": "2026-10-18T20:49:12Z"
+      "updatedAt": "2026-10-18T23:15:51Z"
     },
     {
       "name": "shazaam",
@@ -454,8 +494,53 @@
       "url": "https://git.marcuschiu.com/shazaam/",
       "repository": "https://github.com/TheRealMarcusChiu/shazaam",
       "screenshot": "assets/previews/shazaam.webp",
+      "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2025-08-17T09:03:23Z",
       "updatedAt": "2026-07-03T05:55:18Z"
+    },
+    {
+      "name": "confluence-obsidian-quartz",
+      "title": "Quartz Feed · /var/log",
+      "category": "knowledge",
+      "url": "https://git.marcuschiu.com/confluence-obsidian-quartz/",
+      "repository": "https://github.com/TheRealMarcusChiu/confluence-obsidian-quartz",
+      "screenshot": "assets/previews/confluence-obsidian-quartz.webp",
+      "screenshotCapturedOn": "2026-10-19",
+      "createdAt": "2026-06-01T19:51:03Z",
+      "updatedAt": "2026-06-04T07:37:11Z"
+    },
+    {
+      "name": "f1-car-generations",
+      "title": "The Shape of Speed · F1, 1950–2026",
+      "category": "tech",
+      "url": "https://git.marcuschiu.com/f1-car-generations/",
+      "repository": "https://github.com/TheRealMarcusChiu/f1-car-generations",
+      "screenshot": "assets/previews/f1-car-generations.webp",
+      "screenshotCapturedOn": "2026-10-19",
+      "createdAt": "2026-10-19T05:44:38Z",
+      "updatedAt": "2026-10-19T05:57:46Z"
+    },
+    {
+      "name": "fake-personal-website",
+      "title": "Fake Personal Site · Inspector",
+      "category": "personal",
+      "url": "https://git.marcuschiu.com/fake-personal-website/",
+      "repository": "https://github.com/TheRealMarcusChiu/fake-personal-website",
+      "screenshot": "assets/previews/fake-personal-website.webp",
+      "screenshotCapturedOn": "2026-10-19",
+      "createdAt": "2019-03-02T04:36:01Z",
+      "updatedAt": "2026-07-03T05:29:35Z"
+    },
+    {
+      "name": "wiki-viewer",
+      "title": "Wiki Viewer · Empty Garden",
+      "category": "knowledge",
+      "url": "https://git.marcuschiu.com/wiki-viewer/",
+      "repository": "https://github.com/TheRealMarcusChiu/wiki-viewer",
+      "screenshot": "assets/previews/wiki-viewer.webp",
+      "screenshotCapturedOn": "2026-10-19",
+      "createdAt": "2026-07-09T07:20:31Z",
+      "updatedAt": "2026-07-12T04:51:36Z"
     }
   ]
 }

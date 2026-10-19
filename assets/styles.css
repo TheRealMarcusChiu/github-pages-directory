@@ -434,6 +434,15 @@ option { background: var(--surface); color: var(--text); }
 }
 .card-date { white-space: nowrap; }
 .card-date time { color: var(--para); font-variant-numeric: tabular-nums; }
+/* Per-entry preview capture date: quieter than the repo dates and never highlighted by sort. */
+.card-capture {
+  display: block;
+  margin: 0.2rem 0 0;
+  color: var(--muted);
+  font-size: 0.6875rem;
+  letter-spacing: 0.02em;
+}
+.card-capture time { color: var(--muted); font-variant-numeric: tabular-nums; }
 .gallery[data-sort="updated"] .date-updated time,
 .gallery[data-sort="created"] .date-created time { color: var(--gold); }
 

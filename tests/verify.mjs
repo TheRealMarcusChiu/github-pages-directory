@@ -7,9 +7,16 @@ import { dirname, join, extname, normalize as normalizePath } from "node:path";
 import { createServer } from "node:http";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const EXPECTED_COUNT = 41;
+const EXPECTED_COUNT = 45;
 const OWNER = "TheRealMarcusChiu";
-const SNAPSHOT = "2026-10-18";
+const SNAPSHOT = "2026-10-19";
+// Preview capture dates are per entry: the original 41 previews kept their 2026-10-18 captures,
+// the four repositories added in the 2026-10-19 refresh were captured that day.
+const ORIGINAL_CAPTURE = "2026-10-18";
+const ADDED_CAPTURE = "2026-10-19";
+const ORIGINAL_COUNT = 41;
+const ADDED = ["confluence-obsidian-quartz", "f1-car-generations", "fake-personal-website", "wiki-viewer"];
+const LONG_DATE = { "2026-10-18": "18 October 2026", "2026-10-19": "19 October 2026" };
 const PREVIEW_DIR = "assets/previews";
 const PREVIEW_SIZE = { width: 1365, height: 900 };
 const HOMEPAGE_REPO = "therealmarcuschiu.github.io";
@@ -19,11 +26,11 @@ const GOOGLE_FONTS =
 
 // Category id → label → primary repositories. Each repository has exactly one primary category.
 const EXPECTED_CATEGORIES = [
-  ["personal", "Personal & Portfolio", ["therealmarcuschiu.github.io", "personal-website", "personal-website-2-public", "personal-website-3", "projects", "now", "workouts", "images"]],
+  ["personal", "Personal & Portfolio", ["therealmarcuschiu.github.io", "personal-website", "personal-website-2-public", "personal-website-3", "projects", "now", "workouts", "images", "fake-personal-website"]],
   ["writing", "Writing & Reflection", ["thoughts", "quotes", "meditations"]],
   ["faith", "Faith & Bible Study", ["bible-graph", "the-law-of-first-mention"]],
-  ["tech", "Tech & Learning", ["bandwidth-compare", "barnes-hut-algorithm", "confluence-data", "display-tech-explorer", "fisher-information", "monitor-tech-guide", "tech", "visualizing-neural-networks", "obsidian-generator", "obsidian-stargazer", "crontab-guru-clone", "shazaam"]],
-  ["knowledge", "Knowledge & Reading", ["quartz", "stardust", "var-log", "var-log-1"]],
+  ["tech", "Tech & Learning", ["bandwidth-compare", "barnes-hut-algorithm", "confluence-data", "display-tech-explorer", "fisher-information", "monitor-tech-guide", "tech", "visualizing-neural-networks", "obsidian-generator", "obsidian-stargazer", "crontab-guru-clone", "shazaam", "f1-car-generations"]],
+  ["knowledge", "Knowledge & Reading", ["quartz", "stardust", "var-log", "var-log-1", "confluence-obsidian-quartz", "wiki-viewer"]],
   ["games", "Games & Simulations", ["better-plume", "birdseye-arena", "dark-twilight-imperium", "spinning-cube", "tetris-ascii", "tetris-canvas", "tetris-unicode", "tower-defense", "shared-canvas", "table-topics"]],
   ["art", "Art & 3D", ["art", "my-room-in-3d"]],
 ];
@@ -35,52 +42,57 @@ const EXPECTED_ALSO_IN = {
 // Every site whose primary category is the key must also be listed in the value category.
 const SECONDARY_COUNT = Object.values(EXPECTED_ALSO_IN).flat().length;
 const REQUIRED_OVERLAPS = [["art", "personal"]];
-// Exact source order, display titles and GitHub repository created_at / updated_at, retrieved once from the
-// authenticated owner repo listing on 2026-10-18. Repository metadata only — not page-content dates.
+// Exact source order, display titles, GitHub repository created_at / updated_at (retrieved once from the
+// authenticated owner Pages inventory on 2026-10-19) and per-entry preview capture date.
+// Repository metadata only — not page-content dates. The four additions are appended after the original 41.
 const EXPECTED_SITES = [
-  ["therealmarcuschiu.github.io", "Account Home", "2020-07-12T18:05:00Z", "2026-07-03T06:00:22Z"],
-  ["personal-website", "Personal Website · Developer (v1)", "2018-12-21T07:19:36Z", "2025-05-28T20:45:00Z"],
-  ["personal-website-2-public", "Personal Website · Hi There (v2)", "2025-06-09T05:09:38Z", "2026-07-03T06:00:55Z"],
-  ["personal-website-3", "Personal Website · Terminal (v3)", "2026-06-10T00:53:07Z", "2026-10-18T20:24:47Z"],
-  ["projects", "Projects · Selected Work", "2026-06-10T18:39:17Z", "2026-08-19T19:15:51Z"],
-  ["now", "Now", "2026-07-01T21:51:17Z", "2026-10-18T20:03:31Z"],
-  ["workouts", "Training Log", "2026-06-24T18:35:11Z", "2026-08-07T06:11:53Z"],
-  ["thoughts", "Mark the Thoughts", "2026-06-09T23:29:40Z", "2026-09-26T20:14:02Z"],
-  ["quotes", "Quotes Worth Keeping", "2026-06-09T06:46:37Z", "2026-08-19T19:14:09Z"],
-  ["meditations", "Meditations", "2026-08-02T06:27:30Z", "2026-10-18T03:06:46Z"],
-  ["bible-graph", "Bible Graph", "2026-07-03T20:27:30Z", "2026-07-10T03:36:13Z"],
-  ["the-law-of-first-mention", "The Law of First Mention", "2025-08-14T20:27:13Z", "2026-07-03T05:46:27Z"],
-  ["bandwidth-compare", "Bandwidth Compare", "2026-10-16T04:26:33Z", "2026-10-16T19:33:32Z"],
-  ["barnes-hut-algorithm", "Barnes–Hut Gravity Simulation", "2026-01-26T18:15:23Z", "2026-07-03T05:56:58Z"],
-  ["confluence-data", "Confluence Data Visualizations", "2020-05-12T01:03:40Z", "2026-07-03T07:09:14Z"],
-  ["display-tech-explorer", "Display Tech Explorer", "2026-10-18T17:04:16Z", "2026-10-18T17:06:01Z"],
-  ["fisher-information", "Fisher Information", "2021-12-23T19:39:34Z", "2026-07-03T05:56:08Z"],
-  ["monitor-tech-guide", "Display Atlas · Monitor Tech Guide", "2026-10-18T04:20:19Z", "2026-10-18T04:20:35Z"],
-  ["tech", "What the Tech?", "2026-06-09T18:22:49Z", "2026-07-03T06:42:43Z"],
-  ["visualizing-neural-networks", "Visualizing Neural Networks", "2025-09-02T03:15:39Z", "2026-07-03T05:41:40Z"],
-  ["obsidian-generator", "ZIM Archive → Obsidian Vault", "2026-07-09T20:20:13Z", "2026-07-10T03:57:54Z"],
-  ["obsidian-stargazer", "Obsidian Stargazer", "2026-07-09T20:16:50Z", "2026-07-10T02:48:34Z"],
-  ["crontab-guru-clone", "Crontab Guru Clone", "2019-04-01T04:23:31Z", "2026-07-03T05:44:58Z"],
-  ["quartz", "/var/log · Quartz", "2026-06-04T17:24:25Z", "2026-07-11T17:41:12Z"],
-  ["stardust", "Stardust Knowledge Garden", "2026-06-29T05:23:53Z", "2026-10-07T18:03:58Z"],
-  ["var-log", "/var/log Knowledge Garden", "2026-06-04T20:38:46Z", "2026-07-12T04:06:25Z"],
-  ["var-log-1", "/var/log · Quartz Archive", "2026-06-26T17:48:53Z", "2026-06-26T19:50:07Z"],
-  ["better-plume", "Plume", "2026-10-10T05:28:48Z", "2026-10-10T06:13:20Z"],
-  ["birdseye-arena", "Birdseye Arena", "2026-10-11T01:28:21Z", "2026-10-13T05:37:32Z"],
-  ["dark-twilight-imperium", "Oracle Rex · Twilight Imperium Companion", "2026-07-03T05:27:24Z", "2026-07-03T05:40:05Z"],
-  ["spinning-cube", "Spinning Cube", "2026-07-03T05:33:28Z", "2026-07-03T05:34:53Z"],
-  ["tetris-ascii", "Tetris · ASCII", "2025-08-14T04:57:41Z", "2026-07-03T06:45:00Z"],
-  ["tetris-canvas", "Tetris · Canvas", "2025-08-08T04:02:38Z", "2026-07-03T06:35:50Z"],
-  ["tetris-unicode", "Tetris · Unicode", "2025-08-11T21:51:55Z", "2026-07-03T06:38:03Z"],
-  ["tower-defense", "Hold the Margin · Tower Defense", "2026-07-06T03:42:06Z", "2026-07-06T03:54:32Z"],
-  ["shared-canvas", "Common · Shared Canvas", "2026-09-26T21:46:08Z", "2026-10-18T21:14:42Z"],
-  ["table-topics", "Table Topics", "2023-05-23T02:06:33Z", "2026-07-03T05:57:17Z"],
-  ["art", "Art Gallery", "2026-09-07T06:35:16Z", "2026-09-07T06:36:29Z"],
-  ["my-room-in-3d", "My Room in 3D", "2026-07-03T04:58:16Z", "2026-07-03T05:55:49Z"],
-  ["images", "Markive · YouTube Videos, Quotes & Images", "2026-06-08T19:32:30Z", "2026-10-18T20:49:12Z"],
-  ["shazaam", "Local Shazam", "2025-08-17T09:03:23Z", "2026-07-03T05:55:18Z"],
+  ["therealmarcuschiu.github.io", "Account Home", "2020-07-12T18:05:00Z", "2026-07-03T06:00:22Z", "2026-10-18"],
+  ["personal-website", "Personal Website · Developer (v1)", "2018-12-21T07:19:36Z", "2025-05-28T20:45:00Z", "2026-10-18"],
+  ["personal-website-2-public", "Personal Website · Hi There (v2)", "2025-06-09T05:09:38Z", "2026-07-03T06:00:55Z", "2026-10-18"],
+  ["personal-website-3", "Personal Website · Terminal (v3)", "2026-06-10T00:53:07Z", "2026-10-18T23:08:24Z", "2026-10-18"],
+  ["projects", "Projects · Selected Work", "2026-06-10T18:39:17Z", "2026-08-19T19:15:51Z", "2026-10-18"],
+  ["now", "Now", "2026-07-01T21:51:17Z", "2026-10-19T05:23:01Z", "2026-10-18"],
+  ["workouts", "Training Log", "2026-06-24T18:35:11Z", "2026-08-07T06:11:53Z", "2026-10-18"],
+  ["thoughts", "Mark the Thoughts", "2026-06-09T23:29:40Z", "2026-09-26T20:14:02Z", "2026-10-18"],
+  ["quotes", "Quotes Worth Keeping", "2026-06-09T06:46:37Z", "2026-08-19T19:14:09Z", "2026-10-18"],
+  ["meditations", "Meditations", "2026-08-02T06:27:30Z", "2026-10-18T03:06:46Z", "2026-10-18"],
+  ["bible-graph", "Bible Graph", "2026-07-03T20:27:30Z", "2026-07-10T03:36:13Z", "2026-10-18"],
+  ["the-law-of-first-mention", "The Law of First Mention", "2025-08-14T20:27:13Z", "2026-07-03T05:46:27Z", "2026-10-18"],
+  ["bandwidth-compare", "Bandwidth Compare", "2026-10-16T04:26:33Z", "2026-10-19T02:52:50Z", "2026-10-18"],
+  ["barnes-hut-algorithm", "Barnes–Hut Gravity Simulation", "2026-01-26T18:15:23Z", "2026-07-03T05:56:58Z", "2026-10-18"],
+  ["confluence-data", "Confluence Data Visualizations", "2020-05-12T01:03:40Z", "2026-07-03T07:09:14Z", "2026-10-18"],
+  ["display-tech-explorer", "Display Tech Explorer", "2026-10-18T17:04:16Z", "2026-10-18T17:06:01Z", "2026-10-18"],
+  ["fisher-information", "Fisher Information", "2021-12-23T19:39:34Z", "2026-07-03T05:56:08Z", "2026-10-18"],
+  ["monitor-tech-guide", "Display Atlas · Monitor Tech Guide", "2026-10-18T04:20:19Z", "2026-10-18T04:20:35Z", "2026-10-18"],
+  ["tech", "What the Tech?", "2026-06-09T18:22:49Z", "2026-07-03T06:42:43Z", "2026-10-18"],
+  ["visualizing-neural-networks", "Visualizing Neural Networks", "2025-09-02T03:15:39Z", "2026-07-03T05:41:40Z", "2026-10-18"],
+  ["obsidian-generator", "ZIM Archive → Obsidian Vault", "2026-07-09T20:20:13Z", "2026-07-10T03:57:54Z", "2026-10-18"],
+  ["obsidian-stargazer", "Obsidian Stargazer", "2026-07-09T20:16:50Z", "2026-07-10T02:48:34Z", "2026-10-18"],
+  ["crontab-guru-clone", "Crontab Guru Clone", "2019-04-01T04:23:31Z", "2026-07-03T05:44:58Z", "2026-10-18"],
+  ["quartz", "/var/log · Quartz", "2026-06-04T17:24:25Z", "2026-07-11T17:41:12Z", "2026-10-18"],
+  ["stardust", "Stardust Knowledge Garden", "2026-06-29T05:23:53Z", "2026-10-07T18:03:58Z", "2026-10-18"],
+  ["var-log", "/var/log Knowledge Garden", "2026-06-04T20:38:46Z", "2026-07-12T04:06:25Z", "2026-10-18"],
+  ["var-log-1", "/var/log · Quartz Archive", "2026-06-26T17:48:53Z", "2026-06-26T19:50:07Z", "2026-10-18"],
+  ["better-plume", "Plume", "2026-10-10T05:28:48Z", "2026-10-18T22:30:26Z", "2026-10-18"],
+  ["birdseye-arena", "Birdseye Arena", "2026-10-11T01:28:21Z", "2026-10-18T22:35:00Z", "2026-10-18"],
+  ["dark-twilight-imperium", "Oracle Rex · Twilight Imperium Companion", "2026-07-03T05:27:24Z", "2026-07-03T05:40:05Z", "2026-10-18"],
+  ["spinning-cube", "Spinning Cube", "2026-07-03T05:33:28Z", "2026-07-03T05:34:53Z", "2026-10-18"],
+  ["tetris-ascii", "Tetris · ASCII", "2025-08-14T04:57:41Z", "2026-07-03T06:45:00Z", "2026-10-18"],
+  ["tetris-canvas", "Tetris · Canvas", "2025-08-08T04:02:38Z", "2026-07-03T06:35:50Z", "2026-10-18"],
+  ["tetris-unicode", "Tetris · Unicode", "2025-08-11T21:51:55Z", "2026-07-03T06:38:03Z", "2026-10-18"],
+  ["tower-defense", "Hold the Margin · Tower Defense", "2026-07-06T03:42:06Z", "2026-07-06T03:54:32Z", "2026-10-18"],
+  ["shared-canvas", "Common · Shared Canvas", "2026-09-26T21:46:08Z", "2026-10-18T21:14:42Z", "2026-10-18"],
+  ["table-topics", "Table Topics", "2023-05-23T02:06:33Z", "2026-07-03T05:57:17Z", "2026-10-18"],
+  ["art", "Art Gallery", "2026-09-07T06:35:16Z", "2026-09-07T06:36:29Z", "2026-10-18"],
+  ["my-room-in-3d", "My Room in 3D", "2026-07-03T04:58:16Z", "2026-07-03T05:55:49Z", "2026-10-18"],
+  ["images", "Markive · YouTube Videos, Quotes & Images", "2026-06-08T19:32:30Z", "2026-10-18T23:15:51Z", "2026-10-18"],
+  ["shazaam", "Local Shazam", "2025-08-17T09:03:23Z", "2026-07-03T05:55:18Z", "2026-10-18"],
+  ["confluence-obsidian-quartz", "Quartz Feed · /var/log", "2026-06-01T19:51:03Z", "2026-06-04T07:37:11Z", "2026-10-19"],
+  ["f1-car-generations", "The Shape of Speed · F1, 1950–2026", "2026-10-19T05:44:38Z", "2026-10-19T05:57:46Z", "2026-10-19"],
+  ["fake-personal-website", "Fake Personal Site · Inspector", "2019-03-02T04:36:01Z", "2026-07-03T05:29:35Z", "2026-10-19"],
+  ["wiki-viewer", "Wiki Viewer · Empty Garden", "2026-07-09T07:20:31Z", "2026-07-12T04:51:36Z", "2026-10-19"],
 ];
-const DATES_RETRIEVED = "2026-10-18T21:24:42Z";
+const DATES_RETRIEVED = "2026-10-19T05:58:50Z";
 const ISO_UTC = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
 const SORT_OPTIONS = [["created", "Recently created"], ["updated", "Recently updated"], ["category", "Category"]];
 // Titles/categories settled by earlier requests that must not regress.
@@ -114,8 +126,13 @@ try {
 const sites = Array.isArray(data.sites) ? data.sites : [];
 check(sites.length === EXPECTED_COUNT, `exactly ${EXPECTED_COUNT} entries (found ${sites.length})`);
 check(data.snapshotDate === SNAPSHOT, `snapshotDate is ${SNAPSHOT}`);
-check(data.screenshots?.capturedOn === SNAPSHOT && data.screenshots?.width === PREVIEW_SIZE.width &&
-  data.screenshots?.height === PREVIEW_SIZE.height, "screenshot metadata records capture date and 1365×900 size");
+check(!("capturedOn" in (data.screenshots ?? {})) && data.screenshots?.captureDatePolicy === "per-entry" &&
+  data.screenshots?.width === PREVIEW_SIZE.width && data.screenshots?.height === PREVIEW_SIZE.height && data.screenshots?.format === "webp",
+  "screenshot metadata: per-entry capture dates (no global capturedOn), 1365×900 WebP");
+check(/screenshotCapturedOn/.test(data.screenshots?.note ?? "") && (data.screenshots?.note ?? "").includes(`original ${ORIGINAL_COUNT}`) &&
+  (data.screenshots?.note ?? "").includes(ORIGINAL_CAPTURE) && (data.screenshots?.note ?? "").includes(ADDED_CAPTURE) &&
+  /may have changed/.test(data.screenshots?.note ?? ""),
+  `screenshot note distinguishes the original ${ORIGINAL_COUNT} (${ORIGINAL_CAPTURE}) from the additions (${ADDED_CAPTURE})`);
 
 const names = sites.map((s) => s.name);
 const unique = (key) => new Set(sites.map((s) => s[key])).size === sites.length;
@@ -144,18 +161,21 @@ check(sites.find((s) => s.name === HOMEPAGE_REPO)?.title === "Account Home", "ac
 const badTitles = sites.filter((s) => typeof s.title !== "string" || !s.title.trim() || s.title !== s.title.trim() ||
   s.title.length > 60 || /[<>]/.test(s.title)).map((s) => s.name);
 check(badTitles.length === 0, `every entry has a readable plain-text title${list(badTitles)}`);
-const BASE_KEYS = "category,createdAt,name,repository,screenshot,title,updatedAt,url";
+const BASE_KEYS = "category,createdAt,name,repository,screenshot,screenshotCapturedOn,title,updatedAt,url";
 const unexpectedKeys = sites.filter((s) => Object.keys(s).filter((k) => k !== "alsoIn").sort().join() !== BASE_KEYS).map((s) => s.name);
 check(unexpectedKeys.length === 0,
-  `entries have exactly name/title/category/url/repository/screenshot/createdAt/updatedAt, plus optional alsoIn${list(unexpectedKeys)}`);
+  `entries have exactly name/title/category/url/repository/screenshot/screenshotCapturedOn/createdAt/updatedAt, plus optional alsoIn${list(unexpectedKeys)}`);
 check(JSON.stringify(sites.map((s) => [s.name, s.title])) === JSON.stringify(EXPECTED_SITES.map(([n, t]) => [n, t])),
-  `the ${EXPECTED_COUNT} names and display titles are unchanged, in their original source order`);
+  `the ${EXPECTED_COUNT} names and display titles match, in source order`);
+check(EXPECTED_SITES.length === EXPECTED_COUNT && JSON.stringify(names.slice(ORIGINAL_COUNT)) === JSON.stringify(ADDED),
+  `the original ${ORIGINAL_COUNT} keep their relative order and the ${ADDED.length} additions are appended at the end`);
 
 // Repository dates (GitHub created_at / updated_at)
 const meta = data.repositoryDates ?? {};
 check(meta.retrievedAt === DATES_RETRIEVED && meta.retrievedAt.startsWith(SNAPSHOT) && /created_at/.test(meta.source ?? "") &&
   /updated_at/.test(meta.source ?? "") && /not page-content dates/i.test(meta.note ?? ""),
   "repositoryDates records the GitHub API source, retrieval time on the snapshot date, and that these are not page-content dates");
+check(!("capturedOn" in meta) && !/screenshot|capture/i.test(meta.note ?? ""), "repositoryDates stays separate from preview capture dates");
 const validIso = (t) => typeof t === "string" && ISO_UTC.test(t) && new Date(t).toISOString() === t.replace("Z", ".000Z");
 const badStamps = sites.filter((s) => !validIso(s.createdAt) || !validIso(s.updatedAt)).map((s) => s.name);
 check(badStamps.length === 0, `all ${sites.length} entries have valid ISO 8601 UTC createdAt and updatedAt${list(badStamps)}`);
@@ -261,7 +281,7 @@ for (const f of onDisk) {
   else if (buf.length < MIN_PREVIEW_BYTES) badShotFormat.push(`${f} (${buf.length} bytes, likely blank)`);
 }
 check(badShotFormat.length === 0, `all previews are complete, non-trivial lossy VP8 WebP${list(badShotFormat)}`);
-// Re-captured from the live sites after the game restyles; still covered by the single global capture date.
+// Re-captured from the live sites after the game restyles on 2026-10-18 (part of the original 41 captures).
 const REFRESHED_PREVIEWS = ["shared-canvas", "better-plume", "birdseye-arena"];
 const badRefreshed = REFRESHED_PREVIEWS.filter((name) => {
   const s = sites.find((x) => x.name === name);
@@ -271,8 +291,18 @@ const badRefreshed = REFRESHED_PREVIEWS.filter((name) => {
     size.width !== PREVIEW_SIZE.width || size.height !== PREVIEW_SIZE.height;
 });
 check(badRefreshed.length === 0, `refreshed previews (${REFRESHED_PREVIEWS.join(", ")}) are referenced 1365×900 WebP${list(badRefreshed)}`);
-const perEntryDates = sites.filter((s) => "capturedOn" in s || "screenshotCapturedOn" in s).map((s) => s.name);
-check(perEntryDates.length === 0, `capture date is the single global screenshots.capturedOn (no per-entry dates)${list(perEntryDates)}`);
+// Per-entry capture dates: required on every entry, valid calendar dates, never after the snapshot.
+const validDay = (d) => typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d) && new Date(`${d}T00:00:00Z`).toISOString().startsWith(d);
+const badCapture = sites.filter((s) => !validDay(s.screenshotCapturedOn) || s.screenshotCapturedOn > SNAPSHOT || "capturedOn" in s).map((s) => s.name);
+check(badCapture.length === 0, `every entry has a valid screenshotCapturedOn on or before ${SNAPSHOT}${list(badCapture)}`);
+const wrongCapture = sites.filter((s, i) => s.screenshotCapturedOn !== EXPECTED_SITES[i]?.[4]).map((s) => `${s.name}→${s.screenshotCapturedOn}`);
+check(wrongCapture.length === 0, `capture dates match the expected per-entry dates${list(wrongCapture)}`);
+const originals = sites.filter((s) => !ADDED.includes(s.name));
+const additions = sites.filter((s) => ADDED.includes(s.name));
+check(originals.length === ORIGINAL_COUNT && originals.every((s) => s.screenshotCapturedOn === ORIGINAL_CAPTURE),
+  `all ${ORIGINAL_COUNT} original previews keep capture date ${ORIGINAL_CAPTURE}`);
+check(additions.length === ADDED.length && additions.every((s) => s.screenshotCapturedOn === ADDED_CAPTURE),
+  `the ${ADDED.length} added previews (${ADDED.join(", ")}) are dated ${ADDED_CAPTURE}`);
 
 // ---------------------------------------------------------------- HTML / assets
 const html = read("index.html");
@@ -308,7 +338,14 @@ check(/role="status"/.test(html) && /aria-live="polite"/.test(html), "result cou
 check(/id="empty"[^>]*hidden/.test(html), "empty state exists and is hidden by default");
 check(html.includes('href="assets/styles.css"'), "stylesheet linked with a relative path");
 check(html.includes('src="assets/app.js"'), "script linked with a relative path");
-check(html.includes(SNAPSHOT) || /18 October 2026/.test(html), "capture date shown in the UI");
+check(/<time datetime="2026-10-19">19 October 2026<\/time>/.test(html) && /<time datetime="2026-10-19">2026-10-19<\/time>/.test(html),
+  "snapshot date 2026-10-19 shown in the header and footer");
+check(!/2026-10-18|18 October 2026/.test(html), "no stale 18 October snapshot/global capture date in the page");
+check(/<strong id="total-count">45<\/strong>/.test(html) && /45 sites/.test(html.match(/<footer[\s\S]*?<\/footer>/)?.[0] ?? "") && /45-site/.test(html.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? ""),
+  "header, footer and meta description describe 45 sites");
+check(/GitHub Pages configured/.test(html), "UI says membership means GitHub Pages is configured");
+check(/dated per card/.test(html) && /capture dates vary by entry/.test(html.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? ""),
+  "UI and meta description say preview capture dates vary by entry");
 check(/not automatically synced/i.test(html) && /may have changed/i.test(html), "static-snapshot disclaimer shown in the UI");
 check(/1365×900/.test(html) && /viewport (?:previews?|captures?)/i.test(html), "UI says screenshots are 1365×900 viewport captures");
 const headerText = (html.match(/<header[\s\S]*?<\/header>/)?.[0] ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
@@ -347,7 +384,13 @@ check(/width: "1365"/.test(js) && /height: "900"/.test(js), "screenshots have in
 check(/const EAGER_IMAGES = 3;/.test(js) && /loading: shotCount\+\+ < EAGER_IMAGES \? "eager" : "lazy"/.test(js) &&
   (js.match(/loading:/g) ?? []).length === 1 && (js.match(/shotCount = 0/g) ?? []).length === 1,
   "first three screenshots load eagerly; all others are lazy-loaded");
-check(/alt: `Preview screenshot of \$\{site\.title\} \(\$\{site\.name\}\)/.test(js), "screenshots get meaningful alt text (title + repo)");
+check(/alt: `Preview screenshot of \$\{site\.title\} \(\$\{site\.name\}\)\$\{captured \? `, captured \$\{captured\}` : ""\}`/.test(js) &&
+  /const captured = longDate\(site\.screenshotCapturedOn\)/.test(js),
+  "screenshots get meaningful alt text (title + repo + that entry's capture date)");
+check(!/18 October 2026|19 October 2026|2026-10-1[89]/.test(js), "app.js has no hard-coded global screenshot/snapshot date");
+check(/el\("span", \{ class: "card-capture" \}/.test(js) && /text: "Preview"/.test(js) &&
+  /datetime: site\.screenshotCapturedOn/.test(js) && /CAPTURE_DATE\.exec/.test(js),
+  "each card shows its validated per-entry preview capture date in a separate Preview line");
 check(/el\("a", \{ class: "card-main", href: site\.url, "aria-labelledby": `\$\{titleId\} \$\{hostId\}` \}, children\)/.test(js) &&
   /el\("a", \{ class: "card-link card-repo", href: site\.repository, "aria-label": `GitHub repo: \$\{site\.name\}`/.test(js),
   "each tile is one site link (screenshot + text) with a sibling GitHub repository link");
@@ -377,11 +420,22 @@ check(/"Newsreader", Georgia/.test(css) && /"JetBrains Mono", ui-monospace/.test
 check(/prefers-reduced-motion/.test(css), "styles respect prefers-reduced-motion");
 check(/:focus-visible/.test(css), "styles define visible focus states");
 check(/minmax\(min\(100%,/.test(css), "card grid collapses without overflow on narrow screens");
+check(/\.card-capture \{[^}]*color: var\(--muted\)/.test(css) && /\.card-capture time \{[^}]*color: var\(--muted\)/.test(css) &&
+  !/data-sort[^{]*\.card-capture/.test(css), "preview capture line is subtle muted text, never highlighted as a sort date");
 check(/--tap:\s*2\.75rem/.test(css) && /min-height: var\(--tap\)/.test(css), "controls and links have comfortable tap targets");
 
 // README
 check(readme.includes(SNAPSHOT) && /not automatically synced/i.test(readme), "README states the snapshot date and that it is not synced");
 check(/1365×900/.test(readme) && /may have changed/i.test(readme), "README notes screenshots are dated 1365×900 previews");
+check(/\(45 entries\)/.test(readme) && /exactly 45 unique entries/.test(readme) && /45 local 1365×900/.test(readme) &&
+  !/\(41 entries\)|exactly 41 unique|41 local/.test(readme), "README describes 45 entries, not the old 41");
+check(/GitHub Pages\s+configured/.test(readme) && /Pages\s+API/.test(readme), "README says membership means Pages configured per the Pages API inventory");
+check(/Capture dates vary by entry/.test(readme) && /screenshotCapturedOn/.test(readme) && readme.includes(ORIGINAL_CAPTURE) &&
+  readme.includes(ADDED_CAPTURE) && !/one global capture date/.test(readme), "README documents per-entry capture dates");
+check(/confluence-obsidian-quartz/.test(readme) && /raw RSS feed/.test(readme) && /application\/rss\+xml/.test(readme) &&
+  /wiki-viewer/.test(readme) && /empty state/.test(readme) && /0 shown/.test(readme),
+  "README discloses the RSS-feed and empty-wiki capture states");
+check(readme.includes(DATES_RETRIEVED), "README records the repository-date retrieval time");
 check(/python3 -m http\.server/.test(readme) && /node tests\/verify\.mjs/.test(readme), "README has local preview and test instructions");
 
 // ---------------------------------------------------------------- Browser (optional: needs Playwright)
@@ -430,6 +484,9 @@ const visibleCards = (page) => page.$$eval(".section:not([hidden]) .card:not([hi
   li.querySelector(".card-category").textContent,
   li.querySelector(".date-created time")?.getAttribute("datetime"),
   li.querySelector(".date-updated time")?.getAttribute("datetime"),
+  li.querySelector(".card-capture time")?.getAttribute("datetime"),
+  li.querySelector(".card-capture")?.textContent,
+  li.querySelector(".shot img")?.getAttribute("alt"),
 ]));
 const uniqueNames = (cards) => [...new Set(cards.map((c) => c[1]))];
 const isDescending = (values) => values.every((v, i) => i === 0 || values[i - 1] >= v);
@@ -482,7 +539,14 @@ async function exercise(page, label) {
       return created !== s.createdAt || updated !== s.updatedAt || !cat.startsWith(want[0]) || !want.every((l) => cat.includes(l));
     }).map((c) => c[1]);
     check(wrongMeta.length === 0, tag(`${mode}: every card shows its primary/secondary categories and repo dates${list(wrongMeta)}`));
-    check(/Showing all 41 sites, most recently (updated|created) repository first\./.test(await statusText(page)),
+    const wrongCapture = cards.filter(([, name, , , , captured, line, alt]) => {
+      const s = sites.find((x) => x.name === name);
+      const long = LONG_DATE[s.screenshotCapturedOn];
+      return captured !== s.screenshotCapturedOn || line !== `Preview · ${long}` ||
+        alt !== `Preview screenshot of ${s.title} (${s.name}), captured ${long}`;
+    }).map((c) => c[1]);
+    check(wrongCapture.length === 0, tag(`${mode}: every card shows its own preview capture date (visible line + alt text)${list(wrongCapture)}`));
+    check(new RegExp(`^Showing all ${EXPECTED_COUNT} sites, most recently (updated|created) repository first\\.`).test(await statusText(page)),
       tag(`${mode}: status announces the count and order`));
   }
 
@@ -495,9 +559,10 @@ async function exercise(page, label) {
     JSON.stringify(grouped.filter((c) => c[0] === `cat-${id}`).map((c) => c[1])) !== JSON.stringify(membersOf(id))).map(([id]) => id);
   check(badGroups.length === 0, tag(`category: each section lists exactly its primary + secondary members in source order${list(badGroups)}`));
   check(grouped.length === EXPECTED_COUNT + SECONDARY_COUNT && uniqueNames(grouped).length === EXPECTED_COUNT &&
-    /Showing all 41 sites, grouped by category\./.test(await statusText(page)),
+    (await statusText(page)) === `Showing all ${EXPECTED_COUNT} sites, grouped by category.`,
     tag(`category: ${EXPECTED_COUNT + SECONDARY_COUNT} cards, ${EXPECTED_COUNT} unique sites counted`));
-  check(await page.textContent("#total-count") === "41" && await page.textContent("#category-count") === "7", tag("header shows 41 sites across 7 categories"));
+  check(await page.textContent("#total-count") === String(EXPECTED_COUNT) && await page.textContent("#category-count") === "7",
+    tag(`header shows ${EXPECTED_COUNT} sites across 7 categories`));
 
   // Category dropdown: closed by default; opens to checkboxes carrying member counts.
   check(!(await menuOpen(page)) && await page.isHidden("#category-panel") &&
@@ -522,7 +587,7 @@ async function exercise(page, label) {
     const want = membersOf("personal");
     const ordered = mode === "category" ? want : EXPECTED_ORDER[mode].filter((n) => want.includes(n));
     check(JSON.stringify(cards.map((c) => c[1])) === JSON.stringify(ordered) &&
-      (await statusText(page)).startsWith(`Showing ${want.length} of 41 sites in Personal & Portfolio`) &&
+      (await statusText(page)).startsWith(`Showing ${want.length} of ${EXPECTED_COUNT} sites in Personal & Portfolio`) &&
       (await page.textContent("#category-summary")) === "Personal & Portfolio",
       tag(`${mode}: Personal checkbox shows its ${want.length} members${mode === "category" ? "" : " in global sort order"}`));
 
@@ -532,14 +597,14 @@ async function exercise(page, label) {
     const wantBoth = mode === "category" ? [...membersOf("faith"), ...membersOf("games")] : EXPECTED_ORDER[mode].filter((n) => both.includes(n));
     check(JSON.stringify(cards.map((c) => c[1])) === JSON.stringify(wantBoth) &&
       (await page.textContent("#category-summary")) === "2 categories" &&
-      (await statusText(page)).startsWith(`Showing ${both.length} of 41 sites in Faith & Bible Study or Games & Simulations`),
+      (await statusText(page)).startsWith(`Showing ${both.length} of ${EXPECTED_COUNT} sites in Faith & Bible Study or Games & Simulations`),
       tag(`${mode}: two checked categories show the union (${both.length}) in ${mode === "category" ? "section" : "global sort"} order`));
 
     await page.fill("#filter", "tetris");
     cards = await visibleCards(page);
     const tetris = (mode === "category" ? membersOf("games") : EXPECTED_ORDER[mode]).filter((n) => n.startsWith("tetris-"));
     check(JSON.stringify(cards.map((c) => c[1])) === JSON.stringify(tetris) &&
-      (await statusText(page)).startsWith("Showing 3 of 41 sites in Faith & Bible Study or Games & Simulations matching “tetris”"),
+      (await statusText(page)).startsWith(`Showing 3 of ${EXPECTED_COUNT} sites in Faith & Bible Study or Games & Simulations matching “tetris”`),
       tag(`${mode}: search + categories → the 3 Tetris builds, still in sort order`));
 
     await pickCategories(page, ["personal"]);
@@ -620,7 +685,9 @@ async function exercise(page, label) {
   await page.click("body", { position: { x: 1, y: 1 } });
   await page.keyboard.press("/");
   await page.keyboard.type("quartz");
-  check(await activeId(page) === "filter" && uniqueNames(await visibleCards(page)).length === 2, tag("keyboard: “/” focuses search"));
+  const quartzHits = sites.filter((s) => /quartz/i.test(`${s.name} ${s.title}`)).length;
+  check(await activeId(page) === "filter" && quartzHits === 3 && uniqueNames(await visibleCards(page)).length === quartzHits,
+    tag(`keyboard: “/” focuses search (“quartz” finds ${quartzHits} sites)`));
   await page.keyboard.press("Escape");
   check(await page.inputValue("#filter") === "" && uniqueNames(await visibleCards(page)).length === EXPECTED_COUNT,
     tag("keyboard: Esc clears the search"));
@@ -721,9 +788,9 @@ async function exercise(page, label) {
 async function exerciseTies(page) {
   const tied = structuredClone(data);
   const set = (name, createdAt, updatedAt) => Object.assign(tied.sites.find((s) => s.name === name), { createdAt, updatedAt });
-  set("tetris-unicode", "2026-10-18T22:00:00Z", "2026-10-18T23:59:00Z");
-  set("quotes", "2026-10-18T22:00:00Z", "2026-10-18T22:30:00Z");
-  set("art", "2026-10-18T22:00:00Z", "2026-10-18T22:00:00Z");
+  set("tetris-unicode", "2026-10-19T05:50:00Z", "2026-10-19T05:58:00Z");
+  set("quotes", "2026-10-19T05:50:00Z", "2026-10-19T05:55:00Z");
+  set("art", "2026-10-19T05:50:00Z", "2026-10-19T05:50:00Z");
   await page.route("**/data/sites.json", (route) => route.fulfill({ contentType: "application/json", body: JSON.stringify(tied) }));
   const load = async () => { await page.reload(); await page.waitForSelector(".card"); return (await visibleCards(page)).map((c) => c[1]); };
   const order = await load();
