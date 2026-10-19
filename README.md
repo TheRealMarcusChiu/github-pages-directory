@@ -110,8 +110,10 @@ titles, screenshots); HTTPS-only links and correct repository URLs; no
 category exactly once, with exactly the expected `alsoIn` secondary memberships; each screenshot path is relative and points at an existing 1365×900
 WebP with no orphans (all complete, non-blank lossy VP8), each entry's required `screenshotCapturedOn` (exact per entry: 2026-10-18 for 40 of the original 41, 2026-10-19 for the re-captured `bandwidth-compare`, the four additions, the two later additions and the final addition); relative asset paths; only the Google Fonts stylesheet as a
 remote resource; no HTML-injection APIs; and accessibility basics (lang, landmarks,
-labelled search, category dropdown and checkbox group, live status, alt text, focus styles, reduced motion,
-tap targets) plus the snapshot disclaimers in the page and this README. The exact
+labelled search, category dropdown and checkbox group, alt text, focus styles, reduced motion,
+tap targets) plus the snapshot disclaimers in the meta description, footer and this README.
+The masthead is just the eyebrow and title, with no result-status line; each control is
+one outlined field with its short uppercase label inside, before the active value. The exact
 names, titles and source order are pinned, and every entry must carry valid ISO 8601
 UTC `createdAt` ≤ `updatedAt` matching the retrieved GitHub values; the page must
 offer a labelled *Sort by* select defaulting to *Recently created*.
@@ -124,7 +126,8 @@ search composition in every mode, zero results and both reset buttons, the dropd
 (open/close, Escape, Tab-away, outside click, focus return, checked states, arrow
 keys), tile structure (one site anchor around image and text, a separate GitHub
 anchor, no nested anchors) and real clicks on the image, card background and GitHub
-link, controls on one row on desktop, no horizontal overflow (menu open or closed),
+link, in-field labels (SEARCH, CATEGORY, SORT BY) with gold chevrons on the two menus,
+controls on one row on desktop, no horizontal overflow (menu open or closed),
 and no console errors, failed requests or off-site requests besides Google Fonts.
 
 ## Data format
@@ -149,8 +152,7 @@ and no console errors, failed requests or off-site requests besides Google Fonts
 
 A site with `alsoIn` keeps its primary `category` and gets an extra card in each
 listed section; its card label names the primary category first. Category checkboxes and
-section headers count every member, while the header total and the result status
-count unique sites. Currently every Art & 3D site is also in
+section headers count every member, while the empty state counts unique sites. Currently every Art & 3D site is also in
 Personal & Portfolio.
 
 Display titles were written by hand, using the 2026-10-18 and 2026-10-19 scans' page

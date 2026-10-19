@@ -358,12 +358,17 @@ check((html.match(/<h1[\s>]/g) ?? []).length === 1, "index.html has exactly one 
 check(/<h1>Pages, <em>gathered\.<\/em><\/h1>/.test(html), "h1 is the concise title “Pages, gathered.”");
 check(/h1 em \{[^}]*color: var\(--gold\)/.test(css) && /h1 \{[^}]*font-family: var\(--serif\)[^}]*font-style: italic/.test(css),
   "h1 keeps the Newsreader italic / gold treatment");
-check(/\.lede \{(?![^}]*font-family: var\(--serif\))[^}]*color: var\(--muted\)[^}]*max-width: \d+ch/.test(css) ||
-  /\.lede \{(?![^}]*font-family: var\(--serif\))[^}]*max-width: \d+ch[^}]*color: var\(--muted\)/.test(css),
-  "supporting copy is muted mono with a restrained line length");
+const mastheadHtml = html.match(/<header class="masthead">[\s\S]*?<\/header>/)?.[0] ?? "";
+const footerHtml = html.match(/<footer[\s\S]*?<\/footer>/)?.[0] ?? "";
+const footerText = footerHtml.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+check(/^<header class="masthead">\s*<div class="wrap">\s*<p class="eyebrow">TheRealMarcusChiu · GitHub Pages<\/p>\s*<h1>Pages, <em>gathered\.<\/em><\/h1>\s*<\/div>\s*<\/header>$/.test(mastheadHtml),
+  "masthead holds only the eyebrow and the concise title");
+check(!/class="lede"|class="note"|id="snapshot-note"|id="total-count"|id="category-count"/.test(html) &&
+  !/\.lede\b|\.note\b/.test(css) && !/total-count|category-count|snapshot-note/.test(js),
+  "the old masthead lede (site/category counts) and snapshot note are gone from markup, styles and script");
 check(/<main[\s>]/.test(html) && /<header[\s>]/.test(html) && /<footer[\s>]/.test(html), "index.html has header/main/footer landmarks");
 check(/class="skip-link" href="#directory"/.test(html) && /id="directory"/.test(html), "skip link targets the directory");
-check(/<label for="filter"[^>]*>/.test(html) && /<input id="filter" type="search"/.test(html), "search input has an associated label");
+check(/<label for="filter"[^>]*>Search<\/label>/.test(html) && /<input id="filter" type="search"/.test(html), "search input has an associated label");
 check(/role="search"/.test(html), "search region is exposed as a landmark");
 check(/<button type="button" id="category-toggle"[^>]*aria-expanded="false"[^>]*aria-controls="category-panel"[^>]*aria-labelledby="category-filter-label category-summary"/.test(html) &&
   /id="category-filter-label"[^>]*>Category</.test(html),
@@ -375,27 +380,43 @@ const controlsHtml = html.match(/<search class="controls"[\s\S]*?<\/search>/)?.[
 check(["id=\"filter\"", "id=\"category-toggle\"", "id=\"sort\""].every((id) => controlsHtml.includes(id)),
   "search, category dropdown and sort live together in the controls row");
 check(/grid-template-columns: minmax\(0, 2fr\) minmax\(0, 1fr\) minmax\(0, 1fr\)/.test(css), "desktop controls share one three-column row");
-check(/role="status"/.test(html) && /aria-live="polite"/.test(html), "result count uses a live status region");
+check(!/id="result-status"|role="status"|aria-live/.test(html) && !/result-status|Showing (?:all )?\$\{|statusTimer/.test(js),
+  "no result-status line or live result counter in the markup or script");
+// Each control is one outlined field: its short label sits inside, before the active value; no labels above fields.
+const fieldOf = (cls) => controlsHtml.match(new RegExp(`<div class="field ${cls}">([\\s\\S]*?)</div>`))?.[1] ?? "";
+check(/^\s*<label for="filter" class="field-label">Search<\/label>\s*<input id="filter"[^>]*placeholder="title, repo or category"/.test(fieldOf("search-field")),
+  "search field: in-field SEARCH label before the input, placeholder “title, repo or category”");
+check(/<button type="button" id="category-toggle" class="field menu-toggle"[^>]*>\s*<span id="category-filter-label" class="field-label">Category<\/span>\s*<span id="category-summary" class="field-value">All categories<\/span>\s*<\/button>/.test(controlsHtml),
+  "category field: the toggle shows its CATEGORY label, then the active selection");
+check(/^\s*<label for="sort" class="field-label">Sort by<\/label>\s*<select id="sort"[^>]*class="field-value"/.test(fieldOf("sort-field")),
+  "sort field: in-field SORT BY label before the select");
+check(!/class="label"/.test(html) && !/\.label\b/.test(css) && (controlsHtml.match(/class="field-label"/g) ?? []).length === 3,
+  "no stacked labels above the fields; exactly three in-field labels");
+check(/\.field \{[^}]*border: 1px solid var\(--border\)[^}]*border-radius: [1-9]\d*px[^}]*background-color: var\(--surface\)/.test(css) &&
+  /\.field-label \{[^}]*color: var\(--muted\)/.test(css) && /\.eyebrow, \.field-label,[^{]*\{[^}]*font-family: var\(--mono\)[^}]*text-transform: uppercase/.test(css) &&
+  /\.field-value \{[^}]*color: var\(--text\)[^}]*var\(--mono\)[^}]*text-transform: uppercase/.test(css),
+  "fields: rounded warm-dark outline, muted uppercase mono label, light uppercase mono value");
+check(/\.menu-toggle, \.sort-field select \{[^}]*linear-gradient\(45deg, transparent 50%, var\(--gold\) 50%\)/.test(css),
+  "category and sort fields draw a gold chevron");
 check(/id="empty"[^>]*hidden/.test(html), "empty state exists and is hidden by default");
 check(html.includes('href="assets/styles.css"'), "stylesheet linked with a relative path");
 check(html.includes('src="assets/app.js"'), "script linked with a relative path");
-check(/<time datetime="2026-10-19">19 October 2026<\/time>/.test(html) && /<time datetime="2026-10-19">2026-10-19<\/time>/.test(html),
-  "snapshot date 2026-10-19 shown in the header and footer");
+const metaDescription = html.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? "";
+check(/<time datetime="2026-10-19">2026-10-19<\/time>/.test(footerHtml) && /dated 19 October 2026/.test(metaDescription) && !/<time/.test(mastheadHtml),
+  "snapshot date 2026-10-19 kept in the footer and meta description, not the masthead");
 check(!/2026-10-18|18 October 2026/.test(html), "no stale 18 October snapshot/global capture date in the page");
-check(/<strong id="total-count">48<\/strong>/.test(html) && /48 sites/.test(html.match(/<footer[\s\S]*?<\/footer>/)?.[0] ?? "") && /48-site/.test(html.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? ""),
-  "header, footer and meta description describe 48 sites");
+check(/48 sites/.test(footerHtml) && /48-site/.test(metaDescription), "footer and meta description describe 48 sites");
 check(!/\b4[57](?: sites|-site|<\/strong>)/.test(html), "no stale 45- or 47-site count in the page");
-check(/GitHub Pages configured/.test(html), "UI says membership means GitHub Pages is configured");
-check(/dated per card/.test(html) && /capture dates vary by entry/.test(html.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? ""),
-  "UI and meta description say preview capture dates vary by entry");
-check(/not automatically synced/i.test(html) && /may have changed/i.test(html), "static-snapshot disclaimer shown in the UI");
-check(/1365×900/.test(html) && /viewport (?:previews?|captures?)/i.test(html), "UI says screenshots are 1365×900 viewport captures");
-const headerText = (html.match(/<header[\s\S]*?<\/header>/)?.[0] ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-const footerText = (html.match(/<footer[\s\S]*?<\/footer>/)?.[0] ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-check(headerText.length <= 330 && (html.match(/class="note"/g) ?? []).length === 1, `header copy is short: one note (${headerText.length} chars)`);
-check(footerText.length <= 110 && (html.match(/<footer[\s\S]*?<\/footer>/)?.[0].match(/<p>/g) ?? []).length === 1,
+check(/GitHub Pages configured/.test(metaDescription), "meta description says membership means GitHub Pages is configured");
+check(/capture dates vary by entry/.test(metaDescription), "meta description says preview capture dates vary by entry");
+check(/Static 48-site snapshot/.test(metaDescription) && /^Snapshot /.test(footerText), "meta description and footer present the page as a static snapshot");
+check(/1365×900/.test(metaDescription) && /viewport (?:previews?|captures?)/i.test(metaDescription), "meta description says screenshots are 1365×900 viewport captures");
+const headerText = mastheadHtml.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+check(headerText === "TheRealMarcusChiu · GitHub Pages Pages, gathered.", `masthead text is just the eyebrow and title (“${headerText}”)`);
+check(footerText.length <= 110 && (footerHtml.match(/<p>/g) ?? []).length === 1,
   `footer is a single short line (${footerText.length} chars)`);
-check(/GitHub repository metadata/.test(html) && /not page-content dates/.test(html), "UI labels created/updated as repository metadata, not page-content dates");
+check(/id="sort-hint"[^>]*>Recent orders use GitHub repository created and updated dates, not page-content dates\./.test(html),
+  "sort hint labels created/updated as GitHub repository dates, not page-content dates");
 const sortSelect = html.match(/<select id="sort"[^>]*>([\s\S]*?)<\/select>/);
 check(/<label for="sort"[^>]*>Sort by<\/label>/.test(html) && !!sortSelect, "a labelled “Sort by” select exists");
 const sortOpts = [...(sortSelect?.[1] ?? "").matchAll(/<option value="([^"]+)"( selected)?>([^<]+)<\/option>/g)];
@@ -442,8 +463,8 @@ check(/inCategory && terms\.every/.test(js), "search and category filter combine
 check(/data\.sites\.filter\(\(s\) => isMember\(s, category\.id\)\)/.test(js) &&
   /const isMember = \(site, id\) => site\.category === id \|\| alsoIn\(site\)\.includes\(id\)/.test(js),
   "sections include sites by primary category or alsoIn membership");
-check(/total = new Set\(/.test(js) && /const shownSites = new Set\(\)/.test(js) && /const shown = shownSites\.size/.test(js),
-  "header total and status count unique sites, not duplicated cards");
+check(/const shownSites = new Set\(\)/.test(js) && /const shown = shownSites\.size/.test(js) && /empty\.hidden = shown !== 0/.test(js),
+  "the empty state counts unique sites, not duplicated cards");
 check(/renderOption\(s\.category\.id, s\.category\.label, s\.items\.length\)/.test(js),
   "category checkboxes count every member (primary + secondary)");
 check(/return \[\.\.\.entries\]\.sort\(/.test(js) && !/data\.sites\.sort\(|\bsites\.sort\(|\.reverse\(\)/.test(js),
@@ -534,7 +555,6 @@ const visibleCards = (page) => page.$$eval(".section:not([hidden]) .card:not([hi
 ]));
 const uniqueNames = (cards) => [...new Set(cards.map((c) => c[1]))];
 const isDescending = (values) => values.every((v, i) => i === 0 || values[i - 1] >= v);
-const statusText = async (page) => { await page.waitForTimeout(350); return page.textContent("#result-status"); };
 
 // Category dropdown helpers
 const menuOpen = (page) => page.getAttribute("#category-toggle", "aria-expanded").then((v) => v === "true");
@@ -549,6 +569,75 @@ async function pickCategories(page, ids) {
 const checkedIds = (page) => page.$$eval("#category-options input", (b) => b.filter((x) => x.checked).map((x) => x.value));
 const activeId = (page) => page.evaluate(() => document.activeElement?.id || document.activeElement?.value || "");
 
+// Masthead is just eyebrow + title; no visible status line; each control is one field with its label inside.
+async function minimalHeaderAndFields(page, tag) {
+  const masthead = await page.$$eval(".masthead .wrap > *", (n) => n.map((x) => `${x.tagName}.${x.className}`));
+  check(JSON.stringify(masthead) === JSON.stringify(["P.eyebrow", "H1."]), tag(`masthead shows only the eyebrow and title (${masthead.join(", ")})`));
+  check(await page.locator("#result-status, [role=status], [aria-live]").count() === 0 &&
+    !/Showing|across \d+ categor|Snapshot from/.test(await page.innerText("body")),
+    tag("no visible result-status line, live counter, header counts or snapshot note"));
+  check(await page.getByLabel("Search", { exact: true }).evaluate((n) => n.id) === "filter" &&
+    await page.getByRole("button", { name: "Category All categories", exact: true }).count() === 1 &&
+    await page.getByLabel("Sort by", { exact: true }).evaluate((n) => n.id) === "sort",
+    tag("search, category and sort keep programmatic labels"));
+
+  const fields = await page.evaluate(() => {
+    const box = (n) => n.getBoundingClientRect();
+    const style = (n) => getComputedStyle(n);
+    return [
+      ["search", ".search-field", ".search-field .field-label", "#filter"],
+      ["category", "#category-toggle", "#category-filter-label", "#category-summary"],
+      ["sort", ".sort-field", ".sort-field .field-label", "#sort"],
+    ].map(([name, f, l, v]) => {
+      const [field, label, value] = [f, l, v].map((sel) => document.querySelector(sel));
+      const [fb, lb, vb, cb] = [field, label, value, field.closest(".control")].map(box);
+      // Where the value text starts: inside the select's left padding for sort, the element's left edge otherwise.
+      const valueStart = vb.left + (value.tagName === "SELECT" ? parseFloat(style(value).paddingLeft) : 0);
+      const chevronOn = name === "search" ? null : style(name === "sort" ? value : field).backgroundImage;
+      const center = [lb.left + lb.width / 2, lb.top + lb.height / 2];
+      return {
+        name,
+        labelText: label.innerText,
+        valueText: value.tagName === "INPUT" ? value.placeholder : value.tagName === "SELECT" ? value.selectedOptions[0].textContent : value.innerText,
+        valueUpper: style(value).textTransform === "uppercase",
+        labelInside: lb.left >= fb.left && lb.right <= fb.right && lb.top >= fb.top && lb.bottom <= fb.bottom,
+        labelBefore: lb.right <= valueStart + 0.5 && Math.abs((lb.top + lb.bottom) / 2 - (vb.top + vb.bottom) / 2) < 3,
+        nothingAbove: Math.abs(cb.top - fb.top) < 0.5,
+        height: Math.round(fb.height),
+        border: style(field).borderTopColor,
+        borderWidth: style(field).borderTopWidth,
+        radius: parseFloat(style(field).borderTopLeftRadius),
+        labelColor: style(label).color,
+        labelFont: style(label).fontFamily,
+        labelUpper: style(label).textTransform === "uppercase",
+        valueColor: style(value).color,
+        valueFont: style(value).fontFamily,
+        chevron: chevronOn,
+        hit: document.elementFromPoint(...center)?.closest("label, button, select, input")?.id || document.elementFromPoint(...center)?.closest("label")?.htmlFor,
+      };
+    });
+  });
+  const MUTED = "rgb(169, 158, 136)", TEXT = "rgb(236, 225, 207)", BORDER = "rgb(42, 34, 24)";
+  const want = { search: ["SEARCH", "title, repo or category"], category: ["CATEGORY", "ALL CATEGORIES"], sort: ["SORT BY", "Recently created"] };
+  for (const f of fields) {
+    check(f.labelText === want[f.name][0] && f.valueText === want[f.name][1] && f.labelInside && f.labelBefore && f.nothingAbove,
+      tag(`${f.name}: “${f.labelText}” sits inside the field, before “${f.valueText}”, with no label above`));
+    check(f.border === BORDER && f.borderWidth === "1px" && f.radius >= 4 && f.labelColor === MUTED && f.labelUpper &&
+      /JetBrains Mono/.test(f.labelFont) && /JetBrains Mono/.test(f.valueFont) &&
+      (f.name === "search" ? true : f.valueColor === TEXT && f.valueUpper),
+      tag(`${f.name}: rounded warm-dark outline, muted uppercase mono label, light mono value`));
+  }
+  const chevrons = fields.filter((f) => f.chevron !== null);
+  check(chevrons.length === 2 && chevrons.every((f) => /linear-gradient/.test(f.chevron) && f.chevron.includes("rgb(216, 169, 66)")),
+    tag("category and sort fields show a gold chevron"));
+  check(new Set(fields.map((f) => f.height)).size === 1, tag(`the three fields share one height (${fields.map((f) => f.height).join("/")})`));
+  check(fields.find((f) => f.name === "sort").hit === "sort" && fields.find((f) => f.name === "category").hit === "category-toggle",
+    tag("clicks on the SORT BY and CATEGORY labels land on their controls"));
+  await page.click(".search-field .field-label");
+  check(await activeId(page) === "filter", tag("clicking the in-field SEARCH label focuses the search input"));
+  await page.locator("#filter").blur();
+}
+
 async function exercise(page, label) {
   const tag = (m) => `[${label}] ${m}`;
   await page.waitForSelector(".card");
@@ -557,6 +646,7 @@ async function exercise(page, label) {
     tag("Sort by select is labelled and defaults to Recently created"));
   check(JSON.stringify(await page.$$eval("#sort option", (o) => o.map((x) => [x.value, x.textContent]))) === JSON.stringify(SORT_OPTIONS),
     tag("sort options render in order"));
+  await minimalHeaderAndFields(page, tag);
 
   // Default view, before touching anything: created_at descending.
   const initial = await visibleCards(page);
@@ -590,8 +680,6 @@ async function exercise(page, label) {
         alt !== `Preview screenshot of ${s.title} (${s.name}), captured ${long}`;
     }).map((c) => c[1]);
     check(wrongCapture.length === 0, tag(`${mode}: every card shows its own preview capture date (visible line + alt text)${list(wrongCapture)}`));
-    check(new RegExp(`^Showing all ${EXPECTED_COUNT} sites, most recently (updated|created) repository first\\.`).test(await statusText(page)),
-      tag(`${mode}: status announces the count and order`));
   }
 
   await select.selectOption("category");
@@ -602,11 +690,8 @@ async function exercise(page, label) {
   const badGroups = EXPECTED_CATEGORIES.filter(([id]) =>
     JSON.stringify(grouped.filter((c) => c[0] === `cat-${id}`).map((c) => c[1])) !== JSON.stringify(membersOf(id))).map(([id]) => id);
   check(badGroups.length === 0, tag(`category: each section lists exactly its primary + secondary members in source order${list(badGroups)}`));
-  check(grouped.length === EXPECTED_COUNT + SECONDARY_COUNT && uniqueNames(grouped).length === EXPECTED_COUNT &&
-    (await statusText(page)) === `Showing all ${EXPECTED_COUNT} sites, grouped by category.`,
-    tag(`category: ${EXPECTED_COUNT + SECONDARY_COUNT} cards, ${EXPECTED_COUNT} unique sites counted`));
-  check(await page.textContent("#total-count") === String(EXPECTED_COUNT) && await page.textContent("#category-count") === "7",
-    tag(`header shows ${EXPECTED_COUNT} sites across 7 categories`));
+  check(grouped.length === EXPECTED_COUNT + SECONDARY_COUNT && uniqueNames(grouped).length === EXPECTED_COUNT,
+    tag(`category: ${EXPECTED_COUNT + SECONDARY_COUNT} cards, ${EXPECTED_COUNT} unique sites`));
 
   // Category dropdown: closed by default; opens to checkboxes carrying member counts.
   check(!(await menuOpen(page)) && await page.isHidden("#category-panel") &&
@@ -631,8 +716,8 @@ async function exercise(page, label) {
     const want = membersOf("personal");
     const ordered = mode === "category" ? want : EXPECTED_ORDER[mode].filter((n) => want.includes(n));
     check(JSON.stringify(cards.map((c) => c[1])) === JSON.stringify(ordered) &&
-      (await statusText(page)).startsWith(`Showing ${want.length} of ${EXPECTED_COUNT} sites in Personal & Portfolio`) &&
-      (await page.textContent("#category-summary")) === "Personal & Portfolio",
+      (await page.textContent("#category-summary")) === "Personal & Portfolio" &&
+      (await page.innerText("#category-summary")) === "PERSONAL & PORTFOLIO",
       tag(`${mode}: Personal checkbox shows its ${want.length} members${mode === "category" ? "" : " in global sort order"}`));
 
     await pickCategories(page, ["games", "faith"]);
@@ -640,19 +725,16 @@ async function exercise(page, label) {
     const both = sites.filter((s) => isMember(s, "games") || isMember(s, "faith")).map((s) => s.name);
     const wantBoth = mode === "category" ? [...membersOf("faith"), ...membersOf("games")] : EXPECTED_ORDER[mode].filter((n) => both.includes(n));
     check(JSON.stringify(cards.map((c) => c[1])) === JSON.stringify(wantBoth) &&
-      (await page.textContent("#category-summary")) === "2 categories" &&
-      (await statusText(page)).startsWith(`Showing ${both.length} of ${EXPECTED_COUNT} sites in Faith & Bible Study or Games & Simulations`),
+      (await page.textContent("#category-summary")) === "2 categories",
       tag(`${mode}: two checked categories show the union (${both.length}) in ${mode === "category" ? "section" : "global sort"} order`));
 
     await page.fill("#filter", "tetris");
     cards = await visibleCards(page);
     const tetris = (mode === "category" ? membersOf("games") : EXPECTED_ORDER[mode]).filter((n) => n.startsWith("tetris-"));
-    check(JSON.stringify(cards.map((c) => c[1])) === JSON.stringify(tetris) &&
-      (await statusText(page)).startsWith(`Showing 3 of ${EXPECTED_COUNT} sites in Faith & Bible Study or Games & Simulations matching “tetris”`),
+    check(JSON.stringify(cards.map((c) => c[1])) === JSON.stringify(tetris),
       tag(`${mode}: search + categories → the 3 Tetris builds, still in sort order`));
 
     await pickCategories(page, ["personal"]);
-    await statusText(page);
     check(await page.isVisible("#empty") && (await visibleCards(page)).length === 0 &&
       await page.isVisible("#clear-search") && await page.isVisible("#show-all") &&
       (await page.textContent("#empty-detail")) === "No sites in Personal & Portfolio matching “tetris”.",
@@ -802,7 +884,7 @@ async function exercise(page, label) {
   check(await page.evaluate(() => document.activeElement?.classList.contains("card-repo")), tag("keyboard: Tab goes from a tile's site link to its GitHub link"));
 
   // Layout: controls share one row on desktop and stack on phones. No horizontal overflow in any mode.
-  const tops = await page.$$eval("#filter, #category-toggle, #sort", (n) => n.map((x) => Math.round(x.getBoundingClientRect().top)));
+  const tops = await page.$$eval(".search-field, #category-toggle, .sort-field", (n) => n.map((x) => Math.round(x.getBoundingClientRect().top)));
   const width = page.viewportSize().width;
   check(width >= 900 ? new Set(tops).size === 1 : tops[0] < tops[1] && tops[1] < tops[2],
     tag(width >= 900 ? "desktop: search, category and sort are on one row" : "phone: controls stack"));

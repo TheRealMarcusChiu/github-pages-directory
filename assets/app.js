@@ -11,9 +11,9 @@
   const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   // Created order never consults updated_at: ties fall straight through to repo name, then source order.
   const SORTS = {
-    created: { keys: ["createdAt"], phrase: "most recently created repository first" },
-    updated: { keys: ["updatedAt", "createdAt"], phrase: "most recently updated repository first" },
-    category: { phrase: "grouped by category" },
+    created: { keys: ["createdAt"] },
+    updated: { keys: ["updatedAt", "createdAt"] },
+    category: {},
   };
   const DEFAULT_SORT = "created";
   // Only the first gallery row loads eagerly; everything below the fold stays lazy.
@@ -27,7 +27,6 @@
   const categoryPanel = document.getElementById("category-panel");
   const categoryOptions = document.getElementById("category-options");
   const categoryClear = document.getElementById("category-clear");
-  const status = document.getElementById("result-status");
   const empty = document.getElementById("empty");
   const emptyDetail = document.getElementById("empty-detail");
   const clearSearch = document.getElementById("clear-search");
@@ -40,10 +39,8 @@
   let orders = {};
   let sortMode = DEFAULT_SORT;
   let checkboxes = [];
-  let total = 0;
   // Selected category ids; empty means every category. A site matches if it is in any selected one.
   let activeCategories = new Set();
-  let statusTimer = 0;
   let shotCount = 0;
 
   const plural = (n, word, many = `${word}s`) => `${n} ${n === 1 ? word : many}`;
@@ -285,17 +282,6 @@
     clearSearch.hidden = !raw;
     showAll.hidden = activeCategories.size === 0;
     if (!shown) emptyDetail.textContent = `No sites ${scope}.`;
-
-    const order = SORTS[sortMode].phrase;
-    const message = shown
-      ? scope
-        ? `Showing ${shown} of ${plural(total, "site")} ${scope}, ${order}.`
-        : `Showing all ${plural(total, "site")}, ${order}.`
-      : `No sites ${scope}.`;
-
-    // Debounce the live region so screen readers aren't flooded while typing.
-    clearTimeout(statusTimer);
-    statusTimer = setTimeout(() => { status.textContent = message; }, raw ? 300 : 0);
   }
 
   async function init() {
@@ -317,8 +303,6 @@
         .map((category) => [category, data.sites.filter((s) => isMember(s, category.id))])
         .filter(([, sites]) => sites.length)
         .map(([category, sites], i) => renderSection(category, sites, String(i + 1).padStart(2, "0"), labels));
-      // Unique repositories, not cards: secondary memberships duplicate cards across sections.
-      total = new Set(sections.flatMap((s) => s.items.map((i) => i.name))).size;
 
       const entries = allSection.items.map((item, i) => ({ ...initial[i], item }));
       orders = {
@@ -329,18 +313,13 @@
       gallery.replaceChildren(allSection.node, ...sections.map((s) => s.node));
       categoryOptions.replaceChildren(...sections.map((s) => renderOption(s.category.id, s.category.label, s.items.length)));
 
-      document.getElementById("total-count").textContent = String(total);
-      document.getElementById("total-label").textContent = total === 1 ? "site" : "sites";
-      document.getElementById("category-count").textContent = String(sections.length);
-      document.getElementById("category-label").textContent = sections.length === 1 ? "category" : "categories";
-
       // Honour checkboxes the browser restored on back/forward navigation.
       setCategories(checkboxes.filter((b) => b.checked).map((b) => b.value));
       // Honour a value the browser restored on back/forward navigation.
       setSort(sortSelect.value);
     } catch (err) {
-      status.textContent =
-        "Could not load data/sites.json. If you opened this file directly, serve the folder over HTTP instead (see README).";
+      gallery.replaceChildren(el("p", { class: "status", role: "alert",
+        text: "Could not load data/sites.json. If you opened this file directly, serve the folder over HTTP instead (see README)." }));
       console.error(err);
     }
   }
