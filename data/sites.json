@@ -7,7 +7,7 @@
     "width": 1365,
     "height": 900,
     "format": "webp",
-    "note": "Viewport previews; each entry's screenshotCapturedOn is its capture date. The original 41 previews were captured on 2026-10-18 and the four added on 2026-10-19; live sites may have changed since."
+    "note": "Viewport previews; each entry's screenshotCapturedOn is its capture date. 40 of the original 41 previews were captured on 2026-10-18; bandwidth-compare was re-captured on 2026-10-19; the four additions were captured on 2026-10-19; live sites may have changed since."
   },
   "repositoryDates": {
     "source": "GitHub REST API repository created_at / updated_at (authenticated owner repo listing)",
@@ -184,7 +184,7 @@
       "url": "https://git.marcuschiu.com/bandwidth-compare/",
       "repository": "https://github.com/TheRealMarcusChiu/bandwidth-compare",
       "screenshot": "assets/previews/bandwidth-compare.webp",
-      "screenshotCapturedOn": "2026-10-18",
+      "screenshotCapturedOn": "2026-10-19",
       "createdAt": "2026-10-16T04:26:33Z",
       "updatedAt": "2026-10-19T02:52:50Z"
     },

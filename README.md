@@ -16,8 +16,10 @@ separate *GitHub repo* link.
 >
 > **Screenshots:** `assets/previews/<repo>.webp` are 1365×900 viewport previews
 > (top of the page only, not full-page). Capture dates vary by entry and are stored
-> per site as `screenshotCapturedOn`: the original 41 were captured on **2026-10-18**,
-> the four added in this refresh on **2026-10-19**. They are local static images, not
+> per site as `screenshotCapturedOn`: 40 of the original 41 were captured on **2026-10-18**;
+> `bandwidth-compare` (one of the original 41) was re-captured on **2026-10-19**, and the
+> four added in this refresh were captured on **2026-10-19** — 40 previews dated 2026-10-18,
+> 5 dated 2026-10-19. They are local static images, not
 > live views — the live sites may have changed since.
 >
 > **Notes on the 2026-10-19 additions:** `confluence-obsidian-quartz` answers HTTP 200
@@ -104,7 +106,7 @@ Checks include: exactly 45 unique entries (names, Pages URLs, repository URLs,
 titles, screenshots); HTTPS-only links and correct repository URLs; no
 `github-pages-directory` self-entry; every repository in its expected primary
 category exactly once, with exactly the expected `alsoIn` secondary memberships; each screenshot path is relative and points at an existing 1365×900
-WebP with no orphans (all complete, non-blank lossy VP8), each entry's required `screenshotCapturedOn` (2026-10-18 for the original 41, 2026-10-19 for the four additions); relative asset paths; only the Google Fonts stylesheet as a
+WebP with no orphans (all complete, non-blank lossy VP8), each entry's required `screenshotCapturedOn` (exact per entry: 2026-10-18 for 40 of the original 41, 2026-10-19 for the re-captured `bandwidth-compare` and the four additions); relative asset paths; only the Google Fonts stylesheet as a
 remote resource; no HTML-injection APIs; and accessibility basics (lang, landmarks,
 labelled search, category dropdown and checkbox group, live status, alt text, focus styles, reduced motion,
 tap targets) plus the snapshot disclaimers in the page and this README. The exact

@@ -10,12 +10,15 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const EXPECTED_COUNT = 45;
 const OWNER = "TheRealMarcusChiu";
 const SNAPSHOT = "2026-10-19";
-// Preview capture dates are per entry: the original 41 previews kept their 2026-10-18 captures,
-// the four repositories added in the 2026-10-19 refresh were captured that day.
+// Preview capture dates are per entry: 40 of the original 41 previews kept their 2026-10-18 captures;
+// bandwidth-compare (one of the original 41) was re-captured on 2026-10-19, and the four repositories
+// added in the 2026-10-19 refresh were captured that day — 40 previews dated 2026-10-18, 5 dated 2026-10-19.
 const ORIGINAL_CAPTURE = "2026-10-18";
 const ADDED_CAPTURE = "2026-10-19";
 const ORIGINAL_COUNT = 41;
 const ADDED = ["confluence-obsidian-quartz", "f1-car-generations", "fake-personal-website", "wiki-viewer"];
+// Original entries whose preview was re-captured on ADDED_CAPTURE after a redeploy.
+const RECAPTURED = ["bandwidth-compare"];
 const LONG_DATE = { "2026-10-18": "18 October 2026", "2026-10-19": "19 October 2026" };
 const PREVIEW_DIR = "assets/previews";
 const PREVIEW_SIZE = { width: 1365, height: 900 };
@@ -58,7 +61,7 @@ const EXPECTED_SITES = [
   ["meditations", "Meditations", "2026-08-02T06:27:30Z", "2026-10-18T03:06:46Z", "2026-10-18"],
   ["bible-graph", "Bible Graph", "2026-07-03T20:27:30Z", "2026-07-10T03:36:13Z", "2026-10-18"],
   ["the-law-of-first-mention", "The Law of First Mention", "2025-08-14T20:27:13Z", "2026-07-03T05:46:27Z", "2026-10-18"],
-  ["bandwidth-compare", "Bandwidth Compare", "2026-10-16T04:26:33Z", "2026-10-19T02:52:50Z", "2026-10-18"],
+  ["bandwidth-compare", "Bandwidth Compare", "2026-10-16T04:26:33Z", "2026-10-19T02:52:50Z", "2026-10-19"],
   ["barnes-hut-algorithm", "Barnes–Hut Gravity Simulation", "2026-01-26T18:15:23Z", "2026-07-03T05:56:58Z", "2026-10-18"],
   ["confluence-data", "Confluence Data Visualizations", "2020-05-12T01:03:40Z", "2026-07-03T07:09:14Z", "2026-10-18"],
   ["display-tech-explorer", "Display Tech Explorer", "2026-10-18T17:04:16Z", "2026-10-18T17:06:01Z", "2026-10-18"],
@@ -129,10 +132,14 @@ check(data.snapshotDate === SNAPSHOT, `snapshotDate is ${SNAPSHOT}`);
 check(!("capturedOn" in (data.screenshots ?? {})) && data.screenshots?.captureDatePolicy === "per-entry" &&
   data.screenshots?.width === PREVIEW_SIZE.width && data.screenshots?.height === PREVIEW_SIZE.height && data.screenshots?.format === "webp",
   "screenshot metadata: per-entry capture dates (no global capturedOn), 1365×900 WebP");
-check(/screenshotCapturedOn/.test(data.screenshots?.note ?? "") && (data.screenshots?.note ?? "").includes(`original ${ORIGINAL_COUNT}`) &&
-  (data.screenshots?.note ?? "").includes(ORIGINAL_CAPTURE) && (data.screenshots?.note ?? "").includes(ADDED_CAPTURE) &&
-  /may have changed/.test(data.screenshots?.note ?? ""),
-  `screenshot note distinguishes the original ${ORIGINAL_COUNT} (${ORIGINAL_CAPTURE}) from the additions (${ADDED_CAPTURE})`);
+const screenshotNote = data.screenshots?.note ?? "";
+check(/screenshotCapturedOn/.test(screenshotNote) &&
+  screenshotNote.includes(`${ORIGINAL_COUNT - RECAPTURED.length} of the original ${ORIGINAL_COUNT} previews were captured on ${ORIGINAL_CAPTURE}`) &&
+  RECAPTURED.every((name) => screenshotNote.includes(`${name} was re-captured on ${ADDED_CAPTURE}`)) &&
+  screenshotNote.includes(`the four additions were captured on ${ADDED_CAPTURE}`) &&
+  !/The original \d+ previews were captured/.test(screenshotNote) &&
+  /may have changed/.test(screenshotNote),
+  `screenshot note says ${ORIGINAL_COUNT - RECAPTURED.length} of the original ${ORIGINAL_COUNT} are dated ${ORIGINAL_CAPTURE}, ${RECAPTURED.join(", ")} was re-captured on ${ADDED_CAPTURE}, and the additions are dated ${ADDED_CAPTURE}`);
 
 const names = sites.map((s) => s.name);
 const unique = (key) => new Set(sites.map((s) => s[key])).size === sites.length;
@@ -283,14 +290,14 @@ for (const f of onDisk) {
 check(badShotFormat.length === 0, `all previews are complete, non-trivial lossy VP8 WebP${list(badShotFormat)}`);
 // Re-captured from the live sites after the game restyles on 2026-10-18 (part of the original 41 captures).
 const REFRESHED_PREVIEWS = ["shared-canvas", "better-plume", "birdseye-arena"];
-const badRefreshed = REFRESHED_PREVIEWS.filter((name) => {
+const badRefreshed = [...REFRESHED_PREVIEWS, ...RECAPTURED].filter((name) => {
   const s = sites.find((x) => x.name === name);
   const file = join(ROOT, PREVIEW_DIR, `${name}.webp`);
   const size = existsSync(file) && webpSize(readFileSync(file));
   return !s || s.screenshot !== `${PREVIEW_DIR}/${name}.webp` || !size ||
     size.width !== PREVIEW_SIZE.width || size.height !== PREVIEW_SIZE.height;
 });
-check(badRefreshed.length === 0, `refreshed previews (${REFRESHED_PREVIEWS.join(", ")}) are referenced 1365×900 WebP${list(badRefreshed)}`);
+check(badRefreshed.length === 0, `refreshed previews (${[...REFRESHED_PREVIEWS, ...RECAPTURED].join(", ")}) are referenced 1365×900 WebP${list(badRefreshed)}`);
 // Per-entry capture dates: required on every entry, valid calendar dates, never after the snapshot.
 const validDay = (d) => typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d) && new Date(`${d}T00:00:00Z`).toISOString().startsWith(d);
 const badCapture = sites.filter((s) => !validDay(s.screenshotCapturedOn) || s.screenshotCapturedOn > SNAPSHOT || "capturedOn" in s).map((s) => s.name);
@@ -299,8 +306,13 @@ const wrongCapture = sites.filter((s, i) => s.screenshotCapturedOn !== EXPECTED_
 check(wrongCapture.length === 0, `capture dates match the expected per-entry dates${list(wrongCapture)}`);
 const originals = sites.filter((s) => !ADDED.includes(s.name));
 const additions = sites.filter((s) => ADDED.includes(s.name));
-check(originals.length === ORIGINAL_COUNT && originals.every((s) => s.screenshotCapturedOn === ORIGINAL_CAPTURE),
-  `all ${ORIGINAL_COUNT} original previews keep capture date ${ORIGINAL_CAPTURE}`);
+const kept = originals.filter((s) => !RECAPTURED.includes(s.name));
+const recaptured = originals.filter((s) => RECAPTURED.includes(s.name));
+check(originals.length === ORIGINAL_COUNT && kept.length === ORIGINAL_COUNT - RECAPTURED.length &&
+  kept.every((s) => s.screenshotCapturedOn === ORIGINAL_CAPTURE),
+  `${kept.length} of the ${ORIGINAL_COUNT} original previews keep capture date ${ORIGINAL_CAPTURE}`);
+check(recaptured.length === RECAPTURED.length && recaptured.every((s) => s.screenshotCapturedOn === ADDED_CAPTURE),
+  `the ${RECAPTURED.length} re-captured original preview (${RECAPTURED.join(", ")}) is dated ${ADDED_CAPTURE}`);
 check(additions.length === ADDED.length && additions.every((s) => s.screenshotCapturedOn === ADDED_CAPTURE),
   `the ${ADDED.length} added previews (${ADDED.join(", ")}) are dated ${ADDED_CAPTURE}`);
 
