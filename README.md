@@ -8,8 +8,8 @@ the gallery is ordered by *Recently created* (default), *Recently updated* or
 *Category*. Each tile is one link to the live site (screenshot included), with a
 separate *GitHub repo* link.
 
-> **Snapshot caveat:** `data/sites.json` is a static snapshot dated **2026-10-19**
-> (48 entries). It is not automatically synced. Membership means the repository is
+> **Snapshot caveat:** `data/sites.json` is a static snapshot dated **2026-10-20**
+> (49 entries). It is not automatically synced. Membership means the repository is
 > public and has GitHub Pages configured according to the authenticated GitHub Pages
 > API owner inventory — not that the page was reviewed or looks finished. The account
 > homepage is included; this directory's own repository is not.
@@ -20,8 +20,9 @@ separate *GitHub repo* link.
 > `bandwidth-compare` (one of the original 41) was re-captured on **2026-10-19**, and the
 > four added in this refresh were captured on **2026-10-19**, as were the two later
 > additions (`zfs-layout-lab`, `vram-fit-map`) and the final addition
-> (`display-decision-lab`) — 40 previews dated 2026-10-18,
-> 8 dated 2026-10-19, 48 in total. They are local static images, not
+> (`display-decision-lab`); the newest addition (`ups-topology-guide`) was captured on
+> **2026-10-20** — 40 previews dated 2026-10-18,
+> 8 dated 2026-10-19, 1 dated 2026-10-20, 49 in total. They are local static images, not
 > live views — the live sites may have changed since.
 >
 > **Notes on the 2026-10-19 additions:** `confluence-obsidian-quartz` answers HTTP 200
@@ -32,7 +33,9 @@ separate *GitHub repo* link.
 >
 > **Repository dates:** each entry's `createdAt` / `updatedAt` are the GitHub
 > repository `created_at` / `updated_at` values from the authenticated GitHub REST API
-> (one owner Pages inventory, retrieved 2026-10-19T21:46:15Z). They are
+> (one owner Pages inventory, retrieved 2026-10-20T01:28:53Z). Exception: `now` and
+> `images` keep the `updated_at` retrieved at 2026-10-19T21:46:15Z; the 2026-10-20
+> inventory reported newer values that were not applied. They are
 > repository metadata, not page-content dates — `updated_at` moves on any repository
 > update (pushes, settings, description). They are stored statically; the page makes
 > no GitHub API calls.
@@ -43,7 +46,7 @@ separate *GitHub repo* link.
 index.html              Page markup
 assets/styles.css       Warm editorial dark theme (Newsreader + JetBrains Mono)
 assets/app.js           Loads data/sites.json, renders the gallery, search, category dropdown + sort
-assets/previews/*.webp  48 local 1365×900 preview screenshots, capture date per entry
+assets/previews/*.webp  49 local 1365×900 preview screenshots, capture date per entry
 data/sites.json         The inventory (see below)
 tests/verify.mjs        Dependency-free checks
 ```
@@ -104,11 +107,11 @@ PLAYWRIGHT_MODULE=/path/to/node_modules/playwright REQUIRE_BROWSER=1 node tests/
 Without Playwright the browser stage prints `SKIP`; `REQUIRE_BROWSER=1` turns that
 into a failure.
 
-Checks include: exactly 48 unique entries (names, Pages URLs, repository URLs,
+Checks include: exactly 49 unique entries (names, Pages URLs, repository URLs,
 titles, screenshots); HTTPS-only links and correct repository URLs; no
 `github-pages-directory` self-entry; every repository in its expected primary
 category exactly once, with exactly the expected `alsoIn` secondary memberships; each screenshot path is relative and points at an existing 1365×900
-WebP with no orphans (all complete, non-blank lossy VP8), each entry's required `screenshotCapturedOn` (exact per entry: 2026-10-18 for 40 of the original 41, 2026-10-19 for the re-captured `bandwidth-compare`, the four additions, the two later additions and the final addition); relative asset paths; only the Google Fonts stylesheet as a
+WebP with no orphans (all complete, non-blank lossy VP8), each entry's required `screenshotCapturedOn` (exact per entry: 2026-10-18 for 40 of the original 41, 2026-10-19 for the re-captured `bandwidth-compare`, the four additions, the two later additions and the final addition, and 2026-10-20 for the newest addition `ups-topology-guide`); relative asset paths; only the Google Fonts stylesheet as a
 remote resource; no HTML-injection APIs; and accessibility basics (lang, landmarks,
 labelled search, category dropdown and checkbox group, alt text, focus styles, reduced motion,
 tap targets) plus the snapshot disclaimers in the meta description, footer and this README.
@@ -155,7 +158,7 @@ listed section; its card label names the primary category first. Category checkb
 section headers count every member, while the empty state counts unique sites. Currently every Art & 3D site is also in
 Personal & Portfolio.
 
-Display titles were written by hand, using the 2026-10-18 and 2026-10-19 scans' page
+Display titles were written by hand, using the 2026-10-18, 2026-10-19 and 2026-10-20 scans' page
 titles and headings only as hints. Scraped page text is never stored or rendered; the repo slug
 stays visible to tell apart pages with identical titles (e.g. the three Tetris builds
 and the personal-site versions).

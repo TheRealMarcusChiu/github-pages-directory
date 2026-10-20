@@ -1,18 +1,18 @@
 {
   "owner": "TheRealMarcusChiu",
-  "snapshotDate": "2026-10-19",
+  "snapshotDate": "2026-10-20",
   "description": "Static snapshot of TheRealMarcusChiu repositories with GitHub Pages enabled. Not automatically synced.",
   "screenshots": {
     "captureDatePolicy": "per-entry",
     "width": 1365,
     "height": 900,
     "format": "webp",
-    "note": "Viewport previews; each entry's screenshotCapturedOn is its capture date. 40 of the original 41 previews were captured on 2026-10-18; bandwidth-compare was re-captured on 2026-10-19; the four additions were captured on 2026-10-19; the two later additions (zfs-layout-lab, vram-fit-map) were captured on 2026-10-19; the final addition (display-decision-lab) was captured on 2026-10-19; 40 previews are dated 2026-10-18 and 8 are dated 2026-10-19; live sites may have changed since."
+    "note": "Viewport previews; each entry's screenshotCapturedOn is its capture date. 40 of the original 41 previews were captured on 2026-10-18; bandwidth-compare was re-captured on 2026-10-19; the four additions were captured on 2026-10-19; the two later additions (zfs-layout-lab, vram-fit-map) were captured on 2026-10-19; the final addition (display-decision-lab) was captured on 2026-10-19; the newest addition (ups-topology-guide) was captured on 2026-10-20; 40 previews are dated 2026-10-18, 8 are dated 2026-10-19 and 1 is dated 2026-10-20; live sites may have changed since."
   },
   "repositoryDates": {
     "source": "GitHub REST API repository created_at / updated_at (authenticated owner repo listing)",
-    "retrievedAt": "2026-10-19T21:46:15Z",
-    "note": "Repository metadata dates, not page-content dates. updated_at changes on any repository update (pushes, settings, metadata). Static; not automatically synced."
+    "retrievedAt": "2026-10-20T01:28:53Z",
+    "note": "Repository metadata dates, not page-content dates. updated_at changes on any repository update (pushes, settings, metadata). now and images keep the updated_at retrieved at 2026-10-19T21:46:15Z; the 2026-10-20 inventory reported newer values that were not applied. Static; not automatically synced."
   },
   "categories": [
     {
@@ -574,6 +574,17 @@
       "screenshotCapturedOn": "2026-10-19",
       "createdAt": "2026-10-19T21:16:15Z",
       "updatedAt": "2026-10-19T21:45:05Z"
+    },
+    {
+      "name": "ups-topology-guide",
+      "title": "UPS, visualized · UPS topology guide",
+      "category": "tech",
+      "url": "https://git.marcuschiu.com/ups-topology-guide/",
+      "repository": "https://github.com/TheRealMarcusChiu/ups-topology-guide",
+      "screenshot": "assets/previews/ups-topology-guide.webp",
+      "screenshotCapturedOn": "2026-10-20",
+      "createdAt": "2026-10-20T01:24:54Z",
+      "updatedAt": "2026-10-20T01:25:04Z"
     }
   ]
 }
