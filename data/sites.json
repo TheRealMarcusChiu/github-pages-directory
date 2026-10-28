@@ -12,7 +12,7 @@
   "repositoryDates": {
     "source": "GitHub REST API repository created_at / updated_at (authenticated owner repo listing)",
     "retrievedAt": "2026-10-28T00:50:50Z",
-    "note": "Repository metadata dates, not page-content dates. updated_at changes on any repository update (pushes, settings, metadata). Every entry except bit-atlas uses the 2026-10-28T00:50:50Z owner Pages inventory; bit-atlas uses a later lookup retrieved 2026-10-28T03:56:55Z. Static; not automatically synced."
+    "note": "Repository metadata dates, not page-content dates. updated_at changes on any repository update (pushes, settings, metadata). Every entry except bit-atlas uses the 2026-10-28T00:50:50Z owner Pages inventory; bit-atlas uses a later lookup retrieved 2026-10-28T04:42:51Z. Static; not automatically synced."
   },
   "categories": [
     {
@@ -639,7 +639,7 @@
       "screenshot": "assets/previews/bit-atlas.webp",
       "screenshotCapturedOn": "2026-10-28",
       "createdAt": "2026-10-28T00:25:22Z",
-      "updatedAt": "2026-10-28T03:53:27Z"
+      "updatedAt": "2026-10-28T04:41:29Z"
     }
   ]
 }

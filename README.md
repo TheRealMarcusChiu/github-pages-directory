@@ -41,7 +41,7 @@ separate *GitHub repo* link.
 > **Repository dates:** each entry's `createdAt` / `updatedAt` are the GitHub
 > repository `created_at` / `updated_at` values from the authenticated GitHub REST API
 > (one owner Pages inventory, retrieved 2026-10-28T00:50:50Z), applied to every entry
-> except `bit-atlas`, whose values come from a later lookup retrieved 2026-10-28T03:56:55Z.
+> except `bit-atlas`, whose values come from a later lookup retrieved 2026-10-28T04:42:51Z.
 > They are repository metadata, not page-content dates — `updated_at` moves on any repository
 > update (pushes, settings, description). They are stored statically; the page makes
 > no GitHub API calls.
