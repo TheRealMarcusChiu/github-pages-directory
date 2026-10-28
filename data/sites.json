@@ -11,8 +11,8 @@
   },
   "repositoryDates": {
     "source": "GitHub REST API repository created_at / updated_at (authenticated owner repo listing)",
-    "retrievedAt": "2026-10-28T00:42:13Z",
-    "note": "Repository metadata dates, not page-content dates. updated_at changes on any repository update (pushes, settings, metadata). Every entry uses the 2026-10-28T00:42:13Z owner Pages inventory. Static; not automatically synced."
+    "retrievedAt": "2026-10-28T00:50:50Z",
+    "note": "Repository metadata dates, not page-content dates. updated_at changes on any repository update (pushes, settings, metadata). Every entry uses the 2026-10-28T00:50:50Z owner Pages inventory. Static; not automatically synced."
   },
   "categories": [
     {
@@ -628,7 +628,7 @@
       "screenshot": "assets/previews/griefcase.webp",
       "screenshotCapturedOn": "2026-10-28",
       "createdAt": "2026-10-28T00:10:19Z",
-      "updatedAt": "2026-10-28T00:18:53Z"
+      "updatedAt": "2026-10-28T00:50:35Z"
     },
     {
       "name": "bit-atlas",

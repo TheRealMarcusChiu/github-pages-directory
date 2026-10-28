@@ -131,10 +131,10 @@ const EXPECTED_SITES = [
   ["inside-the-machine", "Inside the Machine · Computing Museum", "2026-10-20T05:39:29Z", "2026-10-20T05:44:02Z", "2026-10-20"],
   ["boba-passport", "Boba Passport · Tea Journal", "2026-10-20T18:54:33Z", "2026-10-20T18:54:42Z", "2026-10-20"],
   ["homelab-rack-atlas", "Homelab Rack Atlas · Interactive 3D Rack", "2026-10-21T03:06:45Z", "2026-10-21T03:06:55Z", "2026-10-21"],
-  ["Griefcase", "Griefcase", "2026-10-28T00:10:19Z", "2026-10-28T00:18:53Z", "2026-10-28"],
+  ["Griefcase", "Griefcase", "2026-10-28T00:10:19Z", "2026-10-28T00:50:35Z", "2026-10-28"],
   ["bit-atlas", "Bit Atlas", "2026-10-28T00:25:22Z", "2026-10-28T00:41:57Z", "2026-10-28"],
 ];
-const DATES_RETRIEVED = "2026-10-28T00:42:13Z";
+const DATES_RETRIEVED = "2026-10-28T00:50:50Z";
 // Earlier retrievals whose carried-forward updated_at values are gone now that every entry is refreshed.
 const STALE_RETRIEVALS = /2026-10-19T21:46:15Z|2026-10-20T01:28:53Z|carried forward|not applied/;
 const ISO_UTC = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
