@@ -132,9 +132,11 @@ const EXPECTED_SITES = [
   ["boba-passport", "Boba Passport · Tea Journal", "2026-10-20T18:54:33Z", "2026-10-20T18:54:42Z", "2026-10-20"],
   ["homelab-rack-atlas", "Homelab Rack Atlas · Interactive 3D Rack", "2026-10-21T03:06:45Z", "2026-10-21T03:06:55Z", "2026-10-21"],
   ["Griefcase", "Griefcase", "2026-10-28T00:10:19Z", "2026-10-28T00:50:35Z", "2026-10-28"],
-  ["bit-atlas", "Bit Atlas", "2026-10-28T00:25:22Z", "2026-10-28T00:41:57Z", "2026-10-28"],
+  ["bit-atlas", "Bit Atlas", "2026-10-28T00:25:22Z", "2026-10-28T03:53:27Z", "2026-10-28"],
 ];
 const DATES_RETRIEVED = "2026-10-28T00:50:50Z";
+// bit-atlas alone was refreshed after its redeploy; the rest still match DATES_RETRIEVED.
+const LATER_RETRIEVED = { "bit-atlas": "2026-10-28T03:56:55Z" };
 // Earlier retrievals whose carried-forward updated_at values are gone now that every entry is refreshed.
 const STALE_RETRIEVALS = /2026-10-19T21:46:15Z|2026-10-20T01:28:53Z|carried forward|not applied/;
 const ISO_UTC = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
@@ -231,13 +233,13 @@ const meta = data.repositoryDates ?? {};
 check(meta.retrievedAt === DATES_RETRIEVED && meta.retrievedAt.startsWith(SNAPSHOT) && /created_at/.test(meta.source ?? "") &&
   /updated_at/.test(meta.source ?? "") && /not page-content dates/i.test(meta.note ?? ""),
   "repositoryDates records the GitHub API source, retrieval time on the snapshot date, and that these are not page-content dates");
-check((meta.note ?? "").includes(DATES_RETRIEVED) && !STALE_RETRIEVALS.test(meta.note ?? ""),
-  `repositoryDates says every entry uses the ${DATES_RETRIEVED} inventory, with no carried-forward caveat`);
+check((meta.note ?? "").includes(DATES_RETRIEVED) && Object.values(LATER_RETRIEVED).every((t) => meta.note.includes(t)) && !STALE_RETRIEVALS.test(meta.note ?? ""),
+  `repositoryDates names the ${DATES_RETRIEVED} inventory and each later lookup, with no carried-forward caveat`);
 check(!("capturedOn" in meta) && !/screenshot|capture/i.test(meta.note ?? ""), "repositoryDates stays separate from preview capture dates");
 const validIso = (t) => typeof t === "string" && ISO_UTC.test(t) && new Date(t).toISOString() === t.replace("Z", ".000Z");
 const badStamps = sites.filter((s) => !validIso(s.createdAt) || !validIso(s.updatedAt)).map((s) => s.name);
 check(badStamps.length === 0, `all ${sites.length} entries have valid ISO 8601 UTC createdAt and updatedAt${list(badStamps)}`);
-const badRange = sites.filter((s) => !(s.createdAt <= s.updatedAt && s.updatedAt <= DATES_RETRIEVED)).map((s) => s.name);
+const badRange = sites.filter((s) => !(s.createdAt <= s.updatedAt && s.updatedAt <= (LATER_RETRIEVED[s.name] ?? DATES_RETRIEVED))).map((s) => s.name);
 check(badRange.length === 0, `createdAt ≤ updatedAt ≤ retrieval time for every entry${list(badRange)}`);
 const wrongStamps = sites.filter((s, i) => s.createdAt !== EXPECTED_SITES[i]?.[2] || s.updatedAt !== EXPECTED_SITES[i]?.[3]).map((s) => s.name);
 check(wrongStamps.length === 0, `repository dates match the values retrieved from the GitHub API${list(wrongStamps)}`);
