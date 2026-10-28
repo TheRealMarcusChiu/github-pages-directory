@@ -7,12 +7,12 @@
     "width": 1365,
     "height": 900,
     "format": "webp",
-    "note": "Viewport previews; each entry's screenshotCapturedOn is its capture date. 40 of the original 41 previews were captured on 2026-10-18; bandwidth-compare was re-captured on 2026-10-19; the four additions were captured on 2026-10-19; the two later additions (zfs-layout-lab, vram-fit-map) were captured on 2026-10-19; the final addition (display-decision-lab) was captured on 2026-10-19; the newest addition (ups-topology-guide) was captured on 2026-10-20; the latest additions (inside-the-machine, boba-passport) were captured on 2026-10-20; the most recent addition (homelab-rack-atlas) was captured on 2026-10-21; the current addition (Griefcase) was captured on 2026-10-28; 40 previews are dated 2026-10-18, 8 are dated 2026-10-19, 3 are dated 2026-10-20, 1 is dated 2026-10-21 and 1 is dated 2026-10-28; live sites may have changed since."
+    "note": "Viewport previews; each entry's screenshotCapturedOn is its capture date. 40 of the original 41 previews were captured on 2026-10-18; bandwidth-compare was re-captured on 2026-10-19; the four additions were captured on 2026-10-19; the two later additions (zfs-layout-lab, vram-fit-map) were captured on 2026-10-19; the final addition (display-decision-lab) was captured on 2026-10-19; the newest addition (ups-topology-guide) was captured on 2026-10-20; the latest additions (inside-the-machine, boba-passport) were captured on 2026-10-20; the most recent addition (homelab-rack-atlas) was captured on 2026-10-21; the current additions (Griefcase, bit-atlas) were captured on 2026-10-28; 40 previews are dated 2026-10-18, 8 are dated 2026-10-19, 3 are dated 2026-10-20, 1 is dated 2026-10-21 and 2 are dated 2026-10-28; live sites may have changed since."
   },
   "repositoryDates": {
     "source": "GitHub REST API repository created_at / updated_at (authenticated owner repo listing)",
-    "retrievedAt": "2026-10-28T00:19:09Z",
-    "note": "Repository metadata dates, not page-content dates. updated_at changes on any repository update (pushes, settings, metadata). Every entry uses the 2026-10-28T00:19:09Z owner Pages inventory. Static; not automatically synced."
+    "retrievedAt": "2026-10-28T00:42:13Z",
+    "note": "Repository metadata dates, not page-content dates. updated_at changes on any repository update (pushes, settings, metadata). Every entry uses the 2026-10-28T00:42:13Z owner Pages inventory. Static; not automatically synced."
   },
   "categories": [
     {
@@ -629,6 +629,17 @@
       "screenshotCapturedOn": "2026-10-28",
       "createdAt": "2026-10-28T00:10:19Z",
       "updatedAt": "2026-10-28T00:18:53Z"
+    },
+    {
+      "name": "bit-atlas",
+      "title": "Bit Atlas",
+      "category": "tech",
+      "url": "https://git.marcuschiu.com/bit-atlas/",
+      "repository": "https://github.com/TheRealMarcusChiu/bit-atlas",
+      "screenshot": "assets/previews/bit-atlas.webp",
+      "screenshotCapturedOn": "2026-10-28",
+      "createdAt": "2026-10-28T00:25:22Z",
+      "updatedAt": "2026-10-28T00:41:57Z"
     }
   ]
 }
