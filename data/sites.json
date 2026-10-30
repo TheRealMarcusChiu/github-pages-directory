@@ -1,18 +1,18 @@
 {
   "owner": "TheRealMarcusChiu",
-  "snapshotDate": "2026-10-28",
+  "snapshotDate": "2026-10-30",
   "description": "Static snapshot of TheRealMarcusChiu repositories with GitHub Pages enabled. Not automatically synced.",
   "screenshots": {
     "captureDatePolicy": "per-entry",
     "width": 1365,
     "height": 900,
     "format": "webp",
-    "note": "Viewport previews; each entry's screenshotCapturedOn is its capture date. 40 of the original 41 previews were captured on 2026-10-18; bandwidth-compare was re-captured on 2026-10-19; the four additions were captured on 2026-10-19; the two later additions (zfs-layout-lab, vram-fit-map) were captured on 2026-10-19; the final addition (display-decision-lab) was captured on 2026-10-19; the newest addition (ups-topology-guide) was captured on 2026-10-20; the latest additions (inside-the-machine, boba-passport) were captured on 2026-10-20; the most recent addition (homelab-rack-atlas) was captured on 2026-10-21; the current additions (Griefcase, bit-atlas) were captured on 2026-10-28; 40 previews are dated 2026-10-18, 8 are dated 2026-10-19, 3 are dated 2026-10-20, 1 is dated 2026-10-21 and 2 are dated 2026-10-28; live sites may have changed since."
+    "note": "Viewport previews; each entry's screenshotCapturedOn is its capture date. 40 of the original 41 previews were captured on 2026-10-18; bandwidth-compare was re-captured on 2026-10-19; the four additions were captured on 2026-10-19; the two later additions (zfs-layout-lab, vram-fit-map) were captured on 2026-10-19; the final addition (display-decision-lab) was captured on 2026-10-19; the newest addition (ups-topology-guide) was captured on 2026-10-20; the latest additions (inside-the-machine, boba-passport) were captured on 2026-10-20; the most recent addition (homelab-rack-atlas) was captured on 2026-10-21; the current additions (Griefcase, bit-atlas) were captured on 2026-10-28; Griefcase was re-captured on 2026-10-30; the 2026-10-30 addition (inside-neural-engine) was captured on 2026-10-30; 40 previews are dated 2026-10-18, 8 are dated 2026-10-19, 3 are dated 2026-10-20, 1 is dated 2026-10-21, 1 is dated 2026-10-28 and 2 are dated 2026-10-30; live sites may have changed since."
   },
   "repositoryDates": {
     "source": "GitHub REST API repository created_at / updated_at (authenticated owner repo listing)",
-    "retrievedAt": "2026-10-28T00:50:50Z",
-    "note": "Repository metadata dates, not page-content dates. updated_at changes on any repository update (pushes, settings, metadata). Every entry except bit-atlas uses the 2026-10-28T00:50:50Z owner Pages inventory; bit-atlas uses a later lookup retrieved 2026-10-28T04:42:51Z. Static; not automatically synced."
+    "retrievedAt": "2026-10-30T03:36:12.974716+00:00",
+    "note": "Repository metadata dates, not page-content dates. updated_at changes on any repository update (pushes, settings, metadata). Every entry uses the 2026-10-30T03:36:12.974716+00:00 owner Pages inventory. Static; not automatically synced."
   },
   "categories": [
     {
@@ -109,7 +109,7 @@
       "screenshot": "assets/previews/now.webp",
       "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-07-01T21:51:17Z",
-      "updatedAt": "2026-10-28T00:01:32Z"
+      "updatedAt": "2026-10-30T03:33:42Z"
     },
     {
       "name": "workouts",
@@ -485,7 +485,7 @@
       "screenshot": "assets/previews/images.webp",
       "screenshotCapturedOn": "2026-10-18",
       "createdAt": "2026-06-08T19:32:30Z",
-      "updatedAt": "2026-10-27T05:03:53Z"
+      "updatedAt": "2026-10-30T03:09:42Z"
     },
     {
       "name": "shazaam",
@@ -621,14 +621,14 @@
     },
     {
       "name": "Griefcase",
-      "title": "Griefcase",
+      "title": "greifcase",
       "category": "writing",
       "url": "https://git.marcuschiu.com/Griefcase/",
       "repository": "https://github.com/TheRealMarcusChiu/Griefcase",
       "screenshot": "assets/previews/griefcase.webp",
-      "screenshotCapturedOn": "2026-10-28",
+      "screenshotCapturedOn": "2026-10-30",
       "createdAt": "2026-10-28T00:10:19Z",
-      "updatedAt": "2026-10-28T00:50:35Z"
+      "updatedAt": "2026-10-30T03:25:00Z"
     },
     {
       "name": "bit-atlas",
@@ -640,6 +640,17 @@
       "screenshotCapturedOn": "2026-10-28",
       "createdAt": "2026-10-28T00:25:22Z",
       "updatedAt": "2026-10-28T04:41:29Z"
+    },
+    {
+      "name": "inside-neural-engine",
+      "title": "Inside the Neural Engine",
+      "category": "tech",
+      "url": "https://git.marcuschiu.com/inside-neural-engine/",
+      "repository": "https://github.com/TheRealMarcusChiu/inside-neural-engine",
+      "screenshot": "assets/previews/inside-neural-engine.webp",
+      "screenshotCapturedOn": "2026-10-30",
+      "createdAt": "2026-10-30T02:52:50Z",
+      "updatedAt": "2026-10-30T03:34:07Z"
     }
   ]
 }
