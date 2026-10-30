@@ -255,7 +255,8 @@ async function journey(browser, spec, exp) {
         });
         assert.ok(geo.pageOver <= 0, `page overflows by ${geo.pageOver}px`);
         assert.deepEqual(geo.wide, [], "dialog panel content overflows horizontally");
-        assert.ok(geo.close[0] >= 44 && geo.close[1] >= 44 && geo.close[2], `close button ${geo.close}`);
+        // 44 CSS px target; 0.01 px slack absorbs layout float quantization (43.999996), still rejects 43.9.
+        assert.ok(geo.close[0] >= 44 - 0.01 && geo.close[1] >= 44 - 0.01 && geo.close[2], `close button ${geo.close}`);
         assert.equal(geo.closeName, "Close details");
         assert.equal(geo.closeType, "button");
         assert.ok(geo.titleVisible, "dialog header title hidden");
