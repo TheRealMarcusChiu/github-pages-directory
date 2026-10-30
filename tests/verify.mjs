@@ -518,17 +518,36 @@ check(/width: "1365"/.test(js) && /height: "900"/.test(js), "screenshots have in
 check(/const EAGER_IMAGES = 3;/.test(js) && /loading: shotCount\+\+ < EAGER_IMAGES \? "eager" : "lazy"/.test(js) &&
   (js.match(/loading:/g) ?? []).length === 1 && (js.match(/shotCount = 0/g) ?? []).length === 1,
   "first three screenshots load eagerly; all others are lazy-loaded");
-check(/alt: `Preview screenshot of \$\{site\.title\} \(\$\{site\.name\}\)\$\{captured \? `, captured \$\{captured\}` : ""\}`/.test(js) &&
-  /const captured = longDate\(site\.screenshotCapturedOn\)/.test(js),
-  "screenshots get meaningful alt text (title + repo + that entry's capture date)");
+check(/`Preview screenshot of \$\{site\.title\} \(\$\{site\.name\}\)\$\{captured \? `, captured \$\{captured\}` : ""\}`/.test(js) &&
+  /const captured = longDate\(site\.screenshotCapturedOn\)/.test(js) && (js.match(/alt: previewAlt\(site\)/g) ?? []).length === 2,
+  "tile and dialog screenshots get meaningful alt text (title + repo + that entry's capture date)");
 check(!/(?:1[89]|2[018]|30) October 2026|2026-10-(?:1[89]|2[018]|30)/.test(js), "app.js has no hard-coded global screenshot/snapshot date");
-check(/el\("span", \{ class: "card-capture" \}/.test(js) && /text: "Preview"/.test(js) &&
+check(/<dt>Preview<\/dt>\s*<dd id="details-capture"><\/dd>/.test(html) && /replaceChildren\(\.\.\.renderCapture\(site\)\)/.test(js) &&
   /datetime: site\.screenshotCapturedOn/.test(js) && /CAPTURE_DATE\.exec/.test(js),
-  "each card shows its validated per-entry preview capture date in a separate Preview line");
-check(/el\("a", \{ class: "card-main", href: site\.url, "aria-labelledby": `\$\{titleId\} \$\{hostId\}` \}, children\)/.test(js) &&
-  /el\("a", \{ class: "card-link card-repo", href: site\.repository, "aria-label": `GitHub repo: \$\{site\.name\}`/.test(js),
-  "each tile is one site link (screenshot + text) with a sibling GitHub repository link");
-check(!/Visit site|Visit website|href: site\.screenshot/.test(js + html), "no “Visit site” link and no screenshot-file link");
+  "the details dialog shows the validated per-entry preview capture date in a separate Preview row");
+check(/el\("button", \{\s*type: "button", class: "card-main", "aria-haspopup": "dialog", "aria-controls": "site-details", "aria-label": site\.title,\s*\}, children\)/.test(js) &&
+  /el\("h3", \{ class: "card-heading" \}, \[button\]\)/.test(js) && /el\("span", \{ class: "card-title", text: site\.title \}\)/.test(js),
+  "each tile is one dialog button (screenshot + category + title) inside its h3; no h3 inside the button");
+check(!/el\("a"|card-repo|card-slug|card-dates|card-capture|card-link/.test(js) && !/\.card-(?:repo|slug|dates?|capture|link)\b/.test(css),
+  "collapsed tiles render no anchors, repo slug, dates or capture line (and no leftover styles for them)");
+const dialogs = html.match(/<dialog\b[^>]*>/g) ?? [];
+const dialogHtml = html.match(/<dialog[\s\S]*?<\/dialog>/)?.[0] ?? "";
+check(dialogs.length === 1 && /^<dialog id="site-details" class="details" aria-labelledby="details-title">$/.test(dialogs[0]) &&
+  /<button type="button" id="details-close" class="details-close" aria-label="Close details">/.test(dialogHtml) &&
+  ["details-title", "details-category", "details-repo-name", "details-host", "details-site-link", "details-repo-link", "details-dates", "details-capture"]
+    .every((id) => (html.match(new RegExp(`id="${id}"`, "g")) ?? []).length === 1 && dialogHtml.includes(`id="${id}"`)) &&
+  /<h2 id="details-title"/.test(dialogHtml) && !/<main[\s\S]*<dialog[\s\S]*<\/main>/.test(html),
+  "index.html has exactly one labelled details <dialog> (outside <main>) with a real close button and every details field");
+check(/<a id="details-site-link" class="details-link">Visit website<\/a>/.test(dialogHtml) &&
+  /<a id="details-repo-link" class="details-link">GitHub repo<\/a>/.test(dialogHtml) &&
+  !/Visit site|href: site\.screenshot/.test(js + html) && (html.match(/Visit website/g) ?? []).length === 1,
+  "“Visit website” appears only once, as the dialog's site link; no screenshot-file link");
+check(/details\.showModal\(\)/.test(js) && !/\bdetails\.show\(\)|inert/.test(js) &&
+  /opener\?\.focus\(\{ preventScroll: true \}\)/.test(js) && /e\.key !== "\/"[^\n]*details\.open\) return;/.test(js),
+  "dialog opens modally (native inert/focus trap), restores focus without scrolling, and “/” is ignored while it is open");
+check(/setLink\(detailsSiteLink, site\.url\)/.test(js) && /setLink\(detailsRepoLink, site\.repository\)/.test(js) &&
+  /function setLink\(a, url\) \{\s*if \(isHttps\(url\)\) a\.setAttribute\("href", url\);/.test(js),
+  "dialog links are only set from validated HTTPS source URLs");
 check(/site\.name\} \$\{site\.title\} \$\{category\.label\}/.test(js), "search covers repo name, title and category");
 check(/inCategory && terms\.every/.test(js), "search and category filter combine (AND)");
 check(/data\.sites\.filter\(\(s\) => isMember\(s, category\.id\)\)/.test(js) &&
@@ -554,8 +573,11 @@ check(/"Newsreader", Georgia/.test(css) && /"JetBrains Mono", ui-monospace/.test
 check(/prefers-reduced-motion/.test(css), "styles respect prefers-reduced-motion");
 check(/:focus-visible/.test(css), "styles define visible focus states");
 check(/minmax\(min\(100%,/.test(css), "card grid collapses without overflow on narrow screens");
-check(/\.card-capture \{[^}]*color: var\(--muted\)/.test(css) && /\.card-capture time \{[^}]*color: var\(--muted\)/.test(css) &&
-  !/data-sort[^{]*\.card-capture/.test(css), "preview capture line is subtle muted text, never highlighted as a sort date");
+check(/#details-capture time \{[^}]*color: var\(--muted\)/.test(css) && !/data-sort/.test(css),
+  "preview capture date is subtle muted text, never highlighted as a sort date");
+check(/html:has\(\.details\[open\]\) \{ overflow: hidden;/.test(css) && /\.details-close \{[^}]*width: 2\.75rem;[^}]*height: 2\.75rem;/.test(css) &&
+  /\.details-scroll \{[^}]*overflow-y: auto;/.test(css) && /\.details::backdrop/.test(css),
+  "dialog locks background scroll, scrolls its own content and has a 44px close button");
 check(/--tap:\s*2\.75rem/.test(css) && /min-height: var\(--tap\)/.test(css), "controls and links have comfortable tap targets");
 
 // README
@@ -615,17 +637,23 @@ const EXPECTED_ORDER = { updated: recentOrder("updatedAt", "createdAt"), created
 const labelOf = new Map(categories.map((c) => [c.id, c.label]));
 const membersOf = (id) => sites.filter((s) => isMember(s, id)).map((s) => s.name);
 
-// Visible cards in DOM order: [section id, repo name, category label, created datetime, updated datetime].
+// Visible cards in DOM order: [section id, repo name, category label, screenshot alt]. Collapsed tiles show only
+// the image, category and title, so the repo name comes from the (unique) title.
+const siteOf = (name) => sites.find((s) => s.name === name);
+const nameOfTitle = new Map(sites.map((s) => [s.title, s.name]));
 const visibleCards = (page) => page.$$eval(".section:not([hidden]) .card:not([hidden])", (cards) => cards.map((li) => [
   li.closest(".section").getAttribute("aria-labelledby"),
-  li.querySelector(".card-slug code").textContent,
+  li.querySelector(".card-title").textContent,
   li.querySelector(".card-category").textContent,
-  li.querySelector(".date-created time")?.getAttribute("datetime"),
-  li.querySelector(".date-updated time")?.getAttribute("datetime"),
-  li.querySelector(".card-capture time")?.getAttribute("datetime"),
-  li.querySelector(".card-capture")?.textContent,
   li.querySelector(".shot img")?.getAttribute("alt"),
-]));
+])).then((rows) => rows.map(([section, title, ...rest]) => [section, nameOfTitle.get(title) ?? `?${title}`, ...rest]));
+// Exact text the tile and the dialog use for a site's categories: primary first, then any secondary ones.
+const categoryTextOf = (s) => {
+  const labels = [s.category, ...alsoInOf(s)].map((id) => labelOf.get(id));
+  return labels.length > 1 ? `${labels[0]} · also ${labels.slice(1).join(", ")}` : labels[0];
+};
+// "D Month YYYY" in UTC, computed independently of app.js.
+const longDay = (iso) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 const uniqueNames = (cards) => [...new Set(cards.map((c) => c[1]))];
 const isDescending = (values) => values.every((v, i) => i === 0 || values[i - 1] >= v);
 
@@ -711,6 +739,247 @@ async function minimalHeaderAndFields(page, tag) {
   await page.locator("#filter").blur();
 }
 
+// Everything the open details dialog shows, plus focus, scroll and layout facts.
+const dialogState = (page) => page.evaluate(() => {
+  const d = document.getElementById("site-details");
+  const q = (id) => document.getElementById(id);
+  const img = q("details-image");
+  const scroll = d.querySelector(".details-scroll");
+  const box = d.getBoundingClientRect();
+  const close = q("details-close").getBoundingClientRect();
+  const times = (id) => [...q(id).querySelectorAll("time")].map((t) => t.getAttribute("datetime"));
+  return {
+    open: d.open, modal: d.matches(":modal"), dialogs: document.querySelectorAll("dialog").length,
+    title: q("details-title").textContent, category: q("details-category").textContent,
+    src: img?.getAttribute("src"), alt: img?.getAttribute("alt"), size: img && `${img.getAttribute("width")}x${img.getAttribute("height")}`,
+    images: d.querySelectorAll("img").length,
+    repoName: q("details-repo-name").textContent, host: q("details-host").textContent,
+    siteHref: q("details-site-link").getAttribute("href"), siteText: q("details-site-link").textContent,
+    repoHref: q("details-repo-link").getAttribute("href"), repoText: q("details-repo-link").textContent,
+    dates: times("details-dates"), datesText: q("details-dates").textContent,
+    capture: times("details-capture"), captureText: q("details-capture").textContent,
+    active: document.activeElement?.id,
+    fits: box.left >= 0 && box.top >= 0 && box.right <= innerWidth && box.bottom <= innerHeight,
+    hOverflow: scroll.scrollWidth - scroll.clientWidth,
+    closeSize: [Math.round(close.width), Math.round(close.height)],
+    closeVisible: close.top >= 0 && close.right <= innerWidth,
+    scrollY: window.scrollY,
+  };
+});
+const isOpen = (page) => page.$eval("#site-details", (d) => d.open);
+const isFocused = (locator) => locator.evaluate((n) => n === document.activeElement);
+
+// Every way the expected dialog content for `s` can be wrong (empty when it is right).
+function detailsProblems(d, s) {
+  const long = LONG_DATE[s.screenshotCapturedOn];
+  return Object.entries({
+    open: d.open && d.modal && d.dialogs === 1,
+    focus: d.active === "details-close",
+    title: d.title === s.title,
+    category: d.category === categoryTextOf(s),
+    image: d.images === 1 && d.src === s.screenshot && d.size === "1365x900" &&
+      d.alt === `Preview screenshot of ${s.title} (${s.name}), captured ${long}`,
+    repo: d.repoName === s.name && d.repoHref === s.repository && d.repoText === "GitHub repo",
+    site: d.host === s.url && d.siteHref === s.url && d.siteText === "Visit website",
+    dates: JSON.stringify(d.dates) === JSON.stringify([s.createdAt, s.updatedAt]) &&
+      d.datesText === `created ${longDay(s.createdAt)} · updated ${longDay(s.updatedAt)}`,
+    capture: JSON.stringify(d.capture) === JSON.stringify([s.screenshotCapturedOn]) && d.captureText === `${long} · static viewport capture`,
+    layout: d.fits && d.hOverflow <= 0 && d.closeSize[0] >= 44 && d.closeSize[1] >= 44 && d.closeVisible,
+  }).filter(([, ok]) => !ok).map(([k]) => k);
+}
+
+// Collapsed tiles (image + category + title in one dialog button) and the details dialog they open.
+async function exerciseTiles(page, tag) {
+  const touch = await page.evaluate(() => navigator.maxTouchPoints > 0);
+  const press = (locator) => (touch ? locator.tap() : locator.click());
+  const select = page.getByLabel("Sort by", { exact: true });
+  await select.selectOption("created");
+
+  // Structure: the h3 wraps one phrasing-only button; the card holds nothing but category and title text.
+  const structure = await page.$$eval(".card", (cards) => cards.map((li) => {
+    const mains = li.querySelectorAll(".card-main");
+    const b = mains[0];
+    const category = li.querySelector(".card-category")?.textContent ?? "";
+    const title = li.querySelector(".card-title")?.textContent ?? "";
+    return {
+      title,
+      ok: mains.length === 1 && b.tagName === "BUTTON" && b.type === "button" &&
+        b.getAttribute("aria-haspopup") === "dialog" && b.getAttribute("aria-controls") === "site-details" &&
+        b.getAttribute("aria-label") === title && b.parentElement.matches("h3.card-heading") &&
+        b.parentElement.parentElement.matches("article.card-inner") &&
+        [...b.querySelectorAll("*")].every((n) => n.tagName === "SPAN" || n.tagName === "IMG") &&
+        !!b.querySelector(".shot img") &&
+        [...li.querySelector(".card-body").children].map((n) => n.className).join() === "card-category,card-title" &&
+        li.querySelectorAll("a, code, time, .card-repo, .card-slug, .card-dates, .card-capture, .card-link").length === 0 &&
+        li.textContent === category + title,
+    };
+  }));
+  const badTiles = structure.filter((t) => !t.ok).map((t) => t.title);
+  check(structure.length === EXPECTED_COUNT * 2 + SECONDARY_COUNT && badTiles.length === 0,
+    tag(`every tile: one h3-wrapped dialog button around image, category and title; no links, slug, dates or capture line${list(badTiles)}`));
+  const first = siteOf(EXPECTED_ORDER.created[0]);
+  check(await page.getByRole("button", { name: first.title, exact: true }).filter({ visible: true }).count() === 1 &&
+    await page.getByRole("heading", { level: 3, name: first.title, exact: true }).filter({ visible: true }).count() === 1 &&
+    await page.getByRole("link").filter({ visible: true }).count() === 2,
+    tag("tile buttons are named by the title, keep h3 heading navigation, and the page shows no tile links (only skip + footer)"));
+
+  // Category and title keep their previous computed styles.
+  const styles = await page.locator(".card-main:visible").first().evaluate((b) => {
+    const pick = (n, keys) => Object.fromEntries(keys.map((k) => [k, getComputedStyle(n)[k]]));
+    const keys = ["color", "fontFamily", "fontSize", "fontWeight", "fontStyle", "letterSpacing", "lineHeight", "textTransform", "textAlign", "display", "marginBottom"];
+    return { category: pick(b.querySelector(".card-category"), keys), title: pick(b.querySelector(".card-title"), keys),
+      body: getComputedStyle(b.querySelector(".card-body")).padding };
+  });
+  const MONO = '"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+  const SERIF = 'Newsreader, Georgia, "Times New Roman", serif';
+  const wantStyles = {
+    category: { color: "rgb(216, 169, 66)", fontFamily: MONO, fontSize: "10px", fontWeight: "500", fontStyle: "normal", letterSpacing: "1.4px",
+      lineHeight: "16.5px", textTransform: "uppercase", textAlign: "start", display: "block", marginBottom: "6.4px" },
+    title: { color: "rgb(236, 225, 207)", fontFamily: SERIF, fontSize: "22px", fontWeight: "500", fontStyle: "normal", letterSpacing: "normal",
+      lineHeight: "26.4px", textTransform: "none", textAlign: "start", display: "block", marginBottom: "0px" },
+    body: "16px 17.6px 0px",
+  };
+  check(JSON.stringify(styles) === JSON.stringify(wantStyles), tag(`category and title keep their computed styles (${JSON.stringify(styles)})`));
+
+  // Hit-testing: the image, corners and body of a tile all land on its one button.
+  const buttons = page.locator("#cat-all-sites + ul .card-main:visible");
+  const card = page.locator("#cat-all-sites + ul .card:not([hidden])").first();
+  await card.scrollIntoViewIfNeeded();
+  const box = await card.boundingBox();
+  const imgBox = await card.locator(".shot img").boundingBox();
+  const hitAt = (x, y) => page.evaluate(([px, py]) =>
+    document.elementFromPoint(px, py)?.closest(".card-main") === document.querySelector("#cat-all-sites + ul .card:not([hidden]) .card-main"), [x, y]);
+  const hits = {
+    image: await hitAt(imgBox.x + imgBox.width / 2, imgBox.y + imgBox.height / 2),
+    topLeft: await hitAt(box.x + 3, box.y + 3),
+    bottomRight: await hitAt(box.x + box.width - 3, box.y + box.height - 3),
+    bottomLeft: await hitAt(box.x + 3, box.y + box.height - 3),
+    body: await hitAt(box.x + box.width / 2, box.y + box.height * 0.85),
+  };
+  const misses = Object.entries(hits).filter(([, v]) => !v).map(([k]) => k);
+  check(misses.length === 0, tag(`image, corners and body all hit the tile button${list(misses)}`));
+
+  // Every one of the 55 tiles opens the one dialog with exactly its own data; closing returns focus to it.
+  const wrongDetails = [];
+  const count = await buttons.count();
+  for (let i = 0; i < count; i++) {
+    const b = buttons.nth(i);
+    const s = siteOf(EXPECTED_ORDER.created[i]);
+    await press(b);
+    const problems = detailsProblems(await dialogState(page), s);
+    await page.keyboard.press("Escape");
+    if (await isOpen(page)) problems.push("Esc");
+    if (!(await isFocused(b))) problems.push("focus-restore");
+    if (problems.length) wrongDetails.push(`${s.name}: ${problems.join("/")}`);
+  }
+  check(count === EXPECTED_COUNT && wrongDetails.length === 0,
+    tag(`all ${EXPECTED_COUNT} tiles open the dialog with their own title, categories, image, URL, repo, dates and capture date; Esc closes and refocuses the tile${list(wrongDetails)}`));
+  await press(buttons.first());
+  check(await page.$eval("#details-image", (img) => img.decode().then(() => img.naturalWidth === 1365 && img.naturalHeight === 900)),
+    tag("the dialog image is the original 1365×900 preview"));
+  await page.keyboard.press("Escape");
+
+  // Real clicks on the screenshot and the tile background open it; the close button closes it.
+  await buttons.first().locator(".shot img").click();
+  check(await isOpen(page) && (await dialogState(page)).title === first.title, tag("clicking the screenshot opens the details dialog"));
+  await page.click("#details-close");
+  check(!(await isOpen(page)) && await isFocused(buttons.first()), tag("the Close details button closes the dialog and refocuses the tile"));
+  await buttons.first().click({ position: { x: box.width - 4, y: box.height - 4 } });
+  check(await isOpen(page), tag("clicking the tile background opens the details dialog"));
+  check(await page.getByRole("dialog", { name: first.title, exact: true }).count() === 1 &&
+    await page.getByRole("button", { name: "Close details", exact: true }).count() === 1 &&
+    await page.getByRole("link", { name: "Visit website", exact: true }).count() === 1 &&
+    await page.getByRole("link", { name: "GitHub repo", exact: true }).count() === 1,
+    tag("dialog is named by the site title, with Close details, Visit website and GitHub repo controls"));
+
+  // Clicking content stays open; a real backdrop click/tap closes.
+  await page.click("#details-title");
+  check(await isOpen(page), tag("clicking inside the dialog content does not close it"));
+  if (touch) await page.touchscreen.tap(2, 2); else await page.mouse.click(2, 2);
+  check(!(await isOpen(page)) && await isFocused(buttons.first()), tag("a backdrop click closes the dialog and refocuses the tile"));
+
+  // Keyboard: Enter and Space open; focus is trapped in the dialog; the page behind is inert; "/" does nothing.
+  await buttons.first().focus();
+  await page.keyboard.press("Enter");
+  check(await isOpen(page) && (await dialogState(page)).active === "details-close", tag("keyboard: Enter opens the dialog with focus on Close details"));
+  await page.keyboard.press("Tab");
+  const tab1 = await activeId(page);
+  await page.keyboard.press("Tab");
+  const tab2 = await activeId(page);
+  check(tab1 === "details-site-link" && tab2 === "details-repo-link", tag(`keyboard: Tab moves through the dialog links (${tab1}, ${tab2})`));
+  await page.keyboard.press("/");
+  check(await isOpen(page) && await activeId(page) === "details-repo-link", tag("keyboard: “/” does not steal focus while the dialog is open"));
+  const inert = await page.evaluate(() => {
+    document.getElementById("filter").focus();
+    const sort = document.getElementById("sort").getBoundingClientRect();
+    const hit = document.elementFromPoint(sort.left + 5, sort.top + 5);
+    return document.activeElement?.id !== "filter" && !hit?.closest("search, main");
+  });
+  check(inert, tag("the filters behind the open dialog cannot be focused or clicked"));
+  await page.keyboard.press("Escape");
+  check(!(await isOpen(page)) && await isFocused(buttons.first()), tag("keyboard: Esc closes and returns focus to the tile"));
+  await buttons.nth(1).focus();
+  await page.keyboard.press("Space");
+  check(await isOpen(page) && (await dialogState(page)).title === siteOf(EXPECTED_ORDER.created[1]).title,
+    tag("keyboard: Space opens the focused tile's dialog"));
+  await page.keyboard.press("Escape");
+  // Native Esc fires the dialog's `close` event (which restores focus) one task later; let it run before tabbing
+  // (sub-millisecond, only reachable by automation).
+  await page.waitForTimeout(50);
+  const restored = await isFocused(buttons.nth(1));
+  await page.keyboard.press("Tab");
+  check(restored && await isFocused(buttons.nth(2)),
+    tag(`keyboard: Tab goes from one tile straight to the next (now on ${await page.evaluate(() => document.activeElement?.getAttribute("aria-label") ?? document.activeElement?.tagName)})`));
+
+  // Background scroll is locked while open; closing keeps scroll position, sort, categories and search.
+  await select.selectOption("category");
+  await pickCategories(page, ["tech"]);
+  await page.fill("#filter", "a");
+  const shown = page.locator(".card-main:visible");
+  const target = shown.nth(8);
+  await target.scrollIntoViewIfNeeded();
+  const before = await page.evaluate(() => [window.scrollY, document.getElementById("filter").value, document.getElementById("sort").value,
+    document.getElementById("category-summary").textContent, document.querySelectorAll(".card:not([hidden])").length]);
+  await press(target);
+  await page.mouse.wheel(0, 800);
+  await page.waitForTimeout(300);
+  const during = await dialogState(page);
+  await page.click("#details-close");
+  const after = await page.evaluate(() => [window.scrollY, document.getElementById("filter").value, document.getElementById("sort").value,
+    document.getElementById("category-summary").textContent, document.querySelectorAll(".card:not([hidden])").length]);
+  check(before[0] > 0 && during.open && during.scrollY === before[0] && JSON.stringify(after) === JSON.stringify(before) && await isFocused(target),
+    tag(`background does not scroll while open; closing keeps scroll, sort, category, search and refocuses the tile (${before} → ${during.scrollY} → ${after})`));
+
+  // The dialog scrolls on its own so the bottom link is reachable on small screens.
+  await press(target);
+  const reach = await page.evaluate(() => {
+    const d = document.getElementById("site-details");
+    const scroll = d.querySelector(".details-scroll");
+    scroll.scrollTop = scroll.scrollHeight;
+    const link = document.getElementById("details-repo-link").getBoundingClientRect();
+    const close = document.getElementById("details-close").getBoundingClientRect();
+    return link.bottom <= innerHeight && link.top >= 0 && close.top >= 0 && close.bottom <= innerHeight;
+  });
+  check(reach, tag("with the dialog scrolled to the end, its links and close button stay on screen"));
+  await page.keyboard.press("Escape");
+  await page.fill("#filter", "");
+  await pickCategories(page, []);
+  await select.selectOption("created");
+
+  // The dialog links are ordinary links that navigate (answered locally by the route handler).
+  const goAndBack = async (id, target) => {
+    await press(buttons.first());
+    await Promise.all([page.waitForURL(target), page.click(id)]);
+    const ok = page.url() === target;
+    await page.goBack();
+    await page.waitForSelector(".card");
+    if (await isOpen(page)) await page.keyboard.press("Escape");
+    return ok;
+  };
+  check(await goAndBack("#details-site-link", first.url), tag("Visit website navigates to the site"));
+  check(await goAndBack("#details-repo-link", first.repository), tag("GitHub repo navigates to the repository"));
+}
+
 async function exercise(page, label) {
   const tag = (m) => `[${label}] ${m}`;
   await page.waitForSelector(".card");
@@ -723,36 +992,30 @@ async function exercise(page, label) {
 
   // Default view, before touching anything: created_at descending.
   const initial = await visibleCards(page);
-  check(JSON.stringify(initial.map((c) => c[1])) === JSON.stringify(EXPECTED_ORDER.created) && isDescending(initial.map((c) => c[3])),
+  check(JSON.stringify(initial.map((c) => c[1])) === JSON.stringify(EXPECTED_ORDER.created) && isDescending(initial.map((c) => siteOf(c[1])?.createdAt)),
     tag("default load shows all sites by repository created_at, newest first"));
   check(JSON.stringify(EXPECTED_ORDER.created) !== JSON.stringify(EXPECTED_ORDER.updated),
     tag("created and updated orders differ, so the default-order check is meaningful"));
-  check(await page.$eval(".gallery", (g) => g.dataset.sort) === "created", tag("created date is highlighted by default"));
+  check(await page.$eval(".gallery", (g) => g.dataset.sort) === "created", tag("gallery records the created sort by default"));
   const eager = await page.$$eval("#cat-all-sites + ul img", (imgs) => imgs.slice(0, 4).map((i) => i.loading));
   check(eager.join() === "eager,eager,eager,lazy", tag(`the first three cards in the default order load eagerly (${eager.join()})`));
 
   for (const mode of ["updated", "created"]) {
     await select.selectOption(mode);
     const cards = await visibleCards(page);
-    const key = mode === "updated" ? 4 : 3;
+    const key = mode === "updated" ? "updatedAt" : "createdAt";
     check(cards.length === EXPECTED_COUNT && uniqueNames(cards).length === EXPECTED_COUNT && cards.every((c) => c[0] === "cat-all-sites"),
       tag(`${mode}: one All sites section with ${EXPECTED_COUNT} unique cards (found ${cards.length})`));
     check(JSON.stringify(cards.map((c) => c[1])) === JSON.stringify(EXPECTED_ORDER[mode]),
-      tag(`${mode}: global order matches descending ${mode === "updated" ? "updatedAt" : "createdAt"} with tie-breakers`));
-    check(isDescending(cards.map((c) => c[key])), tag(`${mode}: rendered datetimes are globally descending`));
-    const wrongMeta = cards.filter(([, name, cat, created, updated]) => {
-      const s = sites.find((x) => x.name === name);
-      const want = [s.category, ...alsoInOf(s)].map((id) => labelOf.get(id));
-      return created !== s.createdAt || updated !== s.updatedAt || !cat.startsWith(want[0]) || !want.every((l) => cat.includes(l));
+      tag(`${mode}: global order matches descending ${key} with tie-breakers`));
+    check(isDescending(cards.map((c) => siteOf(c[1])?.[key])), tag(`${mode}: the shown sites' ${key} values are globally descending`));
+    const wrongMeta = cards.filter(([, name, cat]) => cat !== categoryTextOf(siteOf(name))).map((c) => c[1]);
+    check(wrongMeta.length === 0, tag(`${mode}: every card shows its primary/secondary categories${list(wrongMeta)}`));
+    const wrongAlt = cards.filter(([, name, , alt]) => {
+      const s = siteOf(name);
+      return alt !== `Preview screenshot of ${s.title} (${s.name}), captured ${LONG_DATE[s.screenshotCapturedOn]}`;
     }).map((c) => c[1]);
-    check(wrongMeta.length === 0, tag(`${mode}: every card shows its primary/secondary categories and repo dates${list(wrongMeta)}`));
-    const wrongCapture = cards.filter(([, name, , , , captured, line, alt]) => {
-      const s = sites.find((x) => x.name === name);
-      const long = LONG_DATE[s.screenshotCapturedOn];
-      return captured !== s.screenshotCapturedOn || line !== `Preview · ${long}` ||
-        alt !== `Preview screenshot of ${s.title} (${s.name}), captured ${long}`;
-    }).map((c) => c[1]);
-    check(wrongCapture.length === 0, tag(`${mode}: every card shows its own preview capture date (visible line + alt text)${list(wrongCapture)}`));
+    check(wrongAlt.length === 0, tag(`${mode}: every card's screenshot alt names its own preview capture date${list(wrongAlt)}`));
   }
 
   await select.selectOption("category");
@@ -891,70 +1154,7 @@ async function exercise(page, label) {
   check(await page.inputValue("#filter") === "" && uniqueNames(await visibleCards(page)).length === EXPECTED_COUNT,
     tag("keyboard: Esc clears the search"));
 
-  // Tiles: one site anchor wraps image + text; the GitHub anchor is a separate sibling. No nested anchors.
-  const structure = await page.$$eval(".card", (cards) => cards.map((li) => {
-    const main = li.querySelector("a.card-main");
-    const repo = li.querySelectorAll("a.card-repo");
-    return {
-      name: li.querySelector(".card-slug code").textContent,
-      href: main?.getAttribute("href"),
-      repo: repo.length === 1 ? repo[0].getAttribute("href") : null,
-      imgInside: !!main?.querySelector(".shot img"),
-      titleInside: !!main?.querySelector(".card-title"),
-      nested: li.querySelectorAll("a a").length,
-      repoOutside: repo.length === 1 && !repo[0].closest("a.card-main") && repo[0].parentElement === main?.parentElement,
-      anchors: li.querySelectorAll("a").length,
-      visitText: /visit/i.test(li.textContent),
-      labelled: main?.getAttribute("aria-labelledby")?.split(" ").map((id) => document.getElementById(id)?.textContent ?? "").join(" "),
-    };
-  }));
-  const badTiles = structure.filter((t) => {
-    const s = sites.find((x) => x.name === t.name);
-    return t.href !== s.url || t.repo !== s.repository || !t.imgInside || !t.titleInside || t.nested || !t.repoOutside ||
-      t.anchors !== 2 || t.visitText || t.labelled !== `${s.title} (${s.url.replace(/^https:\/\//, "").replace(/\/$/, "")})`;
-  }).map((t) => t.name);
-  check(structure.length === EXPECTED_COUNT * 2 + SECONDARY_COUNT && badTiles.length === 0,
-    tag(`every tile: image + text inside one site anchor, separate GitHub anchor, no nested anchors, no “Visit” text${list(badTiles)}`));
-  check(await page.getByRole("link", { name: "Account Home (git.marcuschiu.com)", exact: true }).count() >= 1 &&
-    await page.getByRole("link", { name: "GitHub repo: therealmarcuschiu.github.io", exact: true }).count() >= 1,
-    tag("site and GitHub links have distinct accessible names"));
-
-  // Real hit-testing: which anchor would a click at each point activate?
-  const first = sites.find((s) => s.name === EXPECTED_ORDER.created[0]);
-  const card = page.locator("#cat-all-sites + ul .card:not([hidden])").first();
-  await card.scrollIntoViewIfNeeded();
-  const box = await card.boundingBox();
-  const repoBox = await card.locator(".card-repo").boundingBox();
-  const imgBox = await card.locator(".shot img").boundingBox();
-  const hrefAt = (x, y) => page.evaluate(([px, py]) => document.elementFromPoint(px, py)?.closest("a")?.getAttribute("href") ?? null, [x, y]);
-  const hits = {
-    image: await hrefAt(imgBox.x + imgBox.width / 2, imgBox.y + imgBox.height / 2),
-    topLeft: await hrefAt(box.x + 3, box.y + 3),
-    bottomRight: await hrefAt(box.x + box.width - 3, box.y + box.height - 3),
-    bottomLeft: await hrefAt(box.x + 3, box.y + box.height - 3),
-    besideGitHub: await hrefAt(Math.min(box.x + box.width - 3, repoBox.x + repoBox.width + 8), repoBox.y + repoBox.height / 2),
-    body: await hrefAt(box.x + box.width / 2, box.y + box.height * 0.78),
-    github: await hrefAt(repoBox.x + repoBox.width / 2, repoBox.y + repoBox.height / 2),
-  };
-  const misses = Object.entries(hits).filter(([k, v]) => k !== "github" && v !== first.url).map(([k, v]) => `${k}→${v}`);
-  check(misses.length === 0, tag(`image, corners, body and the strip beside GitHub all hit the site link${list(misses)}`));
-  check(hits.github === first.repository, tag(`the GitHub link area hits the repository link (${hits.github})`));
-
-  // Real clicks navigate (destinations are answered locally by the route handler).
-  const firstCard = () => page.locator("#cat-all-sites + ul .card:not([hidden])").first();
-  const goAndBack = async (locator, target, position) => {
-    await Promise.all([page.waitForURL(target), locator.click(position ? { position } : {})]);
-    const ok = page.url() === target;
-    await page.goBack();
-    await page.waitForSelector(".card");
-    return ok;
-  };
-  check(await goAndBack(firstCard().locator(".shot img"), first.url), tag("clicking the screenshot navigates to the site"));
-  check(await goAndBack(firstCard(), first.url, { x: box.width - 4, y: box.height - 4 }), tag("clicking the card background navigates to the site"));
-  check(await goAndBack(firstCard().locator(".card-repo"), first.repository), tag("clicking the GitHub link navigates to the repository"));
-  await firstCard().locator(".card-main").focus();
-  await page.keyboard.press("Tab");
-  check(await page.evaluate(() => document.activeElement?.classList.contains("card-repo")), tag("keyboard: Tab goes from a tile's site link to its GitHub link"));
+  await exerciseTiles(page, tag);
 
   // Layout: controls share one row on desktop and stack on phones. No horizontal overflow in any mode.
   const tops = await page.$$eval(".search-field, #category-toggle, .sort-field", (n) => n.map((x) => Math.round(x.getBoundingClientRect().top)));
@@ -1011,6 +1211,7 @@ if (!chromium) {
     for (const [label, options] of [
       ["desktop", { viewport: { width: 1365, height: 900 } }],
       ["phone", { viewport: { width: 360, height: 740 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true }],
+      ["phone-390", { viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true }],
     ]) {
       const context = await browser.newContext(options);
       const page = await context.newPage();

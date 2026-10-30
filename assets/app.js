@@ -32,6 +32,11 @@
   const clearSearch = document.getElementById("clear-search");
   const showAll = document.getElementById("show-all");
   const sortSelect = document.getElementById("sort");
+  const details = document.getElementById("site-details");
+  const detailsScroll = details.querySelector(".details-scroll");
+  const detailsShot = details.querySelector(".details-shot");
+  const detailsSiteLink = document.getElementById("details-site-link");
+  const detailsRepoLink = document.getElementById("details-repo-link");
 
   let sections = [];
   // Recent sorts show every unique site once, in one "All sites" section.
@@ -42,11 +47,12 @@
   // Selected category ids; empty means every category. A site matches if it is in any selected one.
   let activeCategories = new Set();
   let shotCount = 0;
+  // The tile button that opened the details dialog; focus returns there on close.
+  let opener = null;
 
   const plural = (n, word, many = `${word}s`) => `${n} ${n === 1 ? word : many}`;
   // Fold case and punctuation so "var log" finds "/var/log" and "var-log-1".
   const normalize = (s) => s.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, " ").trim();
-  const displayUrl = (url) => url.replace(/^https:\/\//, "").replace(/\/$/, "");
   const isHttps = (u) => { try { return new URL(u).protocol === "https:"; } catch { return false; } };
   // Secondary memberships: optional `alsoIn` list of extra category ids (primary stays `category`).
   const alsoIn = (site) => (Array.isArray(site.alsoIn) ? site.alsoIn.filter((id) => id !== site.category) : []);
@@ -77,48 +83,70 @@
     return node;
   }
 
+  const previewAlt = (site) => {
+    const captured = longDate(site.screenshotCapturedOn);
+    return `Preview screenshot of ${site.title} (${site.name})${captured ? `, captured ${captured}` : ""}`;
+  };
+
+  // Repository dates for the details dialog, shown as UTC calendar days.
   function renderDates(site) {
     const parts = [["createdAt", "created"], ["updatedAt", "updated"]].filter(([key]) => ISO_UTC.test(site[key] ?? ""));
-    if (!parts.length) return null;
-    const p = el("span", { class: "card-dates" }, [el("span", { class: "card-dates-label", text: "Repo" })]);
-    parts.forEach(([key, word], i) => {
-      if (i) p.append(el("span", { class: "card-dates-sep", "aria-hidden": "true", text: " ·" }));
-      p.append(" ", el("span", { class: `card-date date-${word}` }, [
+    return parts.flatMap(([key, word], i) => [
+      ...(i ? [el("span", { class: "details-sep", "aria-hidden": "true", text: " · " })] : []),
+      el("span", { class: "details-date" }, [
         `${word} `,
-        el("time", { datetime: site[key], title: `GitHub repository ${word}: ${site[key]}`, text: site[key].slice(0, 10) }),
-      ]));
-    });
-    return p;
+        el("time", { datetime: site[key], title: `GitHub repository ${word}: ${site[key]}`, text: longDate(site[key].slice(0, 10)) }),
+      ]),
+    ]);
   }
 
   function renderCapture(site) {
     const captured = longDate(site.screenshotCapturedOn);
-    if (!captured) return null;
-    return el("span", { class: "card-capture" }, [
-      el("span", { class: "card-dates-label", text: "Preview" }),
-      el("span", { class: "card-dates-sep", "aria-hidden": "true", text: " ·" }),
-      " ",
+    if (!captured) return [];
+    return [
       el("time", { datetime: site.screenshotCapturedOn, title: `Preview screenshot captured: ${site.screenshotCapturedOn}`, text: captured }),
-    ]);
+      el("span", { class: "details-muted", text: " · static viewport capture" }),
+    ];
   }
 
-  function renderCard(site, category, labels, idPrefix) {
+  // Links are only ever set from validated HTTPS source URLs; anything else leaves no href.
+  function setLink(a, url) {
+    if (isHttps(url)) a.setAttribute("href", url);
+    else a.removeAttribute("href");
+    a.hidden = !isHttps(url);
+  }
+
+  // One reusable dialog: every open replaces all of its content, so nothing leaks between sites.
+  function openDetails(site, categoryText, button) {
+    document.getElementById("details-title").textContent = site.title;
+    document.getElementById("details-category").textContent = categoryText;
+    detailsShot.replaceChildren(...(SCREENSHOT_PATH.test(site.screenshot) ? [el("img", {
+      id: "details-image", src: site.screenshot, alt: previewAlt(site), width: "1365", height: "900", decoding: "async",
+    })] : []));
+    document.getElementById("details-host").textContent = isHttps(site.url) ? site.url : "";
+    setLink(detailsSiteLink, site.url);
+    document.getElementById("details-repo-name").textContent = site.name;
+    setLink(detailsRepoLink, site.repository);
+    document.getElementById("details-dates").replaceChildren(...renderDates(site));
+    document.getElementById("details-capture").replaceChildren(...renderCapture(site));
+    opener = button;
+    details.showModal();
+    detailsScroll.scrollTop = 0;
+  }
+
+  function renderCard(site, category, labels) {
     const isHome = site.name === HOMEPAGE_REPO;
     // Always lead with the primary category, then any secondary ones.
     const memberLabels = [site.category, ...alsoIn(site)].map((id) => labels.get(id)).filter(Boolean);
     const categoryText = memberLabels.length > 1
       ? `${memberLabels[0]} · also ${memberLabels.slice(1).join(", ")}`
       : category.label;
-    // Cards repeat across sections, so ids are scoped to the section.
-    const titleId = `${idPrefix}-${site.name}-title`;
-    const hostId = `${idPrefix}-${site.name}-host`;
     const children = [];
 
     if (SCREENSHOT_PATH.test(site.screenshot)) {
-      const captured = longDate(site.screenshotCapturedOn);
       children.push(el("span", { class: "shot" }, [el("img", {
         src: site.screenshot,
-        alt: `Preview screenshot of ${site.title} (${site.name})${captured ? `, captured ${captured}` : ""}`,
+        alt: previewAlt(site),
         width: "1365",
         height: "900",
         loading: shotCount++ < EAGER_IMAGES ? "eager" : "lazy",
@@ -126,36 +154,20 @@
       })]));
     }
 
-    const body = el("span", { class: "card-body" }, [
+    // A button may only hold phrasing content, so the title is a span and the h3 wraps the button instead.
+    children.push(el("span", { class: "card-body" }, [
       el("span", { class: "card-category", text: categoryText }),
-      el("h3", { id: titleId, class: "card-title", text: site.title }),
-      el("span", { class: "card-slug" }, [
-        el("span", { class: "visually-hidden", text: "Repository: " }),
-        el("code", { text: site.name }),
-      ]),
-      // Referenced by the link's aria-labelledby only; `hidden` keeps it out of the read-out content.
-      el("span", { id: hostId, hidden: "", text: `(${displayUrl(site.url)})` }),
-    ]);
-    const dates = renderDates(site);
-    if (dates) body.append(dates);
-    const capture = renderCapture(site);
-    if (capture) body.append(capture);
-    children.push(body);
+      el("span", { class: "card-title", text: site.title }),
+    ]));
 
-    // The whole tile (screenshot + text) is one site link; the GitHub link is a sibling, never nested.
-    const parts = [];
-    if (isHttps(site.url)) {
-      parts.push(el("a", { class: "card-main", href: site.url, "aria-labelledby": `${titleId} ${hostId}` }, children));
-    } else {
-      parts.push(el("div", { class: "card-main" }, children));
-    }
-    if (isHttps(site.repository)) {
-      // Accessible name starts with the visible label.
-      parts.push(el("a", { class: "card-link card-repo", href: site.repository, "aria-label": `GitHub repo: ${site.name}`, text: "GitHub repo" }));
-    }
+    // The whole tile (screenshot + text) is one button that opens the details dialog.
+    const button = el("button", {
+      type: "button", class: "card-main", "aria-haspopup": "dialog", "aria-controls": "site-details", "aria-label": site.title,
+    }, children);
+    button.addEventListener("click", () => openDetails(site, categoryText, button));
 
     const li = el("li", { class: isHome ? "card home" : "card" }, [
-      el("article", { class: "card-inner" }, parts),
+      el("article", { class: "card-inner" }, [el("h3", { class: "card-heading" }, [button])]),
     ]);
     return {
       node: li,
@@ -173,7 +185,7 @@
       el("span", { class: "section-name", text: category.label }),
       count,
     ]);
-    const items = sites.map((s) => renderCard(s, primaryOf(s), labels, headingId));
+    const items = sites.map((s) => renderCard(s, primaryOf(s), labels));
     const list = el("ul", { class: "cards", role: "list" }, items.map((i) => i.node));
     const node = el("section", { class: "section", "aria-labelledby": headingId }, [heading, list]);
     return { category, node, count, items, list };
@@ -379,8 +391,22 @@
     if (!categoryFilter.contains(e.target)) closeMenu();
   });
 
+  // Details dialog: native Esc and the close button close it; so does a click that starts and ends on the
+  // backdrop (the dialog box itself is fully covered by its content, so only backdrop clicks target it).
+  let downOnBackdrop = false;
+  details.addEventListener("pointerdown", (e) => { downOnBackdrop = e.target === details; });
+  details.addEventListener("click", (e) => {
+    if (downOnBackdrop && e.target === details) details.close();
+    downOnBackdrop = false;
+  });
+  document.getElementById("details-close").addEventListener("click", () => details.close());
+  details.addEventListener("close", () => {
+    opener?.focus({ preventScroll: true });
+    opener = null;
+  });
+
   document.addEventListener("keydown", (e) => {
-    if (e.key !== "/" || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key !== "/" || e.metaKey || e.ctrlKey || e.altKey || details.open) return;
     const t = e.target;
     if (t instanceof HTMLElement && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
     e.preventDefault();

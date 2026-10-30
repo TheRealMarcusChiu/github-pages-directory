@@ -5,8 +5,8 @@ A small, dependency-free static gallery of the GitHub Pages sites published from
 by category with a preview screenshot for each site. Search, a multi-select
 **Category** dropdown and a Finder-style **Sort by** control share one row on desktop;
 the gallery is ordered by *Recently created* (default), *Recently updated* or
-*Category*. Each tile is one link to the live site (screenshot included), with a
-separate *GitHub repo* link.
+*Category*. Each tile shows just the screenshot, category and title; clicking it opens
+an expanded details card with every field and the site and GitHub links.
 
 > **Snapshot caveat:** `data/sites.json` is a static snapshot dated **2026-10-30**
 > (55 entries). It is not automatically synced. Membership means the repository is
@@ -97,16 +97,24 @@ open `http://localhost:8000/github-pages-directory/`.
   mode. Escape, Tab-away or a click outside closes it; arrow keys, Home and End move
   between options; *Show all categories* clears the selection.
 - Counts and the empty/reset state (*Clear search*, *Show all categories*) work the
-  same in every mode. Every card shows its category labels and repo created/updated
-  dates, with the active sort date in gold, plus a separate, quieter
-  *Preview · <date>* line giving that card's screenshot capture date.
+  same in every mode. Every card shows its category labels; the repo dates and the
+  preview capture date are in its details card.
 
-## Tiles
+## Tiles and details
 
-Each tile is one `<a>` to the GitHub Pages URL wrapping the screenshot, category,
-title, repo slug and dates, so clicking anywhere on the tile opens the site. The
-*GitHub repo* link is a sibling anchor (never nested) pinned into a reserved strip at
-the bottom of the tile.
+Each tile is one `<button>` (inside the tile's `<h3>`, since a button may only hold
+phrasing content) wrapping the screenshot, category and title, so clicking or tapping
+anywhere on the tile, or pressing Enter/Space on it, opens the details card. The tile
+holds no links, slug or dates.
+
+The details card is one native modal `<dialog id="site-details">`, reused for every
+site and refilled on each open. It shows the preview at full width, the
+primary/secondary categories, the title, the full Pages URL with a *Visit website*
+link, the repository name with a *GitHub repo* link, the repository created/updated
+dates (GitHub metadata, not page-content dates) and the preview capture date (a
+static capture, not a live view). Esc, the *Close details* button or a click on the
+backdrop close it; focus returns to the tile, and the page behind is inert and does
+not scroll while it is open, so search, category, sort and scroll position are kept.
 
 ## Verify
 
@@ -134,14 +142,17 @@ UTC `createdAt` ≤ `updatedAt` matching the retrieved GitHub values; the page m
 offer a labelled *Sort by* select defaulting to *Recently created*.
 
 The browser stage serves the folder under `/github-pages-directory/` and, at desktop
-(1365×900) and phone (360×740) sizes, checks the default *Recently created* order on
+(1365×900) and phone (360×740 and 390×844) sizes, checks the default *Recently created* order on
 load, all three sort modes (global descending order with tie-breakers, plus a
 tied-`created_at` fixture; category sections and members), multi-category checkbox +
 search composition in every mode, zero results and both reset buttons, the dropdown
 (open/close, Escape, Tab-away, outside click, focus return, checked states, arrow
-keys), tile structure (one site anchor around image and text, a separate GitHub
-anchor, no nested anchors) and real clicks on the image, card background and GitHub
-link, in-field labels (SEARCH, CATEGORY, SORT BY) with gold chevrons on the two menus,
+keys), tile structure (one h3-wrapped dialog button around image, category and title,
+with no links or other metadata, and unchanged category/title styles), the details
+dialog for all 55 sites (every field, link and date, layout and a 44px close button),
+real clicks/taps on the image and card background, Enter/Space, focus trap and
+restore, Esc/close button/backdrop closing, inert filters, the scroll lock, and the
+*Visit website* and *GitHub repo* links navigating, in-field labels (SEARCH, CATEGORY, SORT BY) with gold chevrons on the two menus,
 controls on one row on desktop, no horizontal overflow (menu open or closed),
 and no console errors, failed requests or off-site requests besides Google Fonts.
 
@@ -154,7 +165,7 @@ and no console errors, failed requests or off-site requests besides Google Fonts
 
 | field        | meaning                                                         |
 |--------------|-----------------------------------------------------------------|
-| `name`       | original repository name (slug, shown on every card)           |
+| `name`       | original repository name (slug, shown in the details card)     |
 | `title`      | hand-written display title                                       |
 | `category`   | primary category `id`                                            |
 | `alsoIn`     | optional list of extra category `id`s the card is also shown in  |
@@ -172,7 +183,7 @@ Personal & Portfolio.
 
 Display titles were written by hand, using the 2026-10-18, 2026-10-19, 2026-10-20, 2026-10-21, 2026-10-28 and 2026-10-30 scans' page
 titles and headings only as hints. Scraped page text is never stored or rendered; the repo slug
-stays visible to tell apart pages with identical titles (e.g. the three Tetris builds
+in the details card tells apart pages with similar titles (e.g. the three Tetris builds
 and the personal-site versions).
 
 ## Updating the inventory

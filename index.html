@@ -76,6 +76,37 @@
     </noscript>
   </main>
 
+  <dialog id="site-details" class="details" aria-labelledby="details-title">
+    <button type="button" id="details-close" class="details-close" aria-label="Close details"><span aria-hidden="true">×</span></button>
+    <div class="details-scroll">
+      <div class="details-shot"></div>
+      <div class="details-body">
+        <p id="details-category" class="details-category"></p>
+        <h2 id="details-title" class="details-title"></h2>
+        <dl class="details-meta">
+          <div>
+            <dt>Website</dt>
+            <dd><span id="details-host" class="details-url"></span> <a id="details-site-link" class="details-link">Visit website</a></dd>
+          </div>
+          <div>
+            <dt>Repository</dt>
+            <dd><code id="details-repo-name" class="details-url"></code> <a id="details-repo-link" class="details-link">GitHub repo</a></dd>
+          </div>
+          <div>
+            <dt>Repo dates</dt>
+            <dd id="details-dates"></dd>
+          </div>
+          <div>
+            <dt>Preview</dt>
+            <dd id="details-capture"></dd>
+          </div>
+        </dl>
+        <p class="details-note">Repo dates are GitHub repository created/updated metadata, not page-content dates.
+          The preview is a static 1365×900 capture of the top of the page, not a live view.</p>
+      </div>
+    </div>
+  </dialog>
+
   <footer class="site-footer">
     <div class="wrap">
       <p>
