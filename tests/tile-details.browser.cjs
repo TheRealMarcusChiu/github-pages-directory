@@ -25,7 +25,7 @@ const longDate = (ymd) => { const [y, m, d] = ymd.split("-"); return `${Number(d
 const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const results = [];
 
-async function step(name, fn) {
+async function step(name, fn, cleanup) {
   try {
     await fn();
     results.push({ step: name, ok: true });
@@ -35,6 +35,7 @@ async function step(name, fn) {
     const error = String(err?.message ?? err).split("\n").slice(0, 3).join(" | ");
     results.push({ step: name, ok: false, error });
     console.log(`FAIL ${name}: ${error}`);
+    await cleanup?.().catch((e) => console.log(`  cleanup after "${name}" failed: ${e.message.split("\n")[0]}`));
     return false;
   }
 }
@@ -59,6 +60,10 @@ const readDetails = (page) => page.evaluate(() => {
   const t = (s) => q(s)?.textContent.replace(/\s+/g, " ").trim() ?? null;
   const cap = q("#details-capture");
   const capTime = cap?.matches("time") ? cap : cap?.querySelector("time");
+  // #details-dates may be a <dd>; its label is the preceding <dt> in the same description-list row.
+  const dd = q("#details-dates");
+  let dt = dd?.tagName === "DD" ? dd.previousElementSibling : null;
+  while (dt && dt.tagName !== "DT") dt = dt.previousElementSibling;
   return {
     open: !!d?.open, modal: !!d?.matches(":modal"),
     title: t("#details-title"), category: t("#details-category"), name: t("#details-repo-name"), host: t("#details-host"),
@@ -66,7 +71,7 @@ const readDetails = (page) => page.evaluate(() => {
     repoHref: q("#details-repo-link")?.getAttribute("href"), repoTag: q("#details-repo-link")?.tagName,
     img: q("#details-image")?.src, alt: q("#details-image")?.alt,
     dates: [...(q("#details-dates")?.querySelectorAll("time") ?? [])].map((n) => [n.getAttribute("datetime"), n.textContent.trim()]),
-    datesText: t("#details-dates"), capture: capTime?.getAttribute("datetime"), captureText: cap?.textContent ?? "",
+    datesText: `${dt?.textContent ?? ""} ${dd?.textContent ?? ""}`.replace(/\s+/g, " ").trim(), capture: capTime?.getAttribute("datetime"), captureText: cap?.textContent ?? "",
     text: d?.textContent ?? "",
   };
 });
@@ -99,6 +104,8 @@ async function journey(browser, spec, exp) {
   const ctx = await browser.newContext({ viewport: spec.viewport, isMobile: spec.isMobile, hasTouch: spec.hasTouch,
     reducedMotion: spec.reducedMotion, deviceScaleFactor: 1 });
   const page = await ctx.newPage();
+  page.setDefaultTimeout(5000); // fail fast instead of 30 s cascades; navigation keeps its own default
+  page.setDefaultNavigationTimeout(30000);
   const problems = [];
   page.on("console", (m) => m.type() === "error" && problems.push(`console: ${m.text()}`));
   page.on("pageerror", (e) => problems.push(`pageerror: ${e.message}`));
@@ -116,6 +123,11 @@ async function journey(browser, spec, exp) {
     const a = box();
     requestAnimationFrame(() => requestAnimationFrame(() => r(box() === a)));
   })));
+  // The page uses scroll-behavior: smooth, so poll until scrollY holds still before taking a baseline.
+  const scrollSettled = () => page.waitForFunction(() => new Promise((r) => {
+    const a = scrollY;
+    requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(() => r(scrollY === a))));
+  }));
   const waitOpen = async (want) => { await page.waitForFunction((w) => document.getElementById("site-details")?.open === w, want, { timeout: 3000 }); };
   async function open(trig, how = "click", opts) {
     const url = page.url();
@@ -138,8 +150,19 @@ async function journey(browser, spec, exp) {
       await page.mouse.click(pt[0], pt[1]);
     }
     await waitOpen(false);
-    if (trig) assert.ok(await trig.evaluate((el) => document.activeElement === el), "focus not restored to the origin button");
+    // Native focus restoration lands after the close event, so wait for it rather than sampling once.
+    if (trig) {
+      await page.waitForFunction((el) => document.activeElement === el, await trig.elementHandle(), { timeout: 3000 })
+        .catch(() => assert.fail("focus not restored to the origin button"));
+    }
   }
+  // After a failed step only: close a dialog the failure left open so later steps don't click an inert page.
+  const cleanup = async () => {
+    if (!(await isOpen().catch(() => false))) return;
+    await dialog.evaluate((d) => d.close());
+    await page.waitForFunction(() => !document.getElementById("site-details").open && !document.getElementById("site-details").contains(document.activeElement));
+  };
+  const jstep = (name, fn) => step(name, fn, cleanup);
   const scroller = exp.created[19]; // below the fold at every width, so scrollY restoration is meaningful
 
   try {
@@ -148,7 +171,7 @@ async function journey(browser, spec, exp) {
       exp.sites.length, { timeout: 15000 }).catch(() => {});
     await page.evaluate(() => document.fonts.ready);
 
-    const ready = await step(`${n}: collapsed tiles are image+category+title buttons in created order, one closed dialog`, async () => {
+    const ready = await jstep(`${n}: collapsed tiles are image+category+title buttons in created order, one closed dialog`, async () => {
       const tiles = await page.evaluate(() => [...document.querySelectorAll(".card")].filter((c) => c.checkVisibility()).map((card) => {
         const main = card.querySelector(".card-main");
         const body = card.querySelector(".card-body");
@@ -182,7 +205,7 @@ async function journey(browser, spec, exp) {
     if (!ready) throw new Error("contract DOM missing; remaining steps not runnable");
 
     if (n === "desktop" || n === "phone") {
-      await step(`${n}: collapsed screenshot`, async () => {
+      await jstep(`${n}: collapsed screenshot`, async () => {
         await page.evaluate(() => scrollTo(0, 0));
         await page.waitForFunction(() => [...document.querySelectorAll(".card-main:not([hidden]) img")].slice(0, 3).every((i) => i.complete && i.naturalWidth));
         await settle();
@@ -191,7 +214,7 @@ async function journey(browser, spec, exp) {
     }
 
     if (n === "desktop") {
-      await step(`${n}: every source record opens with matching details, full image, and closes`, async () => {
+      await jstep(`${n}: every source record opens with matching details, full image, and closes`, async () => {
         for (const site of exp.created) {
           const trig = all(site);
           assert.equal(await trig.count(), 1, `${site.title}: expected one visible trigger`);
@@ -204,7 +227,7 @@ async function journey(browser, spec, exp) {
       });
     }
 
-    await step(`${n}: image/title/category/padding clicks open the same card without navigating`, async () => {
+    await jstep(`${n}: image/title/category/padding clicks open the same card without navigating`, async () => {
       const trig = all(scroller);
       const targets = [trig.locator(".shot img"), trig.locator(".card-title"), trig.locator(".card-category"), trig];
       for (const [i, target] of targets.entries()) {
@@ -215,7 +238,7 @@ async function journey(browser, spec, exp) {
       }
     });
 
-    await step(`${n}: dialog fits, header/close/links reachable, no overflow (long title and URL)`, async () => {
+    await jstep(`${n}: dialog fits, header/close/links reachable, no overflow (long title and URL)`, async () => {
       const longest = (k) => [...exp.sites].sort((a, b) => b[k].length - a[k].length)[0];
       for (const site of [longest("title"), longest("url")]) {
         const trig = all(site);
@@ -247,10 +270,11 @@ async function journey(browser, spec, exp) {
       }
     });
 
-    await step(`${n}: inside clicks stay open; Close/Esc/backdrop close; focus trapped and restored; scroll locked`, async () => {
+    await jstep(`${n}: inside clicks stay open; Close/Esc/backdrop close; focus trapped and restored; scroll locked`, async () => {
       const trig = all(scroller);
       for (const how of ["button", "esc", "backdrop"]) {
         await trig.scrollIntoViewIfNeeded();
+        await scrollSettled();
         const y = await page.evaluate(() => scrollY);
         assert.ok(y > 0, "scroller tile should sit below the fold");
         await open(trig, spec.hasTouch && how === "backdrop" ? "tap" : "click");
@@ -294,7 +318,7 @@ async function journey(browser, spec, exp) {
       }
     });
 
-    await step(`${n}: reopening another site fully replaces details`, async () => {
+    await jstep(`${n}: reopening another site fully replaces details`, async () => {
       const [a, b] = [exp.created[0], exp.created.at(-1)];
       await open(all(a));
       assertDetails(await readDetails(page), a);
@@ -309,7 +333,7 @@ async function journey(browser, spec, exp) {
     });
 
     if (n === "desktop" || n === "phone") {
-      await step(`${n}: expanded screenshot`, async () => {
+      await jstep(`${n}: expanded screenshot`, async () => {
         const site = exp.created[0];
         await open(all(site));
         await page.waitForFunction(() => { const i = document.getElementById("details-image"); return i.complete && i.naturalWidth > 0; }, null, { timeout: 10000 });
@@ -319,7 +343,7 @@ async function journey(browser, spec, exp) {
       });
     }
 
-    await step(`${n}: category sort secondary Personal entries open with correct labels, then all sites return`, async () => {
+    await jstep(`${n}: category sort secondary Personal entries open with correct labels, then all sites return`, async () => {
       await page.selectOption("#sort", "category");
       const secondary = exp.sites.filter((s) => (s.alsoIn ?? []).includes("personal") && s.category !== "personal");
       assert.ok(secondary.length >= 2, "expected the Art/Personal secondary entries in source");
@@ -334,7 +358,7 @@ async function journey(browser, spec, exp) {
       assert.equal(await page.locator(".card-main:visible").count(), exp.sites.length);
     });
 
-    await step(`${n}: query/category/sort/scrollY preserved after close`, async () => {
+    await jstep(`${n}: query/category/sort/scrollY preserved after close`, async () => {
       const site = exp.created[5];
       const word = site.title.split(/\s+/).find((w) => w.length >= 3) ?? site.title;
       await page.fill("#filter", word);
@@ -348,6 +372,7 @@ async function journey(browser, spec, exp) {
         y: scrollY }));
       const trig = all(site);
       await trig.scrollIntoViewIfNeeded();
+      await scrollSettled();
       const before = await snap();
       assert.ok(before.visible.includes(site.title), "filtered view lost the target site");
       await open(trig);
@@ -355,7 +380,7 @@ async function journey(browser, spec, exp) {
       assert.deepEqual(await snap(), before);
     });
 
-    await step(`${n}: no console errors, page errors or failed resources`, () => assert.deepEqual(problems, []));
+    await jstep(`${n}: no console errors, page errors or failed resources`, () => assert.deepEqual(problems, []));
   } catch (err) {
     results.push({ step: `${n}: remaining steps`, ok: false, error: `skipped: ${err.message}` });
     console.log(`FAIL ${n}: remaining steps skipped: ${err.message}`);
