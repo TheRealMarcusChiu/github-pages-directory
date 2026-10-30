@@ -5,7 +5,8 @@ A small, dependency-free static gallery of the GitHub Pages sites published from
 by category with a preview screenshot for each site. Search, a multi-select
 **Category** dropdown and a Finder-style **Sort by** control share one row on desktop;
 the gallery is ordered by *Recently created* (default), *Recently updated* or
-*Category*. Each tile shows just the screenshot, category and title; clicking it opens
+*Category*. Each tile shows just the screenshot, category (with the repository's
+created date, `YYYY-MM-DD` UTC, right-aligned on the same row) and title; clicking it opens
 an expanded details card with every field and the site and GitHub links.
 
 > **Snapshot caveat:** `data/sites.json` is a static snapshot dated **2026-10-30**
@@ -103,9 +104,11 @@ open `http://localhost:8000/github-pages-directory/`.
 ## Tiles and details
 
 Each tile is one `<button>` (inside the tile's `<h3>`, since a button may only hold
-phrasing content) wrapping the screenshot, category and title, so clicking or tapping
-anywhere on the tile, or pressing Enter/Space on it, opens the details card. The tile
-holds no links, slug or dates.
+phrasing content) wrapping the screenshot, a meta row (category on the left, wrapping in
+full; the repository `createdAt` as a native `<time>` showing its UTC day at the right)
+and the title, so clicking or tapping anywhere on the tile, or pressing Enter/Space on
+it, opens the details card. The tile holds no links, slug, updated date or capture date;
+an invalid `createdAt` is omitted rather than shown malformed.
 
 The details card is one native modal `<dialog id="site-details">`, reused for every
 site and refilled on each open. It shows the preview at full width, the
@@ -147,8 +150,9 @@ load, all three sort modes (global descending order with tie-breakers, plus a
 tied-`created_at` fixture; category sections and members), multi-category checkbox +
 search composition in every mode, zero results and both reset buttons, the dropdown
 (open/close, Escape, Tab-away, outside click, focus return, checked states, arrow
-keys), tile structure (one h3-wrapped dialog button around image, category and title,
-with no links or other metadata, and unchanged category/title styles), the details
+keys), tile structure (one h3-wrapped dialog button around image, category, created
+date and title, with no links or other metadata, every tile's date matching its
+`createdAt`, and unchanged category/title styles), the details
 dialog for all 55 sites (every field, link and date, layout and a 44px close button),
 real clicks/taps on the image and card background, Enter/Space, focus trap and
 restore, Esc/close button/backdrop closing, inert filters, the scroll lock, and the

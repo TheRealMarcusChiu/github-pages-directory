@@ -529,7 +529,13 @@ check(/el\("button", \{\s*type: "button", class: "card-main", "aria-haspopup": "
   /el\("h3", \{ class: "card-heading" \}, \[button\]\)/.test(js) && /el\("span", \{ class: "card-title", text: site\.title \}\)/.test(js),
   "each tile is one dialog button (screenshot + category + title) inside its h3; no h3 inside the button");
 check(!/el\("a"|card-repo|card-slug|card-dates|card-capture|card-link/.test(js) && !/\.card-(?:repo|slug|dates?|capture|link)\b/.test(css),
-  "collapsed tiles render no anchors, repo slug, dates or capture line (and no leftover styles for them)");
+  "collapsed tiles render no anchors, repo slug, updated date or capture line (and no leftover styles for them)");
+check(/const created = ISO_UTC\.test\(site\.createdAt \?\? ""\) \?/.test(js) &&
+  /class: "card-created", datetime: site\.createdAt, title: `Repository created: \$\{site\.createdAt\}`/.test(js) &&
+  /text: site\.createdAt\.slice\(0, 10\)/.test(js) &&
+  /el\("span", \{ class: "card-meta" \}, \[el\("span", \{ class: "card-category", text: categoryText \}\), \.\.\.created\]\)/.test(js) &&
+  /\.card-created \{[^}]*color: var\(--muted\);[^}]*white-space: nowrap;/.test(css),
+  "tiles show only the validated repository createdAt (UTC day, muted mono) right of the category; invalid stamps are omitted");
 const dialogs = html.match(/<dialog\b[^>]*>/g) ?? [];
 const dialogHtml = html.match(/<dialog[\s\S]*?<\/dialog>/)?.[0] ?? "";
 check(dialogs.length === 1 && /^<dialog id="site-details" class="details" aria-labelledby="details-title">$/.test(dialogs[0]) &&
@@ -795,28 +801,37 @@ async function exerciseTiles(page, tag) {
   const select = page.getByLabel("Sort by", { exact: true });
   await select.selectOption("created");
 
-  // Structure: the h3 wraps one phrasing-only button; the card holds nothing but category and title text.
+  // Structure: the h3 wraps one phrasing-only button; the card holds nothing but category, created date and title text.
   const structure = await page.$$eval(".card", (cards) => cards.map((li) => {
     const mains = li.querySelectorAll(".card-main");
     const b = mains[0];
     const category = li.querySelector(".card-category")?.textContent ?? "";
     const title = li.querySelector(".card-title")?.textContent ?? "";
+    const time = li.querySelector("time.card-created");
     return {
-      title,
+      title, datetime: time?.getAttribute("datetime"), text: time?.textContent, label: time?.title,
       ok: mains.length === 1 && b.tagName === "BUTTON" && b.type === "button" &&
         b.getAttribute("aria-haspopup") === "dialog" && b.getAttribute("aria-controls") === "site-details" &&
         b.getAttribute("aria-label") === title && b.parentElement.matches("h3.card-heading") &&
         b.parentElement.parentElement.matches("article.card-inner") &&
-        [...b.querySelectorAll("*")].every((n) => n.tagName === "SPAN" || n.tagName === "IMG") &&
+        [...b.querySelectorAll("*")].every((n) => n.tagName === "SPAN" || n.tagName === "IMG" || n === time) &&
         !!b.querySelector(".shot img") &&
-        [...li.querySelector(".card-body").children].map((n) => n.className).join() === "card-category,card-title" &&
-        li.querySelectorAll("a, code, time, .card-repo, .card-slug, .card-dates, .card-capture, .card-link").length === 0 &&
-        li.textContent === category + title,
+        [...li.querySelector(".card-body").children].map((n) => n.className).join() === "card-meta,card-title" &&
+        [...li.querySelector(".card-meta").children].map((n) => n.className).join() === "card-category,card-created" &&
+        li.querySelectorAll("time").length === 1 &&
+        li.querySelectorAll("a, code, .card-repo, .card-slug, .card-dates, .card-capture, .card-link").length === 0 &&
+        li.textContent === category + (time?.textContent ?? "") + title,
     };
   }));
   const badTiles = structure.filter((t) => !t.ok).map((t) => t.title);
   check(structure.length === EXPECTED_COUNT * 2 + SECONDARY_COUNT && badTiles.length === 0,
-    tag(`every tile: one h3-wrapped dialog button around image, category and title; no links, slug, dates or capture line${list(badTiles)}`));
+    tag(`every tile: one h3-wrapped dialog button around image, category, created date and title; no links, slug, updated date or capture line${list(badTiles)}`));
+  // Each tile's date is its own inventory createdAt (exact datetime, UTC day text), never a capture/updated date.
+  const badDates = structure.filter((t) => {
+    const s = sites.find((x) => x.title === t.title);
+    return !s || t.datetime !== s.createdAt || t.text !== s.createdAt.slice(0, 10) || t.label !== `Repository created: ${s.createdAt}`;
+  }).map((t) => t.title);
+  check(badDates.length === 0, tag(`every tile shows its repository createdAt (exact datetime, YYYY-MM-DD text, full-ISO title)${list(badDates)}`));
   const first = siteOf(EXPECTED_ORDER.created[0]);
   check(await page.getByRole("button", { name: first.title, exact: true }).filter({ visible: true }).count() === 1 &&
     await page.getByRole("heading", { level: 3, name: first.title, exact: true }).filter({ visible: true }).count() === 1 &&

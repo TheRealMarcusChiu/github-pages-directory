@@ -155,8 +155,13 @@
     }
 
     // A button may only hold phrasing content, so the title is a span and the h3 wraps the button instead.
+    // Repository creation day (UTC) sits right of the category; an invalid stamp is omitted, not rendered malformed.
+    const created = ISO_UTC.test(site.createdAt ?? "") ? [el("time", {
+      class: "card-created", datetime: site.createdAt, title: `Repository created: ${site.createdAt}`,
+      "aria-label": `Repository created ${longDate(site.createdAt.slice(0, 10))}`, text: site.createdAt.slice(0, 10),
+    })] : [];
     children.push(el("span", { class: "card-body" }, [
-      el("span", { class: "card-category", text: categoryText }),
+      el("span", { class: "card-meta" }, [el("span", { class: "card-category", text: categoryText }), ...created]),
       el("span", { class: "card-title", text: site.title }),
     ]));
 

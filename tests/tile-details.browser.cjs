@@ -117,8 +117,9 @@ async function journey(browser, spec, exp) {
     .filter({ has: page.locator(".card-title", { hasText: new RegExp(`^\\s*${esc(site.title)}\\s*$`) }) });
   const all = (site) => scoped('section[aria-labelledby="cat-all-sites"]', site);
   const isOpen = () => dialog.evaluate((d) => d.open);
-  // Poll until fonts are ready and the dialog box is unchanged across two frames (no fixed sleeps).
-  const settle = () => page.waitForFunction(() => document.fonts.ready.then(() => new Promise((r) => {
+  // Poll until fonts and running animations (e.g. the opacity fade) finish and the dialog box is unchanged across two frames (no fixed sleeps).
+  const settle = () => page.waitForFunction(() => document.fonts.ready
+    .then(() => Promise.all(document.getAnimations().map((a) => a.finished.catch(() => {})))).then(() => new Promise((r) => {
     const box = () => JSON.stringify(document.getElementById("site-details")?.getBoundingClientRect());
     const a = box();
     requestAnimationFrame(() => requestAnimationFrame(() => r(box() === a)));
@@ -171,18 +172,25 @@ async function journey(browser, spec, exp) {
       exp.sites.length, { timeout: 15000 }).catch(() => {});
     await page.evaluate(() => document.fonts.ready);
 
-    const ready = await jstep(`${n}: collapsed tiles are image+category+title buttons in created order, one closed dialog`, async () => {
+    const ready = await jstep(`${n}: collapsed tiles are image+category+date+title buttons in created order, one closed dialog`, async () => {
       const tiles = await page.evaluate(() => [...document.querySelectorAll(".card")].filter((c) => c.checkVisibility()).map((card) => {
         const main = card.querySelector(".card-main");
         const body = card.querySelector(".card-body");
         const ids = main?.getAttribute("aria-labelledby");
+        const time = card.querySelector(".card-meta > time.card-created");
+        const box = (s) => { const r = card.querySelector(s)?.getBoundingClientRect(); return r && { l: r.left, r: r.right, t: r.top, b: r.bottom }; };
         return {
+          time: time && { datetime: time.getAttribute("datetime"), text: time.textContent, title: time.title,
+            color: getComputedStyle(time).color, gold: getComputedStyle(card.querySelector(".card-category")).color, font: getComputedStyle(time).fontFamily },
+          order: [...(body?.children ?? [])].map((x) => x.className).join() + "|" + [...(card.querySelector(".card-meta")?.children ?? [])].map((x) => x.className).join(),
+          geo: { meta: box(".card-meta"), cat: box(".card-category"), date: box(".card-created"), title: box(".card-title"), card: box(".card-main"),
+            overflow: [main, body, card.querySelector(".card-meta")].some((x) => x && x.scrollWidth > x.clientWidth) },
           tag: main?.tagName, type: main?.getAttribute("type"), popup: main?.getAttribute("aria-haspopup"), controls: main?.getAttribute("aria-controls"),
           name: ids ? ids.split(/\s+/).map((id) => document.getElementById(id)?.textContent ?? "").join(" ") : main?.getAttribute("aria-label") ?? main?.textContent,
           img: !!card.querySelector(".card-main .shot img"), category: card.querySelector(".card-category")?.textContent, title: card.querySelector(".card-title")?.textContent,
           forbidden: card.querySelectorAll(".card-slug,.card-dates,.card-capture,.card-repo,a").length,
-          // Visible boxes in the body other than category/title (visually-hidden text is 1px and allowed).
-          extra: [...(body?.querySelectorAll("*") ?? [])].filter((x) => !x.closest(".card-category,.card-title") &&
+          // Visible boxes in the body other than the meta row (category + created date) and title (visually-hidden text is 1px and allowed).
+          extra: [...(body?.querySelectorAll("*") ?? [])].filter((x) => !x.matches(".card-meta") && !x.closest(".card-category,.card-created,.card-title") &&
             x.getBoundingClientRect().width > 1 && x.getBoundingClientRect().height > 1).map((x) => x.className || x.tagName),
         };
       }));
@@ -196,6 +204,15 @@ async function journey(browser, spec, exp) {
         assert.equal(t.category, s.categoryText);
         assert.equal(t.forbidden, 0, `${s.name}: collapsed metadata/anchors present`);
         assert.deepEqual(t.extra, [], `${s.name}: extra visible body content`);
+        // Created date: exact inventory createdAt, muted mono (not category gold), top-right of the category's first line, title beneath.
+        assert.equal(t.order, "card-meta,card-title|card-category,card-created", `${s.name}: body/meta children`);
+        assert.deepEqual(t.time && [t.time.datetime, t.time.text, t.time.title],
+          [s.createdAt, s.createdAt.slice(0, 10), `Repository created: ${s.createdAt}`], `${s.name}: created <time>`);
+        assert.ok(t.time.color !== t.time.gold && /mono/i.test(t.time.font), `${s.name}: date must be muted mono, got ${t.time.color} ${t.time.font}`);
+        const g = t.geo;
+        assert.ok(Math.abs(g.date.r - g.meta.r) <= 1 && g.date.l >= g.cat.r && Math.abs(g.date.t - g.cat.t) <= 1 &&
+          g.title.t >= Math.max(g.cat.b, g.date.b) - 0.5 && g.meta.r <= g.card.r && !g.overflow,
+          `${s.name}: created date not right-aligned on the category row without overlap/overflow ${JSON.stringify(g)}`);
       });
       const dlg = await page.evaluate(() => ({ count: document.querySelectorAll("#site-details").length,
         tag: document.getElementById("site-details")?.tagName, open: document.getElementById("site-details")?.open,
