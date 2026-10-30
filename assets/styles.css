@@ -435,7 +435,9 @@ option { background: var(--surface); color: var(--text); text-transform: none; }
 .card-main:hover .card-title { color: var(--gold); }
 
 /* Details dialog: the expanded card. The close button stays pinned while the content scrolls. */
-html:has(.details[open]) { overflow: hidden; scrollbar-gutter: stable; }
+/* The gutter is reserved always (not only while open) so locking the scroll never changes the layout width. */
+html { scrollbar-gutter: stable; }
+html:has(.details[open]) { overflow: hidden; }
 
 .details {
   width: min(46rem, 100vw - 1.5rem);
@@ -467,8 +469,9 @@ html:has(.details[open]) { overflow: hidden; scrollbar-gutter: stable; }
   z-index: 1;
   display: grid;
   place-items: center;
-  width: 2.75rem;
-  height: 2.75rem;
+  /* 46px, not 44: sub-pixel centring can measure a 44px box at 43.99px. */
+  width: 2.875rem;
+  height: 2.875rem;
   padding: 0;
   border: 1px solid var(--gold-faint);
   border-radius: 2px;

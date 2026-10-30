@@ -575,7 +575,7 @@ check(/:focus-visible/.test(css), "styles define visible focus states");
 check(/minmax\(min\(100%,/.test(css), "card grid collapses without overflow on narrow screens");
 check(/#details-capture time \{[^}]*color: var\(--muted\)/.test(css) && !/data-sort/.test(css),
   "preview capture date is subtle muted text, never highlighted as a sort date");
-check(/html:has\(\.details\[open\]\) \{ overflow: hidden;/.test(css) && /\.details-close \{[^}]*width: 2\.75rem;[^}]*height: 2\.75rem;/.test(css) &&
+check(/html:has\(\.details\[open\]\) \{ overflow: hidden;/.test(css) && /\.details-close \{[^}]*width: 2\.875rem;[^}]*height: 2\.875rem;/.test(css) &&
   /\.details-scroll \{[^}]*overflow-y: auto;/.test(css) && /\.details::backdrop/.test(css),
   "dialog locks background scroll, scrolls its own content and has a 44px close button");
 check(/--tap:\s*2\.75rem/.test(css) && /min-height: var\(--tap\)/.test(css), "controls and links have comfortable tap targets");
