@@ -1,6 +1,6 @@
 # GitHub Pages Directory
 
-A small, dependency-free static gallery of the GitHub Pages sites published from
+A small, dependency-free static gallery of curated GitHub Pages sites published from
 [TheRealMarcusChiu](https://github.com/TheRealMarcusChiu)'s repositories, grouped
 by category with a preview screenshot for each site. Search, a multi-select
 **Category** dropdown and a Finder-style **Sort by** control share one row on desktop;
@@ -9,11 +9,15 @@ the gallery is ordered by *Recently created* (default), *Recently updated* or
 created date, `YYYY-MM-DD` UTC, right-aligned on the same row) and title; clicking it opens
 an expanded details card with every field and the site and GitHub links.
 
-> **Snapshot caveat:** `data/sites.json` is a static snapshot dated **2026-10-30**
-> (55 entries). It is not automatically synced. Membership means the repository is
+> **Snapshot caveat:** `data/sites.json` is a static snapshot dated **2026-11-06**
+> (56 entries). It is not automatically synced. Membership means the repository is
 > public and has GitHub Pages configured according to the authenticated GitHub Pages
 > API owner inventory — not that the page was reviewed or looks finished. The account
 > homepage is included; this directory's own repository is not.
+>
+> **Curated scope:** the listing is not exhaustive. The owner inventory retrieved
+> 2026-11-06T23:19:41.913647+00:00 has 59 public repositories with Pages, 58 excluding
+> this directory: 56 are listed, and `afterimage` and `aleph-quest` are deferred, not cards.
 >
 > **Screenshots:** `assets/previews/<repo>.webp` are 1365×900 viewport previews
 > (top of the page only, not full-page). Capture dates vary by entry and are stored
@@ -26,9 +30,11 @@ an expanded details card with every field and the site and GitHub links.
 > `boba-passport`); the most recent addition (`homelab-rack-atlas`) was captured on
 > **2026-10-21**, and the two current additions (`Griefcase`, `bit-atlas`) on
 > **2026-10-28**; `Griefcase` was re-captured on **2026-10-30**, as was the 2026-10-30
-> addition (`inside-neural-engine`) — 40 previews dated 2026-10-18, 8 dated 2026-10-19,
-> 3 dated 2026-10-20, 1 dated 2026-10-21, 1 dated 2026-10-28, 2 dated 2026-10-30, 55 in
-> total. They are local static images, not live views — the live sites may have changed since.
+> addition (`inside-neural-engine`), and the 2026-11-06 addition (`guitar`) on
+> **2026-11-06** — 40 previews dated 2026-10-18, 8 dated 2026-10-19,
+> 3 dated 2026-10-20, 1 dated 2026-10-21, 1 dated 2026-10-28, 2 dated 2026-10-30,
+> 1 dated 2026-11-06, 56 in total. They are local static images, not live views — the
+> live sites may have changed since.
 >
 > **Notes on the 2026-10-19 additions:** `confluence-obsidian-quartz` answers HTTP 200
 > but serves a raw RSS feed (`application/rss+xml`), not a styled site, so its title is
@@ -46,10 +52,15 @@ an expanded details card with every field and the site and GitHub links.
 > `Griefcase` keeps its repository id, case and URL; its display title *greifcase* is the
 > owner's own spelling, and its refreshed preview shows the page's single quote.
 >
+> **Note on the 2026-11-06 update:** `guitar` (*Guitar*) is a musical recording artwork
+> with gold canvas strings and audio controls.
+>
 > **Repository dates:** each entry's `createdAt` / `updatedAt` are the GitHub
-> repository `created_at` / `updated_at` values from the authenticated GitHub REST API
-> (one owner Pages inventory, retrieved 2026-10-30T03:36:12.974716+00:00), applied to
-> every entry. They are repository metadata, not page-content dates — `updated_at` moves on any repository
+> repository `created_at` / `updated_at` values from the authenticated GitHub REST API.
+> The 55 entries before `guitar` use one owner Pages inventory, retrieved
+> 2026-10-30T03:36:12.974716+00:00 (still `repositoryDates.retrievedAt`), and have not been
+> refreshed since; only `guitar` uses the newer retrieval of 2026-11-06T23:19:41.913647+00:00.
+> They are repository metadata, not page-content dates — `updated_at` moves on any repository
 > update (pushes, settings, description). They are stored statically; the page makes
 > no GitHub API calls.
 
@@ -59,7 +70,7 @@ an expanded details card with every field and the site and GitHub links.
 index.html              Page markup
 assets/styles.css       Warm editorial dark theme (Newsreader + JetBrains Mono)
 assets/app.js           Loads data/sites.json, renders the gallery, search, category dropdown + sort
-assets/previews/*.webp  55 local 1365×900 preview screenshots, capture date per entry
+assets/previews/*.webp  56 local 1365×900 preview screenshots, capture date per entry
 data/sites.json         The inventory (see below)
 tests/verify.mjs        Dependency-free checks
 ```
@@ -130,19 +141,20 @@ PLAYWRIGHT_MODULE=/path/to/node_modules/playwright REQUIRE_BROWSER=1 node tests/
 Without Playwright the browser stage prints `SKIP`; `REQUIRE_BROWSER=1` turns that
 into a failure.
 
-Checks include: exactly 55 unique entries (names, Pages URLs, repository URLs,
+Checks include: exactly 56 unique entries (names, Pages URLs, repository URLs,
 titles, screenshots); HTTPS-only links and correct repository URLs; no
 `github-pages-directory` self-entry; every repository in its expected primary
 category exactly once, with exactly the expected `alsoIn` secondary memberships; each screenshot path is relative and points at an existing 1365×900
-WebP with no orphans (all complete, non-blank lossy VP8), each entry's required `screenshotCapturedOn` (exact per entry: 2026-10-18 for 40 of the original 41, 2026-10-19 for the re-captured `bandwidth-compare`, the four additions, the two later additions and the final addition, and 2026-10-20 for the newest addition `ups-topology-guide` and the two latest additions `inside-the-machine` and `boba-passport`, and 2026-10-21 for the most recent addition `homelab-rack-atlas`, 2026-10-28 for the current addition `bit-atlas`, and 2026-10-30 for the re-captured `Griefcase` and the 2026-10-30 addition `inside-neural-engine`); relative asset paths; only the Google Fonts stylesheet as a
+WebP with no orphans (all complete, non-blank lossy VP8), each entry's required `screenshotCapturedOn` (exact per entry: 2026-10-18 for 40 of the original 41, 2026-10-19 for the re-captured `bandwidth-compare`, the four additions, the two later additions and the final addition, and 2026-10-20 for the newest addition `ups-topology-guide` and the two latest additions `inside-the-machine` and `boba-passport`, and 2026-10-21 for the most recent addition `homelab-rack-atlas`, 2026-10-28 for the current addition `bit-atlas`, 2026-10-30 for the re-captured `Griefcase` and the 2026-10-30 addition `inside-neural-engine`, and 2026-11-06 for the 2026-11-06 addition `guitar`); relative asset paths; only the Google Fonts stylesheet as a
 remote resource; no HTML-injection APIs; and accessibility basics (lang, landmarks,
 labelled search, category dropdown and checkbox group, alt text, focus styles, reduced motion,
 tap targets) plus the snapshot disclaimers in the meta description, footer and this README.
 The masthead is just the eyebrow and title, with no result-status line; each control is
 one outlined field with its short uppercase label inside, before the active value. The exact
 names, titles and source order are pinned, and every entry must carry valid ISO 8601
-UTC `createdAt` ≤ `updatedAt` matching the retrieved GitHub values; the page must
-offer a labelled *Sort by* select defaulting to *Recently created*.
+UTC `createdAt` ≤ `updatedAt` ≤ its own retrieval time, matching the retrieved GitHub
+values; the `guitar` record is pinned exactly and the deferred repositories must stay
+unlisted; the page must offer a labelled *Sort by* select defaulting to *Recently created*.
 
 The browser stage serves the folder under `/github-pages-directory/` and, at desktop
 (1365×900) and phone (360×740 and 390×844) sizes, checks the default *Recently created* order on
@@ -153,7 +165,7 @@ search composition in every mode, zero results and both reset buttons, the dropd
 keys), tile structure (one h3-wrapped dialog button around image, category, created
 date and title, with no links or other metadata, every tile's date matching its
 `createdAt`, and unchanged category/title styles), the details
-dialog for all 55 sites (every field, link and date, layout and a 44px close button),
+dialog for all 56 sites (every field, link and date, layout and a 44px close button),
 real clicks/taps on the image and card background, Enter/Space, focus trap and
 restore, Esc/close button/backdrop closing, inert filters, the scroll lock, and the
 *Visit website* and *GitHub repo* links navigating, in-field labels (SEARCH, CATEGORY, SORT BY) with gold chevrons on the two menus,
@@ -164,7 +176,8 @@ and no console errors, failed requests or off-site requests besides Google Fonts
 
 `data/sites.json` has `snapshotDate`, `screenshots` (size, format and
 `captureDatePolicy: "per-entry"`),
-`repositoryDates` (source and retrieval time of the repo dates),
+`repositoryDates` (source and aggregate retrieval time of the repo dates, with any
+per-entry retrieval named in its `note`),
 `categories` (ordered `id`/`label` pairs) and `sites`, where each entry is:
 
 | field        | meaning                                                         |
@@ -185,7 +198,7 @@ listed section; its card label names the primary category first. Category checkb
 section headers count every member, while the empty state counts unique sites. Currently every Art & 3D site is also in
 Personal & Portfolio.
 
-Display titles were written by hand, using the 2026-10-18, 2026-10-19, 2026-10-20, 2026-10-21, 2026-10-28 and 2026-10-30 scans' page
+Display titles were written by hand, using the 2026-10-18, 2026-10-19, 2026-10-20, 2026-10-21, 2026-10-28, 2026-10-30 and 2026-11-06 scans' page
 titles and headings only as hints. Scraped page text is never stored or rendered; the repo slug
 in the details card tells apart pages with similar titles (e.g. the three Tetris builds
 and the personal-site versions).
@@ -194,7 +207,10 @@ and the personal-site versions).
 
 Edit `data/sites.json`, add or replace the matching preview in `assets/previews/`,
 set that entry's `screenshotCapturedOn`, update the snapshot date in `data/sites.json`,
-`index.html` and this README,
-refresh `createdAt` / `updatedAt` from the GitHub API (and `repositoryDates.retrievedAt`),
-then adjust `EXPECTED_COUNT`, `EXPECTED_CATEGORIES`, `EXPECTED_ALSO_IN`, `EXPECTED_SITES`
-(including capture dates) and `DATES_RETRIEVED` in `tests/verify.mjs`.
+`index.html` and this README, and set the new entry's `createdAt` / `updatedAt` from the
+GitHub API. Advance `repositoryDates.retrievedAt` only when every entry's dates are refreshed
+from that retrieval; otherwise leave it and name the entry's own retrieval time in
+`repositoryDates.note` and this README. Reconcile the owner Pages inventory and keep the curated
+listed/deferred counts true, then adjust `EXPECTED_COUNT`, `EXPECTED_CATEGORIES`,
+`EXPECTED_ALSO_IN`, `EXPECTED_SITES` (including capture dates), `DATES_RETRIEVED`,
+`GUITAR_RETRIEVED` and `DEFERRED` in `tests/verify.mjs`.
