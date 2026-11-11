@@ -9,15 +9,15 @@ the gallery is ordered by *Recently created* (default), *Recently updated* or
 created date, `YYYY-MM-DD` UTC, right-aligned on the same row) and title; clicking it opens
 an expanded details card with every field and the site and GitHub links.
 
-> **Snapshot caveat:** `data/sites.json` is a static snapshot dated **2026-11-07**
-> (58 entries). It is not automatically synced. Membership means the repository is
+> **Snapshot caveat:** `data/sites.json` is a static snapshot dated **2026-11-11**
+> (59 entries). It is not automatically synced. Membership means the repository is
 > public and has GitHub Pages configured according to the authenticated GitHub Pages
 > API owner inventory — not that the page was reviewed or looks finished. The account
 > homepage is included; this directory's own repository is not.
 >
 > **Curated scope:** the listing is not exhaustive. The owner inventory retrieved
-> 2026-11-07T07:54:25.397992+00:00 has 60 public repositories with Pages, 59 excluding
-> this directory: 58 are listed, and only `afterimage` is deferred, not a card.
+> 2026-11-11T00:55:03.898738+00:00 has 62 public repositories with Pages, 61 excluding
+> this directory: 59 are listed, and only `afterimage` and `mesh-radio-academy` are deferred, not cards.
 >
 > **Screenshots:** `assets/previews/<repo>.webp` are 1365×900 viewport previews
 > (top of the page only, not full-page). Capture dates vary by entry and are stored
@@ -32,10 +32,11 @@ an expanded details card with every field and the site and GitHub links.
 > **2026-10-28**; `Griefcase` was re-captured on **2026-10-30**, as was the 2026-10-30
 > addition (`inside-neural-engine`), and the 2026-11-06 addition (`guitar`) on
 > **2026-11-06**, as was the 2026-11-07 addition (`aleph-quest`, captured at
-> 2026-11-06T22:28:03Z), and the later 2026-11-07 addition (`baking`) on **2026-11-07**
+> 2026-11-06T22:28:03Z), and the later 2026-11-07 addition (`baking`) on **2026-11-07**,
+> and the 2026-11-11 addition (`scribes-labyrinth`) on **2026-11-11**
 > — 40 previews dated 2026-10-18, 8 dated 2026-10-19,
 > 3 dated 2026-10-20, 1 dated 2026-10-21, 1 dated 2026-10-28, 2 dated 2026-10-30,
-> 2 dated 2026-11-06, 1 dated 2026-11-07, 58 in total. They are local static images, not live views — the
+> 2 dated 2026-11-06, 1 dated 2026-11-07, 1 dated 2026-11-11, 59 in total. They are local static images, not live views — the
 > live sites may have changed since.
 >
 > **Notes on the 2026-10-19 additions:** `confluence-obsidian-quartz` answers HTTP 200
@@ -67,13 +68,20 @@ an expanded details card with every field and the site and GitHub links.
 > **Note on the later 2026-11-07 update:** `baking` (*Matcha Chiffon Cake*) is listed in
 > Personal & Portfolio, with a preview captured from the live page on 2026-11-07.
 >
+> **Note on the 2026-11-11 update:** `scribes-labyrinth` (*The Scribe’s Labyrinth*) is an
+> original, browser-only pixel-art adventure for beginning readers of pointed Biblical
+> Hebrew, with a walkable three-area city and a codex. Like `aleph-quest`, it is listed in
+> Games & Simulations and also in Faith & Bible Study. Its preview shows the live page's
+> fresh default state (the map with Neri and the owl), captured on 2026-11-11.
+>
 > **Repository dates:** each entry's `createdAt` / `updatedAt` are the GitHub
 > repository `created_at` / `updated_at` values from the authenticated GitHub REST API.
 > The 55 entries before `guitar` use one owner Pages inventory, retrieved
 > 2026-10-30T03:36:12.974716+00:00 (still `repositoryDates.retrievedAt`), and have not been
 > refreshed since; only `guitar` uses the newer retrieval of 2026-11-06T23:19:41.913647+00:00,
 > only `aleph-quest` uses the newer retrieval of 2026-11-07T00:37:46.850265+00:00,
-> and only `baking` uses the newer retrieval of 2026-11-07T07:54:25.397992+00:00.
+> only `baking` uses the newer retrieval of 2026-11-07T07:54:25.397992+00:00,
+> and only `scribes-labyrinth` uses the newer retrieval of 2026-11-11T00:55:03.898738+00:00.
 > They are repository metadata, not page-content dates — `updated_at` moves on any repository
 > update (pushes, settings, description). They are stored statically; the page makes
 > no GitHub API calls.
@@ -84,7 +92,7 @@ an expanded details card with every field and the site and GitHub links.
 index.html              Page markup
 assets/styles.css       Warm editorial dark theme (Newsreader + JetBrains Mono)
 assets/app.js           Loads data/sites.json, renders the gallery, search, category dropdown + sort
-assets/previews/*.webp  58 local 1365×900 preview screenshots, capture date per entry
+assets/previews/*.webp  59 local 1365×900 preview screenshots, capture date per entry
 data/sites.json         The inventory (see below)
 tests/verify.mjs        Dependency-free checks
 ```
@@ -155,11 +163,11 @@ PLAYWRIGHT_MODULE=/path/to/node_modules/playwright REQUIRE_BROWSER=1 node tests/
 Without Playwright the browser stage prints `SKIP`; `REQUIRE_BROWSER=1` turns that
 into a failure.
 
-Checks include: exactly 58 unique entries (names, Pages URLs, repository URLs,
+Checks include: exactly 59 unique entries (names, Pages URLs, repository URLs,
 titles, screenshots); HTTPS-only links and correct repository URLs; no
 `github-pages-directory` self-entry; every repository in its expected primary
 category exactly once, with exactly the expected `alsoIn` secondary memberships; each screenshot path is relative and points at an existing 1365×900
-WebP with no orphans (all complete, non-blank lossy VP8), each entry's required `screenshotCapturedOn` (exact per entry: 2026-10-18 for 40 of the original 41, 2026-10-19 for the re-captured `bandwidth-compare`, the four additions, the two later additions and the final addition, and 2026-10-20 for the newest addition `ups-topology-guide` and the two latest additions `inside-the-machine` and `boba-passport`, and 2026-10-21 for the most recent addition `homelab-rack-atlas`, 2026-10-28 for the current addition `bit-atlas`, 2026-10-30 for the re-captured `Griefcase` and the 2026-10-30 addition `inside-neural-engine`, 2026-11-06 for the 2026-11-06 addition `guitar` and the 2026-11-07 addition `aleph-quest`, and 2026-11-07 for the later 2026-11-07 addition `baking`); relative asset paths; only the Google Fonts stylesheet as a
+WebP with no orphans (all complete, non-blank lossy VP8), each entry's required `screenshotCapturedOn` (exact per entry: 2026-10-18 for 40 of the original 41, 2026-10-19 for the re-captured `bandwidth-compare`, the four additions, the two later additions and the final addition, and 2026-10-20 for the newest addition `ups-topology-guide` and the two latest additions `inside-the-machine` and `boba-passport`, and 2026-10-21 for the most recent addition `homelab-rack-atlas`, 2026-10-28 for the current addition `bit-atlas`, 2026-10-30 for the re-captured `Griefcase` and the 2026-10-30 addition `inside-neural-engine`, 2026-11-06 for the 2026-11-06 addition `guitar` and the 2026-11-07 addition `aleph-quest`, 2026-11-07 for the later 2026-11-07 addition `baking`, and 2026-11-11 for the 2026-11-11 addition `scribes-labyrinth`); relative asset paths; only the Google Fonts stylesheet as a
 remote resource; no HTML-injection APIs; and accessibility basics (lang, landmarks,
 labelled search, category dropdown and checkbox group, alt text, focus styles, reduced motion,
 tap targets) plus the snapshot disclaimers in the meta description, footer and this README.
@@ -167,7 +175,7 @@ The masthead is just the eyebrow and title, with no result-status line; each con
 one outlined field with its short uppercase label inside, before the active value. The exact
 names, titles and source order are pinned, and every entry must carry valid ISO 8601
 UTC `createdAt` ≤ `updatedAt` ≤ its own retrieval time, matching the retrieved GitHub
-values; the `guitar`, `aleph-quest` and `baking` records are pinned exactly and the deferred repository must stay
+values; the `guitar`, `aleph-quest`, `baking` and `scribes-labyrinth` records are pinned exactly and the deferred repositories must stay
 unlisted; the page must offer a labelled *Sort by* select defaulting to *Recently created*.
 
 The browser stage serves the folder under `/github-pages-directory/` and, at desktop
@@ -179,7 +187,7 @@ search composition in every mode, zero results and both reset buttons, the dropd
 keys), tile structure (one h3-wrapped dialog button around image, category, created
 date and title, with no links or other metadata, every tile's date matching its
 `createdAt`, and unchanged category/title styles), the details
-dialog for all 58 sites (every field, link and date, layout and a 44px close button),
+dialog for all 59 sites (every field, link and date, layout and a 44px close button),
 real clicks/taps on the image and card background, Enter/Space, focus trap and
 restore, Esc/close button/backdrop closing, inert filters, the scroll lock, and the
 *Visit website* and *GitHub repo* links navigating, in-field labels (SEARCH, CATEGORY, SORT BY) with gold chevrons on the two menus,
@@ -210,7 +218,7 @@ per-entry retrieval named in its `note`),
 A site with `alsoIn` keeps its primary `category` and gets an extra card in each
 listed section; its card label names the primary category first. Category checkboxes and
 section headers count every member, while the empty state counts unique sites. Currently every Art & 3D site is also in
-Personal & Portfolio, and `aleph-quest` is also in Faith & Bible Study.
+Personal & Portfolio, and `aleph-quest` and `scribes-labyrinth` are also in Faith & Bible Study.
 
 Display titles were written by hand, using the 2026-10-18, 2026-10-19, 2026-10-20, 2026-10-21, 2026-10-28, 2026-10-30 and 2026-11-06 scans' page
 titles and headings only as hints. Scraped page text is never stored or rendered; the repo slug
@@ -227,4 +235,4 @@ from that retrieval; otherwise leave it and name the entry's own retrieval time 
 `repositoryDates.note` and this README. Reconcile the owner Pages inventory and keep the curated
 listed/deferred counts true, then adjust `EXPECTED_COUNT`, `EXPECTED_CATEGORIES`,
 `EXPECTED_ALSO_IN`, `EXPECTED_SITES` (including capture dates), `DATES_RETRIEVED`,
-`GUITAR_RETRIEVED`, `ALEPH_RETRIEVED`, `BAKING_RETRIEVED` and `DEFERRED` in `tests/verify.mjs`.
+`GUITAR_RETRIEVED`, `ALEPH_RETRIEVED`, `BAKING_RETRIEVED`, `SCRIBES_RETRIEVED` and `DEFERRED` in `tests/verify.mjs`.
