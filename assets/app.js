@@ -85,6 +85,10 @@
 
   const previewAlt = (site) => {
     const captured = longDate(site.screenshotCapturedOn);
+    // A user-supplied screenshot's date is when it was received; its capture date is unknown.
+    if (captured && site.screenshotDateKind === "received") {
+      return `User-supplied screenshot of ${site.title} (${site.name}), received ${captured}; actual capture date unknown`;
+    }
     return `Preview screenshot of ${site.title} (${site.name})${captured ? `, captured ${captured}` : ""}`;
   };
 
@@ -103,6 +107,12 @@
   function renderCapture(site) {
     const captured = longDate(site.screenshotCapturedOn);
     if (!captured) return [];
+    if (site.screenshotDateKind === "received") {
+      return [
+        el("time", { datetime: site.screenshotCapturedOn, title: `User-supplied screenshot received: ${site.screenshotCapturedOn}`, text: captured }),
+        el("span", { class: "details-muted", text: " · received · user-supplied screenshot; actual capture date unknown" }),
+      ];
+    }
     return [
       el("time", { datetime: site.screenshotCapturedOn, title: `Preview screenshot captured: ${site.screenshotCapturedOn}`, text: captured }),
       el("span", { class: "details-muted", text: " · static viewport capture" }),
