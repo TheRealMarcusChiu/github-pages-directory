@@ -7,9 +7,11 @@ import { dirname, join, extname, normalize as normalizePath } from "node:path";
 import { createServer } from "node:http";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const EXPECTED_COUNT = 60;
+const EXPECTED_COUNT = 61;
 const OWNER = "TheRealMarcusChiu";
-const SNAPSHOT = "2026-11-14";
+const SNAPSHOT = "2026-11-15";
+// The earlier snapshot day that neural-space was added in (historical, does not move with SNAPSHOT).
+const NOV14_SNAPSHOT = "2026-11-14";
 // The earlier snapshot day that aleph-quest and baking were added in (historical, does not move with SNAPSHOT).
 const NOV7_SNAPSHOT = "2026-11-07";
 // The earlier snapshot day that scribes-labyrinth was added in (historical, does not move with SNAPSHOT).
@@ -23,8 +25,9 @@ const NOV11_SNAPSHOT = "2026-11-11";
 // re-captured on 2026-10-30, the day of the 2026-10-30 addition (inside-neural-engine), and the 2026-11-06 addition
 // (guitar) was captured that day, as was the 2026-11-07 addition (aleph-quest), and the later 2026-11-07 addition (baking)
 // on 2026-11-07, and the 2026-11-11 addition (scribes-labyrinth) on 2026-11-11, and the 2026-11-14 addition (neural-space) on
-// 2026-11-14 — 40 previews dated 2026-10-18, 8 dated 2026-10-19, 3 dated 2026-10-20, 1 dated 2026-10-21, 1 dated 2026-10-28,
-// 2 dated 2026-10-30, 2 dated 2026-11-06, 1 dated 2026-11-07, 1 dated 2026-11-11, 1 dated 2026-11-14, 60 in total.
+// 2026-11-14, and the 2026-11-15 addition (dev-board-atlas) on 2026-11-15 — 40 previews dated 2026-10-18, 8 dated 2026-10-19,
+// 3 dated 2026-10-20, 1 dated 2026-10-21, 1 dated 2026-10-28, 2 dated 2026-10-30, 2 dated 2026-11-06, 1 dated 2026-11-07,
+// 1 dated 2026-11-11, 1 dated 2026-11-14, 1 dated 2026-11-15, 61 in total.
 const ORIGINAL_CAPTURE = "2026-10-18";
 const ADDED_CAPTURE = "2026-10-19";
 const NEWEST_CAPTURE = "2026-10-20";
@@ -35,6 +38,7 @@ const NOV6_CAPTURE = "2026-11-06";
 const NOV7_CAPTURE = "2026-11-07";
 const NOV11_CAPTURE = "2026-11-11";
 const NOV14_CAPTURE = "2026-11-14";
+const NOV15_CAPTURE = "2026-11-15";
 const ORIGINAL_COUNT = 41;
 const ADDED = ["confluence-obsidian-quartz", "f1-car-generations", "fake-personal-website", "wiki-viewer"];
 // Added later on 2026-10-19 (after the four above), appended in this order.
@@ -63,13 +67,15 @@ const NOV7_LATER_ADDED = ["baking"];
 const NOV11_ADDED = ["scribes-labyrinth"];
 // Added in the 2026-11-14 snapshot (after scribes-labyrinth), appended last; captured that day.
 const NOV14_ADDED = ["neural-space"];
-const ALL_ADDED = [...ADDED, ...LATER_ADDED, ...FINAL_ADDED, ...NEWEST_ADDED, ...LATEST_ADDED, ...RECENT_ADDED, ...CURRENT_ADDED, ...OCT30_ADDED, ...NOV6_ADDED, ...NOV7_ADDED, ...NOV7_LATER_ADDED, ...NOV11_ADDED, ...NOV14_ADDED];
+// Added in the 2026-11-15 snapshot (after neural-space), appended last; captured that day.
+const NOV15_ADDED = ["dev-board-atlas"];
+const ALL_ADDED = [...ADDED, ...LATER_ADDED, ...FINAL_ADDED, ...NEWEST_ADDED, ...LATEST_ADDED, ...RECENT_ADDED, ...CURRENT_ADDED, ...OCT30_ADDED, ...NOV6_ADDED, ...NOV7_ADDED, ...NOV7_LATER_ADDED, ...NOV11_ADDED, ...NOV14_ADDED, ...NOV15_ADDED];
 
 // Original entries whose preview was re-captured on ADDED_CAPTURE after a redeploy.
 const RECAPTURED = ["bandwidth-compare"];
 // 40 previews dated ORIGINAL_CAPTURE, 8 dated ADDED_CAPTURE, 3 dated NEWEST_CAPTURE, 1 dated RECENT_CAPTURE,
 // 1 dated CURRENT_CAPTURE, 2 dated OCT30_CAPTURE, 2 dated NOV6_CAPTURE, 1 dated NOV7_CAPTURE, 1 dated NOV11_CAPTURE,
-// 1 dated NOV14_CAPTURE.
+// 1 dated NOV14_CAPTURE, 1 dated NOV15_CAPTURE.
 const ORIGINAL_CAPTURE_COUNT = ORIGINAL_COUNT - RECAPTURED.length;
 const ADDED_CAPTURE_COUNT = RECAPTURED.length + ADDED.length + LATER_ADDED.length + FINAL_ADDED.length;
 const NEWEST_CAPTURE_COUNT = NEWEST_ADDED.length + LATEST_ADDED.length;
@@ -80,7 +86,8 @@ const NOV6_CAPTURE_COUNT = NOV6_ADDED.length + NOV7_ADDED.length;
 const NOV7_CAPTURE_COUNT = NOV7_LATER_ADDED.length;
 const NOV11_CAPTURE_COUNT = NOV11_ADDED.length;
 const NOV14_CAPTURE_COUNT = NOV14_ADDED.length;
-const LONG_DATE = { "2026-10-18": "18 October 2026", "2026-10-19": "19 October 2026", "2026-10-20": "20 October 2026", "2026-10-21": "21 October 2026", "2026-10-28": "28 October 2026", "2026-10-30": "30 October 2026", "2026-11-06": "6 November 2026", "2026-11-07": "7 November 2026", "2026-11-11": "11 November 2026", "2026-11-14": "14 November 2026" };
+const NOV15_CAPTURE_COUNT = NOV15_ADDED.length;
+const LONG_DATE = { "2026-11-15": "15 November 2026", "2026-10-18": "18 October 2026", "2026-10-19": "19 October 2026", "2026-10-20": "20 October 2026", "2026-10-21": "21 October 2026", "2026-10-28": "28 October 2026", "2026-10-30": "30 October 2026", "2026-11-06": "6 November 2026", "2026-11-07": "7 November 2026", "2026-11-11": "11 November 2026", "2026-11-14": "14 November 2026" };
 const PREVIEW_DIR = "assets/previews";
 const PREVIEW_SIZE = { width: 1365, height: 900 };
 const HOMEPAGE_REPO = "therealmarcuschiu.github.io";
@@ -93,7 +100,7 @@ const EXPECTED_CATEGORIES = [
   ["personal", "Personal & Portfolio", ["therealmarcuschiu.github.io", "personal-website", "personal-website-2-public", "personal-website-3", "projects", "now", "workouts", "images", "fake-personal-website", "boba-passport", "baking"]],
   ["writing", "Writing & Reflection", ["thoughts", "quotes", "meditations", "Griefcase"]],
   ["faith", "Faith & Bible Study", ["bible-graph", "the-law-of-first-mention"]],
-  ["tech", "Tech & Learning", ["bandwidth-compare", "barnes-hut-algorithm", "confluence-data", "display-tech-explorer", "fisher-information", "monitor-tech-guide", "tech", "visualizing-neural-networks", "obsidian-generator", "obsidian-stargazer", "crontab-guru-clone", "shazaam", "f1-car-generations", "zfs-layout-lab", "vram-fit-map", "display-decision-lab", "ups-topology-guide", "inside-the-machine", "homelab-rack-atlas", "bit-atlas", "inside-neural-engine", "neural-space"]],
+  ["tech", "Tech & Learning", ["bandwidth-compare", "barnes-hut-algorithm", "confluence-data", "display-tech-explorer", "fisher-information", "monitor-tech-guide", "tech", "visualizing-neural-networks", "obsidian-generator", "obsidian-stargazer", "crontab-guru-clone", "shazaam", "f1-car-generations", "zfs-layout-lab", "vram-fit-map", "display-decision-lab", "ups-topology-guide", "inside-the-machine", "homelab-rack-atlas", "bit-atlas", "inside-neural-engine", "neural-space", "dev-board-atlas"]],
   ["knowledge", "Knowledge & Reading", ["quartz", "stardust", "var-log", "var-log-1", "confluence-obsidian-quartz", "wiki-viewer"]],
   ["games", "Games & Simulations", ["better-plume", "birdseye-arena", "dark-twilight-imperium", "spinning-cube", "tetris-ascii", "tetris-canvas", "tetris-unicode", "tower-defense", "shared-canvas", "table-topics", "aleph-quest", "scribes-labyrinth"]],
   ["art", "Art & 3D", ["art", "my-room-in-3d", "guitar"]],
@@ -110,12 +117,12 @@ const EXPECTED_ALSO_IN = {
 const SECONDARY_COUNT = Object.values(EXPECTED_ALSO_IN).flat().length;
 const REQUIRED_OVERLAPS = [["art", "personal"]];
 // Exact source order, display titles, GitHub repository created_at / updated_at (from the authenticated owner Pages
-// inventory: the 2026-10-30 retrieval, except guitar's, aleph-quest's, baking's, scribes-labyrinth's and neural-space's own newer retrievals) and
+// inventory: the 2026-10-30 retrieval, except guitar's, aleph-quest's, baking's, scribes-labyrinth's, neural-space's and dev-board-atlas's own newer retrievals) and
 // per-entry preview capture date. Repository metadata only — not page-content dates. The four additions are appended after the
 // original 41, then the two later additions after them, then the final 2026-10-19 addition, then the newest addition, then the
 // two latest additions, then the most recent addition, then the two current additions, then the 2026-10-30 addition,
 // then the 2026-11-06 addition, then the 2026-11-07 addition, then the later 2026-11-07 addition, then the 2026-11-11 addition,
-// then the 2026-11-14 addition last.
+// then the 2026-11-14 addition, then the 2026-11-15 addition last.
 const EXPECTED_SITES = [
   ["therealmarcuschiu.github.io", "Account Home", "2020-07-12T18:05:00Z", "2026-10-26T22:40:55Z", "2026-10-18"],
   ["personal-website", "Personal Website · Developer (v1)", "2018-12-21T07:19:36Z", "2025-05-28T20:45:00Z", "2026-10-18"],
@@ -177,6 +184,7 @@ const EXPECTED_SITES = [
   ["baking", "Matcha Chiffon Cake", "2026-11-07T07:49:07Z", "2026-11-07T07:49:18Z", "2026-11-07"],
   ["scribes-labyrinth", "The Scribe’s Labyrinth", "2026-11-10T02:18:31Z", "2026-11-10T07:03:26Z", "2026-11-11"],
   ["neural-space", "Neural Space", "2026-11-14T22:11:44Z", "2026-11-14T22:11:52Z", "2026-11-14"],
+  ["dev-board-atlas", "Dev Board Atlas", "2026-11-15T08:09:38Z", "2026-11-15T18:18:09Z", "2026-11-15"],
 ];
 // Exact timestamp of the aggregate owner Pages inventory the dates of the 55 entries before guitar come from.
 const DATES_RETRIEVED = "2026-10-30T03:36:12.974716+00:00";
@@ -188,14 +196,16 @@ const ALEPH_RETRIEVED = "2026-11-07T00:37:46.850265+00:00";
 const BAKING_RETRIEVED = "2026-11-07T07:54:25.397992+00:00";
 // Newer owner inventory: the only source of scribes-labyrinth's dates.
 const SCRIBES_RETRIEVED = "2026-11-11T00:55:03.898738+00:00";
-// Newest owner inventory: the only source of neural-space's dates, and of the curated scope below.
+// Newer owner inventory: the only source of neural-space's dates.
 const NEURAL_RETRIEVED = "2026-11-14T22:33:31.807594+00:00";
-const PUBLIC_PAGES_COUNT = 66;
+// Newest owner inventory: the only source of dev-board-atlas's dates, and of the curated scope below.
+const DEV_BOARD_RETRIEVED = "2026-11-15T18:20:25Z";
+const PUBLIC_PAGES_COUNT = 68;
 const SELF_EXCLUDED = 1;
 // Eligible in that inventory but deliberately not cards.
-const DEFERRED = ["afterimage", "cwe-triage-lab", "cwe-triage-lab-v2", "mesh-radio-academy", "oscilloscope-specs-lab"];
+const DEFERRED = ["afterimage", "cwe-triage-lab", "cwe-triage-lab-v2", "mesh-radio-academy", "oscilloscope-specs-lab", "yt2tab"];
 const DEFERRED_LIST = (fmt = (n) => n) => new Intl.ListFormat("en", { type: "conjunction" }).format(DEFERRED.map(fmt));
-const retrievedFor = (s) => (NOV14_ADDED.includes(s.name) ? NEURAL_RETRIEVED : NOV11_ADDED.includes(s.name) ? SCRIBES_RETRIEVED :NOV7_LATER_ADDED.includes(s.name) ? BAKING_RETRIEVED : NOV7_ADDED.includes(s.name) ? ALEPH_RETRIEVED : NOV6_ADDED.includes(s.name) ? GUITAR_RETRIEVED : DATES_RETRIEVED);
+const retrievedFor = (s) => (NOV15_ADDED.includes(s.name) ? DEV_BOARD_RETRIEVED : NOV14_ADDED.includes(s.name) ? NEURAL_RETRIEVED : NOV11_ADDED.includes(s.name) ? SCRIBES_RETRIEVED :NOV7_LATER_ADDED.includes(s.name) ? BAKING_RETRIEVED : NOV7_ADDED.includes(s.name) ? ALEPH_RETRIEVED : NOV6_ADDED.includes(s.name) ? GUITAR_RETRIEVED : DATES_RETRIEVED);
 // Earlier retrievals (and the old bit-atlas later-lookup exception wording) that must not linger.
 const STALE_RETRIEVALS = /2026-10-19T21:46:15Z|2026-10-20T01:28:53Z|2026-10-28T00:50:50Z|2026-10-28T04:42:51Z|later lookup|carried forward|not applied/;
 const ISO_UTC = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
@@ -253,11 +263,12 @@ check(/screenshotCapturedOn/.test(screenshotNote) &&
   screenshotNote.includes(`the ${NOV7_SNAPSHOT} addition (${NOV7_ADDED.join(", ")}) was captured on ${NOV6_CAPTURE}`) &&
   screenshotNote.includes(`the later ${NOV7_SNAPSHOT} addition (${NOV7_LATER_ADDED.join(", ")}) was captured on ${NOV7_CAPTURE}`) &&
   screenshotNote.includes(`the ${NOV11_SNAPSHOT} addition (${NOV11_ADDED.join(", ")}) was captured on ${NOV11_CAPTURE}`) &&
-  screenshotNote.includes(`the ${SNAPSHOT} addition (${NOV14_ADDED.join(", ")}) was captured on ${NOV14_CAPTURE}`) &&
-  screenshotNote.includes(`${ORIGINAL_CAPTURE_COUNT} previews are dated ${ORIGINAL_CAPTURE}, ${ADDED_CAPTURE_COUNT} are dated ${ADDED_CAPTURE}, ${NEWEST_CAPTURE_COUNT} are dated ${NEWEST_CAPTURE}, ${RECENT_CAPTURE_COUNT} is dated ${RECENT_CAPTURE}, ${CURRENT_CAPTURE_COUNT} is dated ${CURRENT_CAPTURE}, ${OCT30_CAPTURE_COUNT} are dated ${OCT30_CAPTURE}, ${NOV6_CAPTURE_COUNT} are dated ${NOV6_CAPTURE}, ${NOV7_CAPTURE_COUNT} is dated ${NOV7_CAPTURE}, ${NOV11_CAPTURE_COUNT} is dated ${NOV11_CAPTURE} and ${NOV14_CAPTURE_COUNT} is dated ${NOV14_CAPTURE}`) &&
+  screenshotNote.includes(`the ${NOV14_SNAPSHOT} addition (${NOV14_ADDED.join(", ")}) was captured on ${NOV14_CAPTURE}`) &&
+  screenshotNote.includes(`the ${SNAPSHOT} addition (${NOV15_ADDED.join(", ")}) was captured on ${NOV15_CAPTURE}`) &&
+  screenshotNote.includes(`${ORIGINAL_CAPTURE_COUNT} previews are dated ${ORIGINAL_CAPTURE}, ${ADDED_CAPTURE_COUNT} are dated ${ADDED_CAPTURE}, ${NEWEST_CAPTURE_COUNT} are dated ${NEWEST_CAPTURE}, ${RECENT_CAPTURE_COUNT} is dated ${RECENT_CAPTURE}, ${CURRENT_CAPTURE_COUNT} is dated ${CURRENT_CAPTURE}, ${OCT30_CAPTURE_COUNT} are dated ${OCT30_CAPTURE}, ${NOV6_CAPTURE_COUNT} are dated ${NOV6_CAPTURE}, ${NOV7_CAPTURE_COUNT} is dated ${NOV7_CAPTURE}, ${NOV11_CAPTURE_COUNT} is dated ${NOV11_CAPTURE}, ${NOV14_CAPTURE_COUNT} is dated ${NOV14_CAPTURE} and ${NOV15_CAPTURE_COUNT} is dated ${NOV15_CAPTURE}`) &&
   !/The original \d+ previews were captured/.test(screenshotNote) &&
   /may have changed/.test(screenshotNote),
-  `screenshot note says ${ORIGINAL_COUNT - RECAPTURED.length} of the original ${ORIGINAL_COUNT} are dated ${ORIGINAL_CAPTURE}, ${RECAPTURED.join(", ")} was re-captured on ${ADDED_CAPTURE}, the other additions are dated ${ADDED_CAPTURE}, ${[...NEWEST_ADDED, ...LATEST_ADDED].join(", ")} are dated ${NEWEST_CAPTURE}, ${RECENT_ADDED.join(", ")} is dated ${RECENT_CAPTURE}, bit-atlas is dated ${CURRENT_CAPTURE}, ${[...OCT30_RECAPTURED, ...OCT30_ADDED].join(", ")} are dated ${OCT30_CAPTURE}, ${[...NOV6_ADDED, ...NOV7_ADDED].join(", ")} are dated ${NOV6_CAPTURE}, ${NOV7_LATER_ADDED.join(", ")} is dated ${NOV7_CAPTURE}, ${NOV11_ADDED.join(", ")} is dated ${NOV11_CAPTURE} and ${NOV14_ADDED.join(", ")} is dated ${NOV14_CAPTURE} (${ORIGINAL_CAPTURE_COUNT}/${ADDED_CAPTURE_COUNT}/${NEWEST_CAPTURE_COUNT}/${RECENT_CAPTURE_COUNT}/${CURRENT_CAPTURE_COUNT}/${OCT30_CAPTURE_COUNT}/${NOV6_CAPTURE_COUNT}/${NOV7_CAPTURE_COUNT}/${NOV11_CAPTURE_COUNT}/${NOV14_CAPTURE_COUNT})`);
+  `screenshot note says ${ORIGINAL_COUNT - RECAPTURED.length} of the original ${ORIGINAL_COUNT} are dated ${ORIGINAL_CAPTURE}, ${RECAPTURED.join(", ")} was re-captured on ${ADDED_CAPTURE}, the other additions are dated ${ADDED_CAPTURE}, ${[...NEWEST_ADDED, ...LATEST_ADDED].join(", ")} are dated ${NEWEST_CAPTURE}, ${RECENT_ADDED.join(", ")} is dated ${RECENT_CAPTURE}, bit-atlas is dated ${CURRENT_CAPTURE}, ${[...OCT30_RECAPTURED, ...OCT30_ADDED].join(", ")} are dated ${OCT30_CAPTURE}, ${[...NOV6_ADDED, ...NOV7_ADDED].join(", ")} are dated ${NOV6_CAPTURE}, ${NOV7_LATER_ADDED.join(", ")} is dated ${NOV7_CAPTURE}, ${NOV11_ADDED.join(", ")} is dated ${NOV11_CAPTURE}, ${NOV14_ADDED.join(", ")} is dated ${NOV14_CAPTURE} and ${NOV15_ADDED.join(", ")} is dated ${NOV15_CAPTURE} (${ORIGINAL_CAPTURE_COUNT}/${ADDED_CAPTURE_COUNT}/${NEWEST_CAPTURE_COUNT}/${RECENT_CAPTURE_COUNT}/${CURRENT_CAPTURE_COUNT}/${OCT30_CAPTURE_COUNT}/${NOV6_CAPTURE_COUNT}/${NOV7_CAPTURE_COUNT}/${NOV11_CAPTURE_COUNT}/${NOV14_CAPTURE_COUNT}/${NOV15_CAPTURE_COUNT})`);
 
 const names = sites.map((s) => s.name);
 const unique = (key) => new Set(sites.map((s) => s[key])).size === sites.length;
@@ -294,13 +305,13 @@ check(JSON.stringify(sites.map((s) => [s.name, s.title])) === JSON.stringify(EXP
   `the ${EXPECTED_COUNT} names and display titles match, in source order`);
 check(EXPECTED_SITES.length === EXPECTED_COUNT && ORIGINAL_COUNT + ALL_ADDED.length === EXPECTED_COUNT &&
   JSON.stringify(names.slice(ORIGINAL_COUNT)) === JSON.stringify(ALL_ADDED),
-  `the original ${ORIGINAL_COUNT} keep their relative order, then the ${ADDED.length} additions, then the ${LATER_ADDED.length} later additions (${LATER_ADDED.join(", ")}), then the final addition (${FINAL_ADDED.join(", ")}), then the newest addition (${NEWEST_ADDED.join(", ")}), then the latest additions (${LATEST_ADDED.join(", ")}), then the most recent addition (${RECENT_ADDED.join(", ")}), then the current additions (${CURRENT_ADDED.join(", ")}), then the ${OCT30_CAPTURE} addition (${OCT30_ADDED.join(", ")}), then the ${NOV6_CAPTURE} addition (${NOV6_ADDED.join(", ")}), then the ${NOV7_SNAPSHOT} addition (${NOV7_ADDED.join(", ")}), then the later ${NOV7_SNAPSHOT} addition (${NOV7_LATER_ADDED.join(", ")}), then the ${NOV11_SNAPSHOT} addition (${NOV11_ADDED.join(", ")}), then the ${SNAPSHOT} addition (${NOV14_ADDED.join(", ")})`);
+  `the original ${ORIGINAL_COUNT} keep their relative order, then the ${ADDED.length} additions, then the ${LATER_ADDED.length} later additions (${LATER_ADDED.join(", ")}), then the final addition (${FINAL_ADDED.join(", ")}), then the newest addition (${NEWEST_ADDED.join(", ")}), then the latest additions (${LATEST_ADDED.join(", ")}), then the most recent addition (${RECENT_ADDED.join(", ")}), then the current additions (${CURRENT_ADDED.join(", ")}), then the ${OCT30_CAPTURE} addition (${OCT30_ADDED.join(", ")}), then the ${NOV6_CAPTURE} addition (${NOV6_ADDED.join(", ")}), then the ${NOV7_SNAPSHOT} addition (${NOV7_ADDED.join(", ")}), then the later ${NOV7_SNAPSHOT} addition (${NOV7_LATER_ADDED.join(", ")}), then the ${NOV11_SNAPSHOT} addition (${NOV11_ADDED.join(", ")}), then the ${NOV14_SNAPSHOT} addition (${NOV14_ADDED.join(", ")}), then the ${SNAPSHOT} addition (${NOV15_ADDED.join(", ")})`);
 
 // Repository dates (GitHub created_at / updated_at)
 const meta = data.repositoryDates ?? {};
-check(meta.retrievedAt === DATES_RETRIEVED && DATES_RETRIEVED < GUITAR_RETRIEVED && GUITAR_RETRIEVED < ALEPH_RETRIEVED && ALEPH_RETRIEVED < BAKING_RETRIEVED && BAKING_RETRIEVED < SCRIBES_RETRIEVED && SCRIBES_RETRIEVED.startsWith(NOV11_SNAPSHOT) && SCRIBES_RETRIEVED < NEURAL_RETRIEVED && NEURAL_RETRIEVED.startsWith(SNAPSHOT) && /created_at/.test(meta.source ?? "") &&
+check(meta.retrievedAt === DATES_RETRIEVED && DATES_RETRIEVED < GUITAR_RETRIEVED && GUITAR_RETRIEVED < ALEPH_RETRIEVED && ALEPH_RETRIEVED < BAKING_RETRIEVED && BAKING_RETRIEVED < SCRIBES_RETRIEVED && SCRIBES_RETRIEVED.startsWith(NOV11_SNAPSHOT) && SCRIBES_RETRIEVED < NEURAL_RETRIEVED && NEURAL_RETRIEVED.startsWith(NOV14_SNAPSHOT) && NEURAL_RETRIEVED < DEV_BOARD_RETRIEVED && DEV_BOARD_RETRIEVED.startsWith(SNAPSHOT) && /created_at/.test(meta.source ?? "") &&
   /updated_at/.test(meta.source ?? "") && /not page-content dates/i.test(meta.note ?? ""),
-  "repositoryDates records the GitHub API source, keeps the older aggregate retrieval time, and says these are not page-content dates; the snapshot day is neural-space's newest retrieval");
+  "repositoryDates records the GitHub API source, keeps the older aggregate retrieval time, and says these are not page-content dates; the snapshot day is dev-board-atlas's newest retrieval");
 check((meta.note ?? "").includes(`retrievedAt is the ${DATES_RETRIEVED} owner Pages inventory`) &&
   (meta.note ?? "").includes("55 entries before guitar, which have not been refreshed since") &&
   (meta.note ?? "").includes(`Only guitar's dates come from the newer ${GUITAR_RETRIEVED} retrieval`) &&
@@ -308,8 +319,9 @@ check((meta.note ?? "").includes(`retrievedAt is the ${DATES_RETRIEVED} owner Pa
   (meta.note ?? "").includes(`only baking's dates come from the newer ${BAKING_RETRIEVED} retrieval`) &&
   (meta.note ?? "").includes(`only scribes-labyrinth's dates come from the newer ${SCRIBES_RETRIEVED} retrieval`) &&
   (meta.note ?? "").includes(`only neural-space's dates come from the newer ${NEURAL_RETRIEVED} retrieval`) &&
+  (meta.note ?? "").includes(`only dev-board-atlas's dates come from the newer ${DEV_BOARD_RETRIEVED} retrieval`) &&
   !/every entry/i.test(meta.note ?? "") && !STALE_RETRIEVALS.test(meta.note ?? ""),
-  `repositoryDates names ${DATES_RETRIEVED} for the 55 older entries, ${GUITAR_RETRIEVED} for guitar only, ${ALEPH_RETRIEVED} for aleph-quest only, ${BAKING_RETRIEVED} for baking only, ${SCRIBES_RETRIEVED} for scribes-labyrinth only and ${NEURAL_RETRIEVED} for neural-space only, claiming no full refresh`);
+  `repositoryDates names ${DATES_RETRIEVED} for the 55 older entries, ${GUITAR_RETRIEVED} for guitar only, ${ALEPH_RETRIEVED} for aleph-quest only, ${BAKING_RETRIEVED} for baking only, ${SCRIBES_RETRIEVED} for scribes-labyrinth only, ${NEURAL_RETRIEVED} for neural-space only and ${DEV_BOARD_RETRIEVED} for dev-board-atlas only, claiming no full refresh`);
 check(!("capturedOn" in meta) && !/screenshot|capture/i.test(meta.note ?? ""), "repositoryDates stays separate from preview capture dates");
 const validIso = (t) => typeof t === "string" && ISO_UTC.test(t) && new Date(t).toISOString() === t.replace("Z", ".000Z");
 const badStamps = sites.filter((s) => !validIso(s.createdAt) || !validIso(s.updatedAt)).map((s) => s.name);
@@ -380,40 +392,46 @@ for (const pin of PINNED) {
 const griefcase = sites.find((s) => s.name === "Griefcase");
 check(griefcase?.url === "https://git.marcuschiu.com/Griefcase/" && griefcase?.screenshot === `${PREVIEW_DIR}/griefcase.webp`,
   "Griefcase keeps its uppercase Pages URL and lowercase preview path");
-check(JSON.stringify(sites.at(-5)) === JSON.stringify({
+check(JSON.stringify(sites.at(-6)) === JSON.stringify({
   name: "guitar", title: "Guitar", category: "art",
   url: "https://git.marcuschiu.com/guitar/", repository: "https://github.com/TheRealMarcusChiu/guitar",
   alsoIn: ["personal"], screenshot: `${PREVIEW_DIR}/guitar.webp`, screenshotCapturedOn: NOV6_CAPTURE,
   createdAt: "2026-11-06T03:03:11Z", updatedAt: "2026-11-06T04:15:47Z",
-}), "guitar is the exact fifth-to-last record (title, Art & 3D + Personal, canonical URL, repository, preview, capture and repository dates)");
-check(JSON.stringify(sites.at(-4)) === JSON.stringify({
+}), "guitar is the exact sixth-to-last record (title, Art & 3D + Personal, canonical URL, repository, preview, capture and repository dates)");
+check(JSON.stringify(sites.at(-5)) === JSON.stringify({
   name: "aleph-quest", title: "Aleph Quest", category: "games",
   url: "https://git.marcuschiu.com/aleph-quest/", repository: "https://github.com/TheRealMarcusChiu/aleph-quest",
   alsoIn: ["faith"], screenshot: `${PREVIEW_DIR}/aleph-quest.webp`, screenshotCapturedOn: NOV6_CAPTURE,
   createdAt: "2026-11-06T22:12:20Z", updatedAt: "2026-11-06T22:26:46Z",
-}), "aleph-quest is the exact fourth-to-last record (title, Games + Faith, canonical URL, repository, preview, capture and repository dates)");
-check(JSON.stringify(sites.at(-3)) === JSON.stringify({
+}), "aleph-quest is the exact fifth-to-last record (title, Games + Faith, canonical URL, repository, preview, capture and repository dates)");
+check(JSON.stringify(sites.at(-4)) === JSON.stringify({
   name: "baking", title: "Matcha Chiffon Cake", category: "personal",
   url: "https://git.marcuschiu.com/baking/", repository: "https://github.com/TheRealMarcusChiu/baking",
   screenshot: `${PREVIEW_DIR}/baking.webp`, screenshotCapturedOn: NOV7_CAPTURE,
   createdAt: "2026-11-07T07:49:07Z", updatedAt: "2026-11-07T07:49:18Z",
-}), "baking is the exact third-to-last record (title, Personal, canonical URL, repository, preview, capture and repository dates)");
-check(JSON.stringify(sites.at(-2)) === JSON.stringify({
+}), "baking is the exact fourth-to-last record (title, Personal, canonical URL, repository, preview, capture and repository dates)");
+check(JSON.stringify(sites.at(-3)) === JSON.stringify({
   name: "scribes-labyrinth", title: "The Scribe’s Labyrinth", category: "games",
   url: "https://git.marcuschiu.com/scribes-labyrinth/", repository: "https://github.com/TheRealMarcusChiu/scribes-labyrinth",
   alsoIn: ["faith"], screenshot: `${PREVIEW_DIR}/scribes-labyrinth.webp`, screenshotCapturedOn: NOV11_CAPTURE,
   createdAt: "2026-11-10T02:18:31Z", updatedAt: "2026-11-10T07:03:26Z",
-}), "scribes-labyrinth is the exact second-to-last record (curly-apostrophe title, Games + Faith, canonical URL, repository, preview, capture and repository dates)");
-check(JSON.stringify(sites.at(-1)) === JSON.stringify({
+}), "scribes-labyrinth is the exact third-to-last record (curly-apostrophe title, Games + Faith, canonical URL, repository, preview, capture and repository dates)");
+check(JSON.stringify(sites.at(-2)) === JSON.stringify({
   name: "neural-space", title: "Neural Space", category: "tech",
   url: "https://git.marcuschiu.com/neural-space/", repository: "https://github.com/TheRealMarcusChiu/neural-space",
   screenshot: `${PREVIEW_DIR}/neural-space.webp`, screenshotCapturedOn: NOV14_CAPTURE,
   createdAt: "2026-11-14T22:11:44Z", updatedAt: "2026-11-14T22:11:52Z",
-}), "neural-space is the exact last record (title, Tech only, canonical URL, repository, preview, capture and repository dates)");
+}), "neural-space is the exact second-to-last record (title, Tech only, canonical URL, repository, preview, capture and repository dates)");
+check(JSON.stringify(sites.at(-1)) === JSON.stringify({
+  name: "dev-board-atlas", title: "Dev Board Atlas", category: "tech",
+  url: "https://git.marcuschiu.com/dev-board-atlas/", repository: "https://github.com/TheRealMarcusChiu/dev-board-atlas",
+  screenshot: `${PREVIEW_DIR}/dev-board-atlas.webp`, screenshotCapturedOn: NOV15_CAPTURE,
+  createdAt: "2026-11-15T08:09:38Z", updatedAt: "2026-11-15T18:18:09Z",
+}), "dev-board-atlas is the exact last record (title, Tech only, canonical URL, repository, preview, capture and repository dates)");
 // Curated scope: the listed count is not the whole eligible inventory.
 check(PUBLIC_PAGES_COUNT - SELF_EXCLUDED === EXPECTED_COUNT + DEFERRED.length && !DEFERRED.some((n) => names.some((m) => m.toLowerCase() === n)) &&
-  [NEURAL_RETRIEVED, `${PUBLIC_PAGES_COUNT} public`, `${PUBLIC_PAGES_COUNT - SELF_EXCLUDED} excluding this directory`, `${EXPECTED_COUNT} are listed`, `${DEFERRED_LIST()} are deferred`].every((t) => (data.description ?? "").includes(t)) &&
-  !/aleph-quest|baking|scribes-labyrinth|neural-space/.test(data.description ?? ""),
+  [DEV_BOARD_RETRIEVED, `${PUBLIC_PAGES_COUNT} public`, `${PUBLIC_PAGES_COUNT - SELF_EXCLUDED} excluding this directory`, `${EXPECTED_COUNT} are listed`, `${DEFERRED_LIST()} are deferred`].every((t) => (data.description ?? "").includes(t)) &&
+  !/aleph-quest|baking|scribes-labyrinth|neural-space|dev-board-atlas/.test(data.description ?? ""),
   `data description states the curated scope: ${EXPECTED_COUNT} listed of ${PUBLIC_PAGES_COUNT - SELF_EXCLUDED} eligible, only ${DEFERRED.join(", ")} deferred, not a card`);
 
 // Screenshots
@@ -513,6 +531,9 @@ check(sites.filter((s) => NOV11_ADDED.includes(s.name)).length === NOV11_CAPTURE
 check(sites.filter((s) => NOV14_ADDED.includes(s.name)).length === NOV14_CAPTURE_COUNT &&
   sites.filter((s) => NOV14_ADDED.includes(s.name)).every((s) => s.screenshotCapturedOn === NOV14_CAPTURE),
   `the added ${NOV14_ADDED.join(", ")} preview is dated ${NOV14_CAPTURE}`);
+check(sites.filter((s) => NOV15_ADDED.includes(s.name)).length === NOV15_CAPTURE_COUNT &&
+  sites.filter((s) => NOV15_ADDED.includes(s.name)).every((s) => s.screenshotCapturedOn === NOV15_CAPTURE),
+  `the added ${NOV15_ADDED.join(", ")} preview is dated ${NOV15_CAPTURE}`);
 const datedOriginal = sites.filter((s) => s.screenshotCapturedOn === ORIGINAL_CAPTURE).length;
 const datedAdded = sites.filter((s) => s.screenshotCapturedOn === ADDED_CAPTURE).length;
 const datedNewest = sites.filter((s) => s.screenshotCapturedOn === NEWEST_CAPTURE).length;
@@ -523,13 +544,14 @@ const datedNov6 = sites.filter((s) => s.screenshotCapturedOn === NOV6_CAPTURE).l
 const datedNov7 = sites.filter((s) => s.screenshotCapturedOn === NOV7_CAPTURE).length;
 const datedNov11 = sites.filter((s) => s.screenshotCapturedOn === NOV11_CAPTURE).length;
 const datedNov14 = sites.filter((s) => s.screenshotCapturedOn === NOV14_CAPTURE).length;
+const datedNov15 = sites.filter((s) => s.screenshotCapturedOn === NOV15_CAPTURE).length;
 check(ORIGINAL_CAPTURE_COUNT === 40 && ADDED_CAPTURE_COUNT === 8 && NEWEST_CAPTURE_COUNT === 3 && RECENT_CAPTURE_COUNT === 1 &&
-  CURRENT_CAPTURE_COUNT === 1 && OCT30_CAPTURE_COUNT === 2 && NOV6_CAPTURE_COUNT === 2 && NOV7_CAPTURE_COUNT === 1 && NOV11_CAPTURE_COUNT === 1 && NOV14_CAPTURE_COUNT === 1 &&
+  CURRENT_CAPTURE_COUNT === 1 && OCT30_CAPTURE_COUNT === 2 && NOV6_CAPTURE_COUNT === 2 && NOV7_CAPTURE_COUNT === 1 && NOV11_CAPTURE_COUNT === 1 && NOV14_CAPTURE_COUNT === 1 && NOV15_CAPTURE_COUNT === 1 &&
   datedOriginal === ORIGINAL_CAPTURE_COUNT && datedAdded === ADDED_CAPTURE_COUNT && datedNewest === NEWEST_CAPTURE_COUNT &&
   datedRecent === RECENT_CAPTURE_COUNT && datedCurrent === CURRENT_CAPTURE_COUNT && datedOct30 === OCT30_CAPTURE_COUNT && datedNov6 === NOV6_CAPTURE_COUNT && datedNov7 === NOV7_CAPTURE_COUNT &&
-  datedNov11 === NOV11_CAPTURE_COUNT && datedNov14 === NOV14_CAPTURE_COUNT &&
-  datedOriginal + datedAdded + datedNewest + datedRecent + datedCurrent + datedOct30 + datedNov6 + datedNov7 + datedNov11 + datedNov14 === EXPECTED_COUNT,
-  `${ORIGINAL_CAPTURE_COUNT} previews dated ${ORIGINAL_CAPTURE} + ${ADDED_CAPTURE_COUNT} dated ${ADDED_CAPTURE} + ${NEWEST_CAPTURE_COUNT} dated ${NEWEST_CAPTURE} + ${RECENT_CAPTURE_COUNT} dated ${RECENT_CAPTURE} + ${CURRENT_CAPTURE_COUNT} dated ${CURRENT_CAPTURE} + ${OCT30_CAPTURE_COUNT} dated ${OCT30_CAPTURE} + ${NOV6_CAPTURE_COUNT} dated ${NOV6_CAPTURE} + ${NOV7_CAPTURE_COUNT} dated ${NOV7_CAPTURE} + ${NOV11_CAPTURE_COUNT} dated ${NOV11_CAPTURE} + ${NOV14_CAPTURE_COUNT} dated ${NOV14_CAPTURE} = ${EXPECTED_COUNT} (found ${datedOriginal} + ${datedAdded} + ${datedNewest} + ${datedRecent} + ${datedCurrent} + ${datedOct30} + ${datedNov6} + ${datedNov7} + ${datedNov11} + ${datedNov14})`);
+  datedNov11 === NOV11_CAPTURE_COUNT && datedNov14 === NOV14_CAPTURE_COUNT && datedNov15 === NOV15_CAPTURE_COUNT &&
+  datedOriginal + datedAdded + datedNewest + datedRecent + datedCurrent + datedOct30 + datedNov6 + datedNov7 + datedNov11 + datedNov14 + datedNov15 === EXPECTED_COUNT,
+  `${ORIGINAL_CAPTURE_COUNT} previews dated ${ORIGINAL_CAPTURE} + ${ADDED_CAPTURE_COUNT} dated ${ADDED_CAPTURE} + ${NEWEST_CAPTURE_COUNT} dated ${NEWEST_CAPTURE} + ${RECENT_CAPTURE_COUNT} dated ${RECENT_CAPTURE} + ${CURRENT_CAPTURE_COUNT} dated ${CURRENT_CAPTURE} + ${OCT30_CAPTURE_COUNT} dated ${OCT30_CAPTURE} + ${NOV6_CAPTURE_COUNT} dated ${NOV6_CAPTURE} + ${NOV7_CAPTURE_COUNT} dated ${NOV7_CAPTURE} + ${NOV11_CAPTURE_COUNT} dated ${NOV11_CAPTURE} + ${NOV14_CAPTURE_COUNT} dated ${NOV14_CAPTURE} + ${NOV15_CAPTURE_COUNT} dated ${NOV15_CAPTURE} = ${EXPECTED_COUNT} (found ${datedOriginal} + ${datedAdded} + ${datedNewest} + ${datedRecent} + ${datedCurrent} + ${datedOct30} + ${datedNov6} + ${datedNov7} + ${datedNov11} + ${datedNov14} + ${datedNov15})`);
 
 // ---------------------------------------------------------------- HTML / assets
 const html = read("index.html");
@@ -588,14 +610,14 @@ check(/id="empty"[^>]*hidden/.test(html), "empty state exists and is hidden by d
 check(html.includes('href="assets/styles.css"'), "stylesheet linked with a relative path");
 check(html.includes('src="assets/app.js"'), "script linked with a relative path");
 const metaDescription = html.match(/<meta name="description" content="([^"]*)"/)?.[1] ?? "";
-check(/<time datetime="2026-11-14">2026-11-14<\/time>/.test(footerHtml) && /dated 14 November 2026/.test(metaDescription) && !/<time/.test(mastheadHtml),
-  "snapshot date 2026-11-14 kept in the footer and meta description, not the masthead");
-check(!/2026-10-(?:1[89]|2[018]|30)|2026-11-(?:0[67]|11)|(?:1[89]|2[018]|30) October 2026|\b(?:[67]|11) November 2026/.test(html), "no stale 18/19/20/21/28/30 October or 6/7/11 November snapshot/global capture date in the page");
-check(/60 sites/.test(footerHtml) && /60-site/.test(metaDescription), "footer and meta description describe 60 sites");
-check(!/\b(?:4[578]|5[123456789])(?: sites|-site|<\/strong>)/.test(html), "no stale 45-, 47-, 48-, 51-, 52-, 53-, 54-, 55-, 56-, 57-, 58- or 59-site count in the page");
+check(/<time datetime="2026-11-15">2026-11-15<\/time>/.test(footerHtml) && /dated 15 November 2026/.test(metaDescription) && !/<time/.test(mastheadHtml),
+  "snapshot date 2026-11-15 kept in the footer and meta description, not the masthead");
+check(!/2026-10-(?:1[89]|2[018]|30)|2026-11-(?:0[67]|1[14])|(?:1[89]|2[018]|30) October 2026|\b(?:[67]|1[14]) November 2026/.test(html), "no stale 18/19/20/21/28/30 October or 6/7/11/14 November snapshot/global capture date in the page");
+check(/61 sites/.test(footerHtml) && /61-site/.test(metaDescription), "footer and meta description describe 61 sites");
+check(!/\b(?:4[578]|5[123456789]|60)(?: sites|-site|<\/strong>)/.test(html), "no stale 45-, 47-, 48-, 51-, 52-, 53-, 54-, 55-, 56-, 57-, 58-, 59- or 60-site count in the page");
 check(/GitHub Pages configured/.test(metaDescription), "meta description says membership means GitHub Pages is configured");
 check(/capture dates vary by entry/.test(metaDescription), "meta description says preview capture dates vary by entry");
-check(/Static 60-site snapshot/.test(metaDescription) && /curated/i.test(metaDescription) && /^Snapshot /.test(footerText), "meta description and footer present the page as a curated static snapshot");
+check(/Static 61-site snapshot/.test(metaDescription) && /curated/i.test(metaDescription) && /^Snapshot /.test(footerText), "meta description and footer present the page as a curated static snapshot");
 check(/1365×900/.test(metaDescription) && /viewport (?:previews?|captures?)/i.test(metaDescription), "meta description says screenshots are 1365×900 viewport captures");
 const headerText = mastheadHtml.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 check(headerText === "TheRealMarcusChiu · GitHub Pages Pages, gathered.", `masthead text is just the eyebrow and title (“${headerText}”)`);
@@ -704,23 +726,23 @@ check(/--tap:\s*2\.75rem/.test(css) && /min-height: var\(--tap\)/.test(css), "co
 // README
 check(readme.includes(SNAPSHOT) && /not automatically synced/i.test(readme), "README states the snapshot date and that it is not synced");
 check(/1365×900/.test(readme) && /may have changed/i.test(readme), "README notes screenshots are dated 1365×900 previews");
-check(/\(60 entries\)/.test(readme) && /exactly 60 unique entries/.test(readme) && /60 local 1365×900/.test(readme) &&
-  !/\((?:41|45|47|48|49|51|52|53|54|55|56|57|58|59) entries\)|exactly (?:41|45|47|48|49|51|52|53|54|55|56|57|58|59) unique|(?:41|45|47|48|49|51|52|53|54|55|56|57|58|59) local/.test(readme), "README describes 60 entries, not the old 41, 45, 47, 48, 49, 51, 52, 53, 54, 55, 56, 57, 58 or 59");
-check([...LATER_ADDED, ...FINAL_ADDED, ...NEWEST_ADDED, ...LATEST_ADDED, ...RECENT_ADDED, ...CURRENT_ADDED, ...OCT30_ADDED, ...NOV6_ADDED, ...NOV7_ADDED, ...NOV7_LATER_ADDED, ...NOV11_ADDED, ...NOV14_ADDED].every((n) => readme.includes(`\`${n}\``)) &&
-  /40 previews dated 2026-10-18, 8 dated 2026-10-19,\s+3 dated 2026-10-20,\s+1 dated 2026-10-21, 1 dated 2026-10-28, 2 dated 2026-10-30,\s+2 dated 2026-11-06, 1 dated 2026-11-07, 1 dated 2026-11-11, 1 dated 2026-11-14, 60 in total/.test(readme) &&
-  !/\b[57] dated 2026-10-19|\b1 dated 2026-10-20|\b2 dated 2026-10-28|\b1 dated 2026-11-06|(?:4[789]|5[0-9]) in total/.test(readme), "README capture prose counts 40 + 8 + 3 + 1 + 1 + 2 + 2 + 1 + 1 + 1 = 60 previews and names the later, final, newest, latest, most recent, current, 2026-10-30, 2026-11-06, both 2026-11-07, the 2026-11-11 and the 2026-11-14 additions");
+check(/\(61 entries\)/.test(readme) && /exactly 61 unique entries/.test(readme) && /61 local 1365×900/.test(readme) &&
+  !/\((?:41|45|47|48|49|51|52|53|54|55|56|57|58|59|60) entries\)|exactly (?:41|45|47|48|49|51|52|53|54|55|56|57|58|59|60) unique|(?:41|45|47|48|49|51|52|53|54|55|56|57|58|59|60) local/.test(readme), "README describes 61 entries, not the old 41, 45, 47, 48, 49, 51, 52, 53, 54, 55, 56, 57, 58, 59 or 60");
+check([...LATER_ADDED, ...FINAL_ADDED, ...NEWEST_ADDED, ...LATEST_ADDED, ...RECENT_ADDED, ...CURRENT_ADDED, ...OCT30_ADDED, ...NOV6_ADDED, ...NOV7_ADDED, ...NOV7_LATER_ADDED, ...NOV11_ADDED, ...NOV14_ADDED, ...NOV15_ADDED].every((n) => readme.includes(`\`${n}\``)) &&
+  /40 previews dated 2026-10-18, 8 dated 2026-10-19,\s+3 dated 2026-10-20,\s+1 dated 2026-10-21, 1 dated 2026-10-28, 2 dated 2026-10-30,\s+2 dated 2026-11-06, 1 dated 2026-11-07, 1 dated 2026-11-11, 1 dated 2026-11-14, 1 dated 2026-11-15, 61 in total/.test(readme) &&
+  !/\b[57] dated 2026-10-19|\b1 dated 2026-10-20|\b2 dated 2026-10-28|\b1 dated 2026-11-06|(?:4[789]|5[0-9]|60) in total/.test(readme), "README capture prose counts 40 + 8 + 3 + 1 + 1 + 2 + 2 + 1 + 1 + 1 + 1 = 61 previews and names the later, final, newest, latest, most recent, current, 2026-10-30, 2026-11-06, both 2026-11-07, the 2026-11-11, the 2026-11-14 and the 2026-11-15 additions");
 check(!STALE_RETRIEVALS.test(readme), "README keeps none of the earlier retrieval timestamps or old later-lookup wording");
 check(!/applied to every entry/.test(readme) && readme.includes(`${EXPECTED_COUNT} are listed`) && readme.includes(`${PUBLIC_PAGES_COUNT} public`) &&
   readme.includes(`${PUBLIC_PAGES_COUNT - SELF_EXCLUDED} excluding this directory`) && /not exhaustive/.test(readme) &&
-  readme.includes(NEURAL_RETRIEVED) && readme.includes(`only ${DEFERRED_LIST((n) => `\`${n}\``)} are deferred, not cards`) &&
-  !/`(?:aleph-quest|baking|scribes-labyrinth|neural-space)` (?:is|are) deferred/.test(readme),
+  readme.includes(DEV_BOARD_RETRIEVED) && readme.includes(`only ${DEFERRED_LIST((n) => `\`${n}\``)} are deferred, not cards`) &&
+  !/`(?:aleph-quest|baking|scribes-labyrinth|neural-space|dev-board-atlas)` (?:is|are) deferred/.test(readme),
   `README states the curated listed/eligible counts and the ${DEFERRED.length} deferred repositories, with no exhaustive or all-refreshed claim`);
 check(/Letter Grove/.test(readme) && /actual live gameplay/.test(readme) && /not a title or menu screen/.test(readme) &&
   readme.includes("`v0.1.0`") && readme.includes("dcb5fc0509a3156dd58f2bf53eca946a9d614180"),
   "README explains that aleph-quest's preview is real gameplay and that the game stays frozen at its v0.1.0 release");
 check(/GitHub Pages\s+configured/.test(readme) && /Pages\s+API/.test(readme), "README says membership means Pages configured per the Pages API inventory");
 check(/Capture dates vary by entry/.test(readme) && /screenshotCapturedOn/.test(readme) && readme.includes(ORIGINAL_CAPTURE) &&
-  readme.includes(ADDED_CAPTURE) && readme.includes(NEWEST_CAPTURE) && readme.includes(RECENT_CAPTURE) && readme.includes(CURRENT_CAPTURE) && readme.includes(OCT30_CAPTURE) && readme.includes(NOV6_CAPTURE) && readme.includes(NOV7_CAPTURE) && readme.includes(NOV11_CAPTURE) && readme.includes(NOV14_CAPTURE) && !/one global capture date/.test(readme), "README documents per-entry capture dates");
+  readme.includes(ADDED_CAPTURE) && readme.includes(NEWEST_CAPTURE) && readme.includes(RECENT_CAPTURE) && readme.includes(CURRENT_CAPTURE) && readme.includes(OCT30_CAPTURE) && readme.includes(NOV6_CAPTURE) && readme.includes(NOV7_CAPTURE) && readme.includes(NOV11_CAPTURE) && readme.includes(NOV14_CAPTURE) && readme.includes(NOV15_CAPTURE) && !/one global capture date/.test(readme), "README documents per-entry capture dates");
 check(/confluence-obsidian-quartz/.test(readme) && /raw RSS feed/.test(readme) && /application\/rss\+xml/.test(readme) &&
   /wiki-viewer/.test(readme) && /empty state/.test(readme) && /0 shown/.test(readme),
   "README discloses the RSS-feed and empty-wiki capture states");
@@ -728,8 +750,9 @@ check(readme.includes(DATES_RETRIEVED) && readme.includes(`only \`guitar\` uses 
   readme.includes(`only \`aleph-quest\` uses the newer retrieval of ${ALEPH_RETRIEVED}`) &&
   readme.includes(`only \`baking\` uses the newer retrieval of ${BAKING_RETRIEVED}`) &&
   readme.includes(`only \`scribes-labyrinth\` uses the newer retrieval of ${SCRIBES_RETRIEVED}`) &&
-  readme.includes(`only \`neural-space\` uses the newer retrieval of ${NEURAL_RETRIEVED}`) && /have not been refreshed since/.test(readme),
-  "README records the older aggregate retrieval time and guitar's, aleph-quest's, baking's, scribes-labyrinth's and neural-space's own newer retrievals");
+  readme.includes(`only \`neural-space\` uses the newer retrieval of ${NEURAL_RETRIEVED}`) &&
+  readme.includes(`only \`dev-board-atlas\` uses the newer retrieval of ${DEV_BOARD_RETRIEVED}`) && /have not been refreshed since/.test(readme),
+  "README records the older aggregate retrieval time and guitar's, aleph-quest's, baking's, scribes-labyrinth's, neural-space's and dev-board-atlas's own newer retrievals");
 check(/Advance `repositoryDates\.retrievedAt` only when every entry's dates are refreshed/.test(readme), "README update policy keeps per-entry retrieval provenance honest");
 check(/python3 -m http\.server/.test(readme) && /node tests\/verify\.mjs/.test(readme), "README has local preview and test instructions");
 
@@ -1331,10 +1354,10 @@ async function exercise(page, label) {
 async function exerciseTies(page) {
   const tied = structuredClone(data);
   const set = (name, createdAt, updatedAt) => Object.assign(tied.sites.find((s) => s.name === name), { createdAt, updatedAt });
-  // The tied created_at must be newer than every real createdAt (latest: neural-space, 2026-11-14T22:11:44Z).
-  set("tetris-unicode", "2026-11-14T23:00:00Z", "2026-11-14T23:00:30Z");
-  set("quotes", "2026-11-14T23:00:00Z", "2026-11-14T23:00:20Z");
-  set("art", "2026-11-14T23:00:00Z", "2026-11-14T23:00:00Z");
+  // The tied created_at must be newer than every real createdAt (latest: dev-board-atlas, 2026-11-15T08:09:38Z).
+  set("tetris-unicode", "2026-11-15T23:00:00Z", "2026-11-15T23:00:30Z");
+  set("quotes", "2026-11-15T23:00:00Z", "2026-11-15T23:00:20Z");
+  set("art", "2026-11-15T23:00:00Z", "2026-11-15T23:00:00Z");
   await page.route("**/data/sites.json", (route) => route.fulfill({ contentType: "application/json", body: JSON.stringify(tied) }));
   const load = async () => { await page.reload(); await page.waitForSelector(".card"); return (await visibleCards(page)).map((c) => c[1]); };
   const order = await load();
