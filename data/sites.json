@@ -723,7 +723,7 @@
     },
     {
       "name": "home-assistant-explorer",
-      "title": "Home Assistant Explorer",
+      "title": "Home Assistant Field Guide",
       "category": "tech",
       "url": "https://git.marcuschiu.com/home-assistant-explorer/",
       "repository": "https://github.com/TheRealMarcusChiu/home-assistant-explorer",

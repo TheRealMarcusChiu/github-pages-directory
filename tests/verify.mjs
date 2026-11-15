@@ -192,7 +192,7 @@ const EXPECTED_SITES = [
   ["scribes-labyrinth", "The Scribe’s Labyrinth", "2026-11-10T02:18:31Z", "2026-11-10T07:03:26Z", "2026-11-11"],
   ["neural-space", "Neural Space", "2026-11-14T22:11:44Z", "2026-11-14T22:11:52Z", "2026-11-14"],
   ["dev-board-atlas", "Dev Board Atlas", "2026-11-15T08:09:38Z", "2026-11-15T18:18:09Z", "2026-11-15"],
-  ["home-assistant-explorer", "Home Assistant Explorer", "2026-11-15T18:14:01Z", "2026-11-15T18:26:15Z", "2026-11-15"],
+  ["home-assistant-explorer", "Home Assistant Field Guide", "2026-11-15T18:14:01Z", "2026-11-15T18:26:15Z", "2026-11-15"],
   ["yt2tab", "yt2tab · Audio to Tab", "2026-11-15T08:52:55Z", "2026-11-15T08:53:04Z", "2026-11-15"],
 ];
 // Exact timestamp of the aggregate owner Pages inventory the dates of the 55 entries before guitar come from.
@@ -452,7 +452,7 @@ check(JSON.stringify(sites.at(-3)) === JSON.stringify({
   createdAt: "2026-11-15T08:09:38Z", updatedAt: "2026-11-15T18:18:09Z",
 }), "dev-board-atlas is the exact third-to-last record (title, Tech only, canonical URL, repository, preview, capture and repository dates)");
 check(JSON.stringify(sites.at(-2)) === JSON.stringify({
-  name: "home-assistant-explorer", title: "Home Assistant Explorer", category: "tech",
+  name: "home-assistant-explorer", title: "Home Assistant Field Guide", category: "tech",
   url: "https://git.marcuschiu.com/home-assistant-explorer/", repository: "https://github.com/TheRealMarcusChiu/home-assistant-explorer",
   screenshot: `${PREVIEW_DIR}/home-assistant-explorer.webp`, screenshotCapturedOn: NOV15_CAPTURE,
   createdAt: "2026-11-15T18:14:01Z", updatedAt: "2026-11-15T18:26:15Z",
