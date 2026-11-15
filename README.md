@@ -10,14 +10,14 @@ created date, `YYYY-MM-DD` UTC, right-aligned on the same row) and title; clicki
 an expanded details card with every field and the site and GitHub links.
 
 > **Snapshot caveat:** `data/sites.json` is a static snapshot dated **2026-11-15**
-> (63 entries). It is not automatically synced. Membership means the repository is
+> (64 entries). It is not automatically synced. Membership means the repository is
 > public and has GitHub Pages configured according to the authenticated GitHub Pages
 > API owner inventory — not that the page was reviewed or looks finished. The account
 > homepage is included; this directory's own repository is not.
 >
 > **Curated scope:** the listing is not exhaustive. The owner inventory retrieved
-> 2026-11-15T18:50:57Z has 69 public repositories with Pages, 68 excluding
-> this directory: 63 are listed, and only `afterimage`, `cwe-triage-lab`, `cwe-triage-lab-v2`,
+> 2026-11-15T21:52:09Z has 70 public repositories with Pages, 69 excluding
+> this directory: 64 are listed, and only `afterimage`, `cwe-triage-lab`, `cwe-triage-lab-v2`,
 > `mesh-radio-academy`, and `oscilloscope-specs-lab` are deferred, not cards.
 >
 > **Screenshots:** `assets/previews/<repo>.webp` are 1365×900 viewport previews
@@ -39,10 +39,11 @@ an expanded details card with every field and the site and GitHub links.
 > and the 2026-11-15 addition (`dev-board-atlas`) on **2026-11-15**,
 > as was the later 2026-11-15 addition (`home-assistant-explorer`); the latest 2026-11-15
 > addition (`yt2tab`) instead uses a user-supplied screenshot received on 2026-11-15, whose
-> `screenshotCapturedOn` records that received date (actual capture time unknown)
+> `screenshotCapturedOn` records that received date (actual capture time unknown); the newest
+> 2026-11-15 addition (`mission-systems-lab`) was captured on 2026-11-15
 > — 40 previews dated 2026-10-18, 8 dated 2026-10-19,
 > 3 dated 2026-10-20, 1 dated 2026-10-21, 1 dated 2026-10-28, 2 dated 2026-10-30,
-> 2 dated 2026-11-06, 1 dated 2026-11-07, 1 dated 2026-11-11, 1 dated 2026-11-14, 3 dated 2026-11-15, 63 in total. They are local static images, not live views — the
+> 2 dated 2026-11-06, 1 dated 2026-11-07, 1 dated 2026-11-11, 1 dated 2026-11-14, 4 dated 2026-11-15, 64 in total. They are local static images, not live views — the
 > live sites may have changed since.
 >
 > **Notes on the 2026-10-19 additions:** `confluence-obsidian-quartz` answers HTTP 200
@@ -96,6 +97,10 @@ an expanded details card with every field and the site and GitHub links.
 > `screenshotDateKind: "received"`, so its alt text and details card label the date as received
 > and say the actual capture date is unknown.
 >
+> **Note on the newest 2026-11-15 update:** `mission-systems-lab` (*Mission Systems Lab*) is
+> listed in Tech & Learning, with a preview of the live page captured on 2026-11-15. Listing
+> it does not certify its CI or any finished hardware.
+>
 > **Repository dates:** each entry's `createdAt` / `updatedAt` are the GitHub
 > repository `created_at` / `updated_at` values from the authenticated GitHub REST API.
 > The 55 entries before `guitar` use one owner Pages inventory, retrieved
@@ -107,7 +112,8 @@ an expanded details card with every field and the site and GitHub links.
 > only `neural-space` uses the newer retrieval of 2026-11-14T22:33:31.807594+00:00,
 > only `dev-board-atlas` uses the newer retrieval of 2026-11-15T18:20:25Z,
 > only `home-assistant-explorer` uses the newer retrieval of 2026-11-15T18:40:06Z,
-> and only `yt2tab` uses the newer retrieval of 2026-11-15T18:50:57Z.
+> only `yt2tab` uses the newer retrieval of 2026-11-15T18:50:57Z,
+> and only `mission-systems-lab` uses the newer retrieval of 2026-11-15T21:52:09Z.
 > They are repository metadata, not page-content dates — `updated_at` moves on any repository
 > update (pushes, settings, description). They are stored statically; the page makes
 > no GitHub API calls.
@@ -118,7 +124,7 @@ an expanded details card with every field and the site and GitHub links.
 index.html              Page markup
 assets/styles.css       Warm editorial dark theme (Newsreader + JetBrains Mono)
 assets/app.js           Loads data/sites.json, renders the gallery, search, category dropdown + sort
-assets/previews/*.webp  63 local 1365×900 preview screenshots, capture date per entry
+assets/previews/*.webp  64 local 1365×900 preview screenshots, capture date per entry
 data/sites.json         The inventory (see below)
 tests/verify.mjs        Dependency-free checks
 ```
@@ -189,11 +195,11 @@ PLAYWRIGHT_MODULE=/path/to/node_modules/playwright REQUIRE_BROWSER=1 node tests/
 Without Playwright the browser stage prints `SKIP`; `REQUIRE_BROWSER=1` turns that
 into a failure.
 
-Checks include: exactly 63 unique entries (names, Pages URLs, repository URLs,
+Checks include: exactly 64 unique entries (names, Pages URLs, repository URLs,
 titles, screenshots); HTTPS-only links and correct repository URLs; no
 `github-pages-directory` self-entry; every repository in its expected primary
 category exactly once, with exactly the expected `alsoIn` secondary memberships; each screenshot path is relative and points at an existing 1365×900
-WebP with no orphans (all complete, non-blank lossy VP8), each entry's required `screenshotCapturedOn` (exact per entry: 2026-10-18 for 40 of the original 41, 2026-10-19 for the re-captured `bandwidth-compare`, the four additions, the two later additions and the final addition, and 2026-10-20 for the newest addition `ups-topology-guide` and the two latest additions `inside-the-machine` and `boba-passport`, and 2026-10-21 for the most recent addition `homelab-rack-atlas`, 2026-10-28 for the current addition `bit-atlas`, 2026-10-30 for the re-captured `Griefcase` and the 2026-10-30 addition `inside-neural-engine`, 2026-11-06 for the 2026-11-06 addition `guitar` and the 2026-11-07 addition `aleph-quest`, 2026-11-07 for the later 2026-11-07 addition `baking`, 2026-11-11 for the 2026-11-11 addition `scribes-labyrinth`, 2026-11-14 for the 2026-11-14 addition `neural-space`, and 2026-11-15 for the 2026-11-15 addition `dev-board-atlas` and the later 2026-11-15 addition `home-assistant-explorer`, plus the received date, not a capture date, of the latest 2026-11-15 addition `yt2tab`'s user-supplied screenshot); relative asset paths; only the Google Fonts stylesheet as a
+WebP with no orphans (all complete, non-blank lossy VP8), each entry's required `screenshotCapturedOn` (exact per entry: 2026-10-18 for 40 of the original 41, 2026-10-19 for the re-captured `bandwidth-compare`, the four additions, the two later additions and the final addition, and 2026-10-20 for the newest addition `ups-topology-guide` and the two latest additions `inside-the-machine` and `boba-passport`, and 2026-10-21 for the most recent addition `homelab-rack-atlas`, 2026-10-28 for the current addition `bit-atlas`, 2026-10-30 for the re-captured `Griefcase` and the 2026-10-30 addition `inside-neural-engine`, 2026-11-06 for the 2026-11-06 addition `guitar` and the 2026-11-07 addition `aleph-quest`, 2026-11-07 for the later 2026-11-07 addition `baking`, 2026-11-11 for the 2026-11-11 addition `scribes-labyrinth`, 2026-11-14 for the 2026-11-14 addition `neural-space`, and 2026-11-15 for the 2026-11-15 addition `dev-board-atlas`, the later 2026-11-15 addition `home-assistant-explorer` and the newest 2026-11-15 addition `mission-systems-lab`, plus the received date, not a capture date, of the latest 2026-11-15 addition `yt2tab`'s user-supplied screenshot); relative asset paths; only the Google Fonts stylesheet as a
 remote resource; no HTML-injection APIs; and accessibility basics (lang, landmarks,
 labelled search, category dropdown and checkbox group, alt text, focus styles, reduced motion,
 tap targets) plus the snapshot disclaimers in the meta description, footer and this README.
@@ -201,7 +207,7 @@ The masthead is just the eyebrow and title, with no result-status line; each con
 one outlined field with its short uppercase label inside, before the active value. The exact
 names, titles and source order are pinned, and every entry must carry valid ISO 8601
 UTC `createdAt` ≤ `updatedAt` ≤ its own retrieval time, matching the retrieved GitHub
-values; the `guitar`, `aleph-quest`, `baking`, `scribes-labyrinth`, `neural-space`, `dev-board-atlas`, `home-assistant-explorer` and `yt2tab` records are pinned exactly and the deferred repositories must stay
+values; the `guitar`, `aleph-quest`, `baking`, `scribes-labyrinth`, `neural-space`, `dev-board-atlas`, `home-assistant-explorer`, `yt2tab` and `mission-systems-lab` records are pinned exactly and the deferred repositories must stay
 unlisted; the page must offer a labelled *Sort by* select defaulting to *Recently created*.
 
 The browser stage serves the folder under `/github-pages-directory/` and, at desktop
@@ -213,7 +219,7 @@ search composition in every mode, zero results and both reset buttons, the dropd
 keys), tile structure (one h3-wrapped dialog button around image, category, created
 date and title, with no links or other metadata, every tile's date matching its
 `createdAt`, and unchanged category/title styles), the details
-dialog for all 63 sites (every field, link and date, layout and a 44px close button),
+dialog for all 64 sites (every field, link and date, layout and a 44px close button),
 real clicks/taps on the image and card background, Enter/Space, focus trap and
 restore, Esc/close button/backdrop closing, inert filters, the scroll lock, and the
 *Visit website* and *GitHub repo* links navigating, in-field labels (SEARCH, CATEGORY, SORT BY) with gold chevrons on the two menus,
